@@ -1,0 +1,4 @@
+name = "NPB_MZ_Multicluster"
+uuid = "82b6ada2-cd04-4344-bed3-e09d14e16e4b"
+authors = ["Francisco Heron de Carvalho Junior <heron@dc.ufc.br>"]
+version = "0.1.0"
