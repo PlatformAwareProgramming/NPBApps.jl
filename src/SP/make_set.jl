@@ -1,16 +1,3 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-       function make_set()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 # This function allocates space for a set of cells and fills the set     
@@ -18,19 +5,13 @@ using Printf
 # nearest neighbor                                                   
 #---------------------------------------------------------------------
 
-#       use sp_data
-#       use mpinpb
-
-#       implicit none
-
-#       integer p, i, j, c, dir, SIZE, excess, ierr,ierrcode
+function make_set()
 
 #---------------------------------------------------------------------
 #     compute square root; add small number to allow for roundoff
 #     (note: this is computed in setup_mpi.f also, but prefer to do
 #     it twice because of some include file problems).
 #---------------------------------------------------------------------
-#      ncells = dint(sqrt(float(no_nodes) + 0.00001e0))
        global ncells = Int(sqrt(no_nodes))
 #---------------------------------------------------------------------
 #      this makes coding easier
@@ -66,16 +47,6 @@ using Printf
           end
        end
 
-#       do    c = 1, p
-#         do    dir = 1, 3
-#            write(*, 840) node, dir, c, cell_coord[dir,c]
-#         end do
-#      end do
-
-# 839   format(' p =', i6)
-# 840   format('node', i3,',','cell_coord[',i3,',',i3,']=', i5)
-
-
 #---------------------------------------------------------------------
 #      slice[dir,n] contains the sequence number of the cell that is in
 #      coordinate plane n in the dir direction
@@ -85,7 +56,6 @@ using Printf
              slice[dir, cell_coord[dir, c]] = c
           end
        end
-
 
 #---------------------------------------------------------------------
 #      fill the predecessor and successor entries, using the indices 
@@ -126,18 +96,13 @@ using Printf
              end
              if cell_size[dir, c] <= 2
                 @printf(stdout, " Error: Cell size too small. Min size is 3\n", )
-# 50             format(' Error: Cell size too small. Min size is 3')
                 ierrcode = 1
-                #MPI_Abort(mpi_comm_world, ierrcode, ierr)
                 MPI.Abort(mpi_comm_world, ierrcode)
                 exit(1)
              end
           end
        end
 
-
-
-
        return nothing
-       end
+end
 

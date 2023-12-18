@@ -1,13 +1,4 @@
 #---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-
-function copy_faces()
-         
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
 # this function copies the face values of a variable defined on a set 
 # of cells to the overlap locations of the adjacent sets of cells. 
 # Because a set of cells interfaces in each direction with exactly one 
@@ -16,6 +7,8 @@ function copy_faces()
 # some internal values while communicating boundary values, but this
 # adds so much overhead that it's not clearly useful. 
 #---------------------------------------------------------------------
+
+function copy_faces()         
 
        requests = Array{MPI.Request}(undef,12)
        ss = Array{Int}(undef,6)

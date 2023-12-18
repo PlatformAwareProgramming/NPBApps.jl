@@ -1,20 +1,11 @@
-
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-function z_solve()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 # this function performs the solution of the approximate factorization
 # step in the z-direction for all five matrix components
 # simultaneously. The Thomas algorithm is employed to solve the
 # systems for the z-lines. Boundary conditions are non-periodic
 #---------------------------------------------------------------------
+
+function z_solve()
 
        requests = Array{MPI.Request}(undef,2)
        s = Array{Float64}(undef,5)
@@ -519,7 +510,7 @@ function z_solve()
 
        if (timeron) timer_stop(t_zsolve) end
 
-return nothing
+       return nothing
 end
 
 

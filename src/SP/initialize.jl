@@ -1,28 +1,9 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-       function initialize()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 # This subroutine initializes the field variable u using 
 # tri-linear transfinite interpolation of the boundary values     
 #---------------------------------------------------------------------
 
-#       use sp_data
-#       implicit none
-
-#       integer c, i, j, k, m, ii, jj, kk, ix, iy, iz
-#       DOUBLEPRECISION  xi, eta, zeta, Pface[5,3,2], Pxi, Peta,  
-#                         Pzeta, temp[5]
+function initialize()
 
       Pface1 = Array{Array{Float64}}(undef,2)
       Pface2 = Array{Array{Float64}}(undef,2)
@@ -226,15 +207,10 @@ using Printf
        end
 
        return nothing
-       end
+end
 
 
-       function lhsinit()
-
-#       use sp_data
-#       implicit none
-
-#       integer i, j, k, d, c, n
+function lhsinit()
 
 #---------------------------------------------------------------------
 # loop over all cells                                       
@@ -286,7 +262,7 @@ using Printf
        end
 
       return nothing
-      end
+end
 
 
 

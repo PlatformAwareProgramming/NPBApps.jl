@@ -1,28 +1,8 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-       function exact_rhs()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 # compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
-#       use sp_data
-#       implicit none
-
-#       DOUBLEPRECISION dtemp[5], xi, eta, zeta, dtpp
-#       integer          c, m, i, j, k, ip1, im1, jp1,  
-#                        jm1, km1, kp1
-
+function exact_rhs()
 
 #---------------------------------------------------------------------
 # loop over all cells owned by this node                   
@@ -362,7 +342,7 @@ using Printf
        end
 
        return nothing
-       end
+end
 
 
 

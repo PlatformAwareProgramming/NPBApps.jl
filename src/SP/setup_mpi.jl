@@ -1,33 +1,14 @@
 
 
 #---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function setup_mpi()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
 # set up MPI stuff
 #---------------------------------------------------------------------
 
-#      use sp_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer ERROR, nc, color
+function setup_mpi()
 
       global DEFAULT_TAG = 0
 
       MPI.Init()
-
-      #if !convertdouble
-      #   global dp_type = MPI.DOUBLE
-      #else
-      #   global dp_type = MPI_REAL ?????
-      #end
 
 #---------------------------------------------------------------------
 #     get a process grid that requires a square number of procs.
@@ -46,5 +27,5 @@
       global root = 0
 
       return nothing
-      end
+end
 

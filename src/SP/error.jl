@@ -1,31 +1,12 @@
-
-rms_work = Array{Float64}(undef,5)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-function error_norm(rms)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-
-
 #---------------------------------------------------------------------
 # this function computes the norm of the difference between the
 # computed solution and the exact solution
 #---------------------------------------------------------------------
 
-#       use sp_data
-#       use mpinpb
+function error_norm(rms)
 
-#       implicit none
-
-#       integer c, i, j, k, m, ii, jj, kk, d, ERROR
-#       DOUBLEPRECISION xi, eta, zeta, u_exact[5], rms[5], rms_work[5],  
-#                        add
-
-      u_exact = Array{Float64}(undef,5)
+       rms_work = Array{Float64}(undef,5)
+       u_exact = Array{Float64}(undef,5)
 
        for m = 1:5
           rms_work[m] = 0.0e0
@@ -55,7 +36,6 @@ function error_norm(rms)
           end
        end
 
-#      mpi_allreduce(rms_work, rms, 5, dp_type, MPI_SUM, comm_setup, ERROR)
        MPI.Allreduce!(rms_work, rms, MPI.SUM, comm_setup)
 
        for m = 1:5
@@ -66,19 +46,13 @@ function error_norm(rms)
        end
 
        return nothing
-       end
+end
 
 
 
-       function rhs_norm(rms)
+function rhs_norm(rms)
 
-#       use sp_data
-#       use mpinpb
-
-#       implicit none
-
-#       integer c, i, j, k, d, m, ERROR
-#       DOUBLEPRECISION rms[5], rms_work[5], add
+       rms_work = Array{Float64}(undef,5)
 
        for m = 1:5
           rms_work[m] = 0.0e0
@@ -97,9 +71,6 @@ function error_norm(rms)
           end
        end
 
-
-
-       #mpi_allreduce(rms_work, rms, 5, dp_type, MPI_SUM, comm_setup, ERROR)
        MPI.Allreduce!(rms_work, rms, MPI.SUM, comm_setup)
 
        for m = 1:5

@@ -3,14 +3,6 @@
 
 function compute_buffer_size(dim)
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#       use sp_data
-#       implicit none
-
-#       integer  c, dim, face_size
-
        if (ncells == 1) 
          return 
        end
@@ -71,19 +63,6 @@ function compute_buffer_size(dim)
        global start_recv_bottom = start_recv_north  + north_size
        global start_recv_top    = start_recv_bottom + bottom_size
 
-       #=in_buffer[1] = Array{Float64}(undef, east_size)
-       in_buffer[2] = Array{Float64}(undef, west_size)
-       in_buffer[3] = Array{Float64}(undef, north_size)
-       in_buffer[4] = Array{Float64}(undef, south_size)
-       in_buffer[5] = Array{Float64}(undef, top_size)
-       in_buffer[6] = Array{Float64}(undef, bottom_size)
-
-       out_buffer[1] = Array{Float64}(undef, east_size)
-       out_buffer[2] = Array{Float64}(undef, west_size)
-       out_buffer[3] = Array{Float64}(undef, north_size)
-       out_buffer[4] = Array{Float64}(undef, south_size)
-       out_buffer[5] = Array{Float64}(undef, top_size)
-       out_buffer[6] = Array{Float64}(undef, bottom_size)=#
 
 
 return nothing

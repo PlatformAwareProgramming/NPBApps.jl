@@ -1,17 +1,11 @@
 #---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-function x_solve()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
 # this function performs the solution of the approximate factorization
 # step in the x-direction for all five matrix components
 # simultaneously. The Thomas algorithm is employed to solve the
 # systems for the x-lines. Boundary conditions are non-periodic
 #---------------------------------------------------------------------
+
+function x_solve()
 
        requests = Array{MPI.Request}(undef,2)
        s = Array{Float64}(undef,5)
@@ -87,16 +81,13 @@ function x_solve()
              p = 0
              for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                 for j = cell_start[2, c]:jsize-cell_end[2, c]-1
-                   lhs[i, j, k, n+2, c] = lhs[i, j, k, n+2, c] -
-                             in_buffer[p+1] * lhs[i, j, k, n+1, c]
-                   lhs[i, j, k, n+3, c] = lhs[i, j, k, n+3, c] -
-                             in_buffer[p+2] * lhs[i, j, k, n+1, c]
+                   lhs[i, j, k, n+2, c] = lhs[i, j, k, n+2, c] - in_buffer[p+1] * lhs[i, j, k, n+1, c]
+                   lhs[i, j, k, n+3, c] = lhs[i, j, k, n+3, c] - in_buffer[p+2] * lhs[i, j, k, n+1, c]
                    for m = 1:3
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                             in_buffer[p+2+m] * lhs[i, j, k, n+1, c]
+                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - in_buffer[p+2+m] * lhs[i, j, k, n+1, c]
                    end
-                   d            = in_buffer[p+6]
-                   e            = in_buffer[p+7]
+                   d = in_buffer[p+6]
+                   e = in_buffer[p+7]
                    for m = 1:3
                       s[m] = in_buffer[p+7+m]
                    end
@@ -120,15 +111,12 @@ function x_solve()
                 n = (m-3)*5
                 for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                    for j = cell_start[2, c]:jsize-cell_end[2, c]-1
-                      lhs[i, j, k, n+2, c] = lhs[i, j, k, n+2, c] -
-                                in_buffer[p+1] * lhs[i, j, k, n+1, c]
-                      lhs[i, j, k, n+3, c] = lhs[i, j, k, n+3, c] -
-                                in_buffer[p+2] * lhs[i, j, k, n+1, c]
-                      rhs[i, j, k, m, c]   = rhs[i, j, k, m, c] -
-                                in_buffer[p+3] * lhs[i, j, k, n+1, c]
-                      d                = in_buffer[p+4]
-                      e                = in_buffer[p+5]
-                      s[m]             = in_buffer[p+6]
+                      lhs[i, j, k, n+2, c] = lhs[i, j, k, n+2, c] - in_buffer[p+1] * lhs[i, j, k, n+1, c]
+                      lhs[i, j, k, n+3, c] = lhs[i, j, k, n+3, c] - in_buffer[p+2] * lhs[i, j, k, n+1, c]
+                      rhs[i, j, k, m, c]   = rhs[i, j, k, m, c] - in_buffer[p+3] * lhs[i, j, k, n+1, c]
+                      d = in_buffer[p+4]
+                      e = in_buffer[p+5]
+                      s[m] = in_buffer[p+6]
                       r1 = lhs[i, j, k, n+2, c]
                       lhs[i, j, k, n+3, c] = lhs[i, j, k, n+3, c] - d * r1
                       lhs[i, j, k, n+4, c] = lhs[i, j, k, n+4, c] - e * r1
@@ -158,29 +146,23 @@ function x_solve()
           for k = cell_start[3, c]:ksize-cell_end[3, c]-1
              for j = cell_start[2, c]:jsize-cell_end[2, c]-1
                 for i = istart:iend-2
-                   i1 = i  + 1
-                   i2 = i  + 2
-                   fac1               = 1.0e0/lhs[i, j, k, n+3, c]
+                   i1 = i + 1
+                   i2 = i + 2
+                   fac1 = 1.0e0/lhs[i, j, k, n+3, c]
                    lhs[i, j, k, n+4, c]   = fac1*lhs[i, j, k, n+4, c]
                    lhs[i, j, k, n+5, c]   = fac1*lhs[i, j, k, n+5, c]
                    for m = 1:3
                       rhs[i, j, k, m, c] = fac1*rhs[i, j, k, m, c]
                    end
-                   lhs[i1, j, k, n+3, c] = lhs[i1, j, k, n+3, c] -
-                               lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+4, c]
-                   lhs[i1, j, k, n+4, c] = lhs[i1, j, k, n+4, c] -
-                               lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+5, c]
+                   lhs[i1, j, k, n+3, c] = lhs[i1, j, k, n+3, c] - lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+4, c]
+                   lhs[i1, j, k, n+4, c] = lhs[i1, j, k, n+4, c] - lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+5, c]
                    for m = 1:3
-                      rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] -
-                               lhs[i1, j, k, n+2, c]*rhs[i, j, k, m, c]
+                      rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] - lhs[i1, j, k, n+2, c]*rhs[i, j, k, m, c]
                    end
-                   lhs[i2, j, k, n+2, c] = lhs[i2, j, k, n+2, c] -
-                               lhs[i2, j, k, n+1, c]*lhs[i, j, k, n+4, c]
-                   lhs[i2, j, k, n+3, c] = lhs[i2, j, k, n+3, c] -
-                               lhs[i2, j, k, n+1, c]*lhs[i, j, k, n+5, c]
+                   lhs[i2, j, k, n+2, c] = lhs[i2, j, k, n+2, c] - lhs[i2, j, k, n+1, c]*lhs[i, j, k, n+4, c]
+                   lhs[i2, j, k, n+3, c] = lhs[i2, j, k, n+3, c] - lhs[i2, j, k, n+1, c]*lhs[i, j, k, n+5, c]
                    for m = 1:3
-                      rhs[i2, j, k, m, c] = rhs[i2, j, k, m, c] -
-                               lhs[i2, j, k, n+1, c]*rhs[i, j, k, m, c]
+                      rhs[i2, j, k, m, c] = rhs[i2, j, k, m, c] - lhs[i2, j, k, n+1, c]*rhs[i, j, k, m, c]
                    end
                 end
              end
@@ -196,25 +178,22 @@ function x_solve()
           i1 = iend
           for k = cell_start[3, c]:ksize-cell_end[3, c]-1
              for j = cell_start[2, c]:jsize-cell_end[2, c]-1
-                fac1               = 1.0e0/lhs[i, j, k, n+3, c]
+                fac1 = 1.0e0/lhs[i, j, k, n+3, c]
                 lhs[i, j, k, n+4, c]   = fac1*lhs[i, j, k, n+4, c]
                 lhs[i, j, k, n+5, c]   = fac1*lhs[i, j, k, n+5, c]
                 for m = 1:3
                    rhs[i, j, k, m, c] = fac1*rhs[i, j, k, m, c]
                 end
-                lhs[i1, j, k, n+3, c] = lhs[i1, j, k, n+3, c] -
-                            lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+4, c]
-                lhs[i1, j, k, n+4, c] = lhs[i1, j, k, n+4, c] -
-                            lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+5, c]
+                lhs[i1, j, k, n+3, c] = lhs[i1, j, k, n+3, c] - lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+4, c]
+                lhs[i1, j, k, n+4, c] = lhs[i1, j, k, n+4, c] - lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+5, c]
                 for m = 1:3
-                   rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] -
-                            lhs[i1, j, k, n+2, c]*rhs[i, j, k, m, c]
+                   rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] - lhs[i1, j, k, n+2, c]*rhs[i, j, k, m, c]
                 end
 #---------------------------------------------------------------------
 #               scale the last row immediately (some of this is
 #               overkill in case this is the last cell)
 #---------------------------------------------------------------------
-                fac2               = 1.0e0/lhs[i1, j, k, n+3, c]
+                fac2 = 1.0e0/lhs[i1, j, k, n+3, c]
                 lhs[i1, j, k, n+4, c] = fac2*lhs[i1, j, k, n+4, c]
                 lhs[i1, j, k, n+5, c] = fac2*lhs[i1, j, k, n+5, c]
                 for m = 1:3
@@ -232,27 +211,21 @@ function x_solve()
              for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                 for j = cell_start[2, c]:jsize-cell_end[2, c]-1
                    for i = istart:iend-2
-                   i1 = i  + 1
-                   i2 = i  + 2
-                   fac1               = 1.0e0/lhs[i, j, k, n+3, c]
-                   lhs[i, j, k, n+4, c]   = fac1*lhs[i, j, k, n+4, c]
-                   lhs[i, j, k, n+5, c]   = fac1*lhs[i, j, k, n+5, c]
-                   rhs[i, j, k, m, c] = fac1*rhs[i, j, k, m, c]
-                   lhs[i1, j, k, n+3, c] = lhs[i1, j, k, n+3, c] -
-                               lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+4, c]
-                   lhs[i1, j, k, n+4, c] = lhs[i1, j, k, n+4, c] -
-                               lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+5, c]
-                   rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] -
-                               lhs[i1, j, k, n+2, c]*rhs[i, j, k, m, c]
-                   lhs[i2, j, k, n+2, c] = lhs[i2, j, k, n+2, c] -
-                               lhs[i2, j, k, n+1, c]*lhs[i, j, k, n+4, c]
-                   lhs[i2, j, k, n+3, c] = lhs[i2, j, k, n+3, c] -
-                               lhs[i2, j, k, n+1, c]*lhs[i, j, k, n+5, c]
-                   rhs[i2, j, k, m, c] = rhs[i2, j, k, m, c] -
-                               lhs[i2, j, k, n+1, c]*rhs[i, j, k, m, c]
+                     i1 = i  + 1
+                     i2 = i  + 2
+                     fac1 = 1.0e0/lhs[i, j, k, n+3, c]
+                     lhs[i, j, k, n+4, c] = fac1*lhs[i, j, k, n+4, c]
+                     lhs[i, j, k, n+5, c] = fac1*lhs[i, j, k, n+5, c]
+                     rhs[i, j, k, m, c] = fac1*rhs[i, j, k, m, c]
+                     lhs[i1, j, k, n+3, c] = lhs[i1, j, k, n+3, c] - lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+4, c]
+                     lhs[i1, j, k, n+4, c] = lhs[i1, j, k, n+4, c] - lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+5, c]
+                     rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] - lhs[i1, j, k, n+2, c]*rhs[i, j, k, m, c]
+                     lhs[i2, j, k, n+2, c] = lhs[i2, j, k, n+2, c] - lhs[i2, j, k, n+1, c]*lhs[i, j, k, n+4, c]
+                     lhs[i2, j, k, n+3, c] = lhs[i2, j, k, n+3, c] - lhs[i2, j, k, n+1, c]*lhs[i, j, k, n+5, c]
+                     rhs[i2, j, k, m, c] = rhs[i2, j, k, m, c] -lhs[i2, j, k, n+1, c]*rhs[i, j, k, m, c]
+                   end
                 end
              end
-          end
 
 #---------------------------------------------------------------------
 #            And again the last two rows separately
@@ -261,28 +234,24 @@ function x_solve()
              i1 = iend
              for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                 for j = cell_start[2, c]:jsize-cell_end[2, c]-1
-                fac1               = 1.0e0/lhs[i, j, k, n+3, c]
-                lhs[i, j, k, n+4, c]   = fac1*lhs[i, j, k, n+4, c]
-                lhs[i, j, k, n+5, c]   = fac1*lhs[i, j, k, n+5, c]
-                rhs[i, j, k, m, c]     = fac1*rhs[i, j, k, m, c]
-                lhs[i1, j, k, n+3, c] = lhs[i1, j, k, n+3, c] -
-                            lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+4, c]
-                lhs[i1, j, k, n+4, c] = lhs[i1, j, k, n+4, c] -
-                            lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+5, c]
-                rhs[i1, j, k, m, c]   = rhs[i1, j, k, m, c] -
-                            lhs[i1, j, k, n+2, c]*rhs[i, j, k, m, c]
-#---------------------------------------------------------------------
-#               Scale the last row immediately (some of this is overkill
-#               if this is the last cell)
-#---------------------------------------------------------------------
-                fac2               = 1.0e0/lhs[i1, j, k, n+3, c]
-                lhs[i1, j, k, n+4, c] = fac2*lhs[i1, j, k, n+4, c]
-                lhs[i1, j, k, n+5, c] = fac2*lhs[i1, j, k, n+5, c]
-                rhs[i1, j, k, m, c]   = fac2*rhs[i1, j, k, m, c]
-
+                  fac1 = 1.0e0/lhs[i, j, k, n+3, c]
+                  lhs[i, j, k, n+4, c] = fac1*lhs[i, j, k, n+4, c]
+                  lhs[i, j, k, n+5, c] = fac1*lhs[i, j, k, n+5, c]
+                  rhs[i, j, k, m, c] = fac1*rhs[i, j, k, m, c]
+                  lhs[i1, j, k, n+3, c] = lhs[i1, j, k, n+3, c] - lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+4, c]
+                  lhs[i1, j, k, n+4, c] = lhs[i1, j, k, n+4, c] - lhs[i1, j, k, n+2, c]*lhs[i, j, k, n+5, c]
+                  rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] - lhs[i1, j, k, n+2, c]*rhs[i, j, k, m, c]
+   #---------------------------------------------------------------------
+   #               Scale the last row immediately (some of this is overkill
+   #               if this is the last cell)
+   #---------------------------------------------------------------------
+                  fac2 = 1.0e0/lhs[i1, j, k, n+3, c]
+                  lhs[i1, j, k, n+4, c] = fac2*lhs[i1, j, k, n+4, c]
+                  lhs[i1, j, k, n+5, c] = fac2*lhs[i1, j, k, n+5, c]
+                  rhs[i1, j, k, m, c]   = fac2*rhs[i1, j, k, m, c]
+                end
              end
           end
-       end
 
 #---------------------------------------------------------------------
 #         send information to the next processor, except when this
@@ -351,8 +320,7 @@ function x_solve()
           jp    = cell_coord[2, c]-1
           kp    = cell_coord[3, c]-1
 
-          buffer_size = (jsize-cell_start[2, c]-cell_end[2, c]) *(
-                        ksize-cell_start[3, c]-cell_end[3, c])
+          buffer_size = (jsize-cell_start[2, c]-cell_end[2, c]) *(ksize-cell_start[3, c]-cell_end[3, c])
 
           if stage != ncells
 
@@ -394,12 +362,8 @@ function x_solve()
                    for j = cell_start[2, c]:jsize-cell_end[2, c]-1
                       sm1 = in_buffer[p+1]
                       sm2 = in_buffer[p+2]
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                              lhs[i, j, k, n+4, c]*sm1 -
-                              lhs[i, j, k, n+5, c]*sm2
-                      rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] -
-                              lhs[i1, j, k, n+4, c] * rhs[i, j, k, m, c] -
-                              lhs[i1, j, k, n+5, c] * sm1
+                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - lhs[i, j, k, n+4, c]*sm1 - lhs[i, j, k, n+5, c]*sm2
+                      rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] - lhs[i1, j, k, n+4, c] * rhs[i, j, k, m, c] - lhs[i1, j, k, n+5, c] * sm1
                       p = p + 2
                    end
                 end
@@ -414,12 +378,8 @@ function x_solve()
                    for j = cell_start[2, c]:jsize-cell_end[2, c]-1
                       sm1 = in_buffer[p+1]
                       sm2 = in_buffer[p+2]
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                              lhs[i, j, k, n+4, c]*sm1 -
-                              lhs[i, j, k, n+5, c]*sm2
-                      rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] -
-                              lhs[i1, j, k, n+4, c] * rhs[i, j, k, m, c] -
-                              lhs[i1, j, k, n+5, c] * sm1
+                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - lhs[i, j, k, n+4, c]*sm1 - lhs[i, j, k, n+5, c]*sm2
+                      rhs[i1, j, k, m, c] = rhs[i1, j, k, m, c] - lhs[i1, j, k, n+4, c] * rhs[i, j, k, m, c] - lhs[i1, j, k, n+5, c] * sm1
                       p = p + 2
                    end
                 end
@@ -437,8 +397,7 @@ function x_solve()
              for m = 1:3
                 for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                    for j = cell_start[2, c]:jsize-cell_end[2, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                                   lhs[i, j, k, n+4, c]*rhs[i1, j, k, m, c]
+                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - lhs[i, j, k, n+4, c]*rhs[i1, j, k, m, c]
                    end
                 end
              end
@@ -447,8 +406,7 @@ function x_solve()
                 n = (m-3)*5
                 for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                    for j = cell_start[2, c]:jsize-cell_end[2, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                                   lhs[i, j, k, n+4, c]*rhs[i1, j, k, m, c]
+                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - lhs[i, j, k, n+4, c]*rhs[i1, j, k, m, c]
                    end
                 end
              end
@@ -469,9 +427,7 @@ function x_solve()
                    for i = iend-2:-1:istart
                       i1 = i  + 1
                       i2 = i  + 2
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                                lhs[i, j, k, n+4, c]*rhs[i1, j, k, m, c] -
-                                lhs[i, j, k, n+5, c]*rhs[i2, j, k, m, c]
+                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - lhs[i, j, k, n+4, c]*rhs[i1, j, k, m, c] - lhs[i, j, k, n+5, c]*rhs[i2, j, k, m, c]
                    end
                 end
              end
@@ -487,9 +443,7 @@ function x_solve()
                    for i = iend-2:-1:istart
                       i1 = i  + 1
                       i2 = i  + 2
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                                lhs[i, j, k, n+4, c]*rhs[i1, j, k, m, c] -
-                                lhs[i, j, k, n+5, c]*rhs[i2, j, k, m, c]
+                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - lhs[i, j, k, n+4, c]*rhs[i1, j, k, m, c] - lhs[i, j, k, n+5, c]*rhs[i2, j, k, m, c]
                    end
                 end
              end
@@ -506,7 +460,7 @@ function x_solve()
                 for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                    for j = cell_start[2, c]:jsize-cell_end[2, c]-1
                       out_buffer[p+1] = rhs[i, j, k, m, c]
-                       out_buffer[p+2] = rhs[i1, j, k, m, c]
+                      out_buffer[p+2] = rhs[i1, j, k, m, c]
                       p = p + 2
                    end
                 end
@@ -530,7 +484,7 @@ function x_solve()
 
        if (timeron) timer_stop(t_xsolve) end
 
-return nothing
+       return nothing
 end
 
 
