@@ -7,11 +7,47 @@ function adi()
          
        txinvr()
 
-       x_solve()
+       x_solve(ncells,
+       successor,
+       predecessor,
+       slice,
+       cell_size,
+       cell_start,
+       cell_end,
+       cell_coord,
+       lhs,
+       rhs,
+       in_buffer,
+       out_buffer,
+       comm_solve)
 
-       y_solve()
+       y_solve(ncells,
+       successor,
+       predecessor,
+       slice,
+       cell_size,
+       cell_start,
+       cell_end,
+       cell_coord,
+       lhs,
+       rhs,
+       in_buffer,
+       out_buffer,
+       comm_solve)
 
-       z_solve()
+       z_solve(ncells,
+       successor,
+       predecessor,
+       slice,
+       cell_size,
+       cell_start,
+       cell_end,
+       cell_coord,
+       lhs,
+       rhs,
+       in_buffer,
+       out_buffer,
+       comm_solve)
 
        add()
 

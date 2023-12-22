@@ -6,7 +6,19 @@
 # systems for the y-lines. Boundary conditions are non-periodic
 #---------------------------------------------------------------------
 
-function y_solve()
+function y_solve(ncells,
+                 successor,
+                 predecessor,
+                 slice,
+                 cell_size,
+                 cell_start,
+                 cell_end,
+                 cell_coord,
+                 lhs,
+                 rhs,
+                 in_buffer,
+                 out_buffer,
+                 comm_solve)
 
        requests = Array{MPI.Request}(undef,2)
        s = Array{Float64}(undef,5)
