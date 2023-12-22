@@ -2,7 +2,7 @@
 # block-diagonal matrix-vector multiplication                  
 #---------------------------------------------------------------------
 
-       function txinvr()
+function txinvr()
 
 #---------------------------------------------------------------------
 #      loop over all cells owned by this node          

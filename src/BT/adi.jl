@@ -1,26 +1,18 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function adi()
+function adi()
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
+      copy_faces()
 
-      copy_faces
+      x_solve()
 
-      x_solve
+      y_solve()
 
-      y_solve
+      z_solve()
 
-      z_solve
-
-      add
+      add()
 
       return nothing
-      end
+end
 

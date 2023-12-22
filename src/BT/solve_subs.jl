@@ -1,71 +1,47 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function matvec_sub(ablock, avec, bvec)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #     subtracts bvec=bvec - ablock*avec
 #---------------------------------------------------------------------
 
-#      implicit none
-
-#      DOUBLEPRECISION ablock,avec,bvec
-#      dimension ablock[5,5],avec[5],bvec[5]
+function matvec_sub(ablock, avec, bvec)
 
 #---------------------------------------------------------------------
 #            rhs[i,ic,jc,kc,ccell] = rhs[i,ic,jc,kc,ccell] 
 #     $           - lhs(i,1,ablock,ia,ja,ka,acell)*
 #---------------------------------------------------------------------
          bvec[1] = bvec[1] - ablock[1,1]*avec[1]-
-                            ablock[1,2]*avec[2]-
-                            ablock[1,3]*avec[3]-
-                            ablock[1,4]*avec[4]-
-                            ablock[1,5]*avec[5]
+                             ablock[1,2]*avec[2]-
+                             ablock[1,3]*avec[3]-
+                             ablock[1,4]*avec[4]-
+                             ablock[1,5]*avec[5]
          bvec[2] = bvec[2] - ablock[2,1]*avec[1]-
-                            ablock[2,2]*avec[2]-
-                            ablock[2,3]*avec[3]-
-                            ablock[2,4]*avec[4]-
-                            ablock[2,5]*avec[5]
+                             ablock[2,2]*avec[2]-
+                             ablock[2,3]*avec[3]-
+                             ablock[2,4]*avec[4]-
+                             ablock[2,5]*avec[5]
          bvec[3] = bvec[3] - ablock[3,1]*avec[1]-
-                            ablock[3,2]*avec[2]-
-                            ablock[3,3]*avec[3]-
-                            ablock[3,4]*avec[4]-
-                            ablock[3,5]*avec[5]
+                             ablock[3,2]*avec[2]-
+                             ablock[3,3]*avec[3]-
+                             ablock[3,4]*avec[4]-
+                             ablock[3,5]*avec[5]
          bvec[4] = bvec[4] - ablock[4,1]*avec[1]-
-                            ablock[4,2]*avec[2]-
-                            ablock[4,3]*avec[3]-
-                            ablock[4,4]*avec[4]-
-                            ablock[4,5]*avec[5]
+                             ablock[4,2]*avec[2]-
+                             ablock[4,3]*avec[3]-
+                             ablock[4,4]*avec[4]-
+                             ablock[4,5]*avec[5]
          bvec[5] = bvec[5] - ablock[5,1]*avec[1]-
-                            ablock[5,2]*avec[2]-
-                            ablock[5,3]*avec[3]-
-                            ablock[5,4]*avec[4]-
-                            ablock[5,5]*avec[5]
-
+                             ablock[5,2]*avec[2]-
+                             ablock[5,3]*avec[3]-
+                             ablock[5,4]*avec[4]-
+                             ablock[5,5]*avec[5]
 
       return nothing
-      end
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function matmul_sub(ablock, bblock, cblock)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
+end
 
 #---------------------------------------------------------------------
 #     subtracts a[i,j,k] X  b[i,j,k] from c[i,j,k]
 #---------------------------------------------------------------------
+
+function matmul_sub(ablock, bblock, cblock)
 
 #      implicit none
 
@@ -74,148 +50,140 @@ using Printf
 
 
          cblock[1,1] = cblock[1,1] - ablock[1,1]*bblock[1,1]-
-                                    ablock[1,2]*bblock[2,1]-
-                                    ablock[1,3]*bblock[3,1]-
-                                    ablock[1,4]*bblock[4,1]-
-                                    ablock[1,5]*bblock[5,1]
+                                     ablock[1,2]*bblock[2,1]-
+                                     ablock[1,3]*bblock[3,1]-
+                                     ablock[1,4]*bblock[4,1]-
+                                     ablock[1,5]*bblock[5,1]
          cblock[2,1] = cblock[2,1] - ablock[2,1]*bblock[1,1]-
-                                    ablock[2,2]*bblock[2,1]-
-                                    ablock[2,3]*bblock[3,1]-
-                                    ablock[2,4]*bblock[4,1]-
-                                    ablock[2,5]*bblock[5,1]
+                                     ablock[2,2]*bblock[2,1]-
+                                     ablock[2,3]*bblock[3,1]-
+                                     ablock[2,4]*bblock[4,1]-
+                                     ablock[2,5]*bblock[5,1]
          cblock[3,1] = cblock[3,1] - ablock[3,1]*bblock[1,1]-
-                                    ablock[3,2]*bblock[2,1]-
-                                    ablock[3,3]*bblock[3,1]-
-                                    ablock[3,4]*bblock[4,1]-
-                                    ablock[3,5]*bblock[5,1]
+                                     ablock[3,2]*bblock[2,1]-
+                                     ablock[3,3]*bblock[3,1]-
+                                     ablock[3,4]*bblock[4,1]-
+                                     ablock[3,5]*bblock[5,1]
          cblock[4,1] = cblock[4,1] - ablock[4,1]*bblock[1,1]-
-                                    ablock[4,2]*bblock[2,1]-
-                                    ablock[4,3]*bblock[3,1]-
-                                    ablock[4,4]*bblock[4,1]-
-                                    ablock[4,5]*bblock[5,1]
+                                     ablock[4,2]*bblock[2,1]-
+                                     ablock[4,3]*bblock[3,1]-
+                                     ablock[4,4]*bblock[4,1]-
+                                     ablock[4,5]*bblock[5,1]
          cblock[5,1] = cblock[5,1] - ablock[5,1]*bblock[1,1]-
-                                    ablock[5,2]*bblock[2,1]-
-                                    ablock[5,3]*bblock[3,1]-
-                                    ablock[5,4]*bblock[4,1]-
-                                    ablock[5,5]*bblock[5,1]
+                                     ablock[5,2]*bblock[2,1]-
+                                     ablock[5,3]*bblock[3,1]-
+                                     ablock[5,4]*bblock[4,1]-
+                                     ablock[5,5]*bblock[5,1]
          cblock[1,2] = cblock[1,2] - ablock[1,1]*bblock[1,2]-
-                                    ablock[1,2]*bblock[2,2]-
-                                    ablock[1,3]*bblock[3,2]-
-                                    ablock[1,4]*bblock[4,2]-
-                                    ablock[1,5]*bblock[5,2]
+                                     ablock[1,2]*bblock[2,2]-
+                                     ablock[1,3]*bblock[3,2]-
+                                     ablock[1,4]*bblock[4,2]-
+                                     ablock[1,5]*bblock[5,2]
          cblock[2,2] = cblock[2,2] - ablock[2,1]*bblock[1,2]-
-                                    ablock[2,2]*bblock[2,2]-
-                                    ablock[2,3]*bblock[3,2]-
-                                    ablock[2,4]*bblock[4,2]-
-                                    ablock[2,5]*bblock[5,2]
+                                     ablock[2,2]*bblock[2,2]-
+                                     ablock[2,3]*bblock[3,2]-
+                                     ablock[2,4]*bblock[4,2]-
+                                     ablock[2,5]*bblock[5,2]
          cblock[3,2] = cblock[3,2] - ablock[3,1]*bblock[1,2]-
-                                    ablock[3,2]*bblock[2,2]-
-                                    ablock[3,3]*bblock[3,2]-
-                                    ablock[3,4]*bblock[4,2]-
-                                    ablock[3,5]*bblock[5,2]
+                                     ablock[3,2]*bblock[2,2]-
+                                     ablock[3,3]*bblock[3,2]-
+                                     ablock[3,4]*bblock[4,2]-
+                                     ablock[3,5]*bblock[5,2]
          cblock[4,2] = cblock[4,2] - ablock[4,1]*bblock[1,2]-
-                                    ablock[4,2]*bblock[2,2]-
-                                    ablock[4,3]*bblock[3,2]-
-                                    ablock[4,4]*bblock[4,2]-
-                                    ablock[4,5]*bblock[5,2]
+                                     ablock[4,2]*bblock[2,2]-
+                                     ablock[4,3]*bblock[3,2]-
+                                     ablock[4,4]*bblock[4,2]-
+                                     ablock[4,5]*bblock[5,2]
          cblock[5,2] = cblock[5,2] - ablock[5,1]*bblock[1,2]-
-                                    ablock[5,2]*bblock[2,2]-
-                                    ablock[5,3]*bblock[3,2]-
-                                    ablock[5,4]*bblock[4,2]-
-                                    ablock[5,5]*bblock[5,2]
+                                     ablock[5,2]*bblock[2,2]-
+                                     ablock[5,3]*bblock[3,2]-
+                                     ablock[5,4]*bblock[4,2]-
+                                     ablock[5,5]*bblock[5,2]
          cblock[1,3] = cblock[1,3] - ablock[1,1]*bblock[1,3]-
-                                    ablock[1,2]*bblock[2,3]-
-                                    ablock[1,3]*bblock[3,3]-
-                                    ablock[1,4]*bblock[4,3]-
-                                    ablock[1,5]*bblock[5,3]
+                                     ablock[1,2]*bblock[2,3]-
+                                     ablock[1,3]*bblock[3,3]-
+                                     ablock[1,4]*bblock[4,3]-
+                                     ablock[1,5]*bblock[5,3]
          cblock[2,3] = cblock[2,3] - ablock[2,1]*bblock[1,3]-
-                                    ablock[2,2]*bblock[2,3]-
-                                    ablock[2,3]*bblock[3,3]-
-                                    ablock[2,4]*bblock[4,3]-
-                                    ablock[2,5]*bblock[5,3]
+                                     ablock[2,2]*bblock[2,3]-
+                                     ablock[2,3]*bblock[3,3]-
+                                     ablock[2,4]*bblock[4,3]-
+                                     ablock[2,5]*bblock[5,3]
          cblock[3,3] = cblock[3,3] - ablock[3,1]*bblock[1,3]-
-                                    ablock[3,2]*bblock[2,3]-
-                                    ablock[3,3]*bblock[3,3]-
-                                    ablock[3,4]*bblock[4,3]-
-                                    ablock[3,5]*bblock[5,3]
+                                     ablock[3,2]*bblock[2,3]-
+                                     ablock[3,3]*bblock[3,3]-
+                                     ablock[3,4]*bblock[4,3]-
+                                     ablock[3,5]*bblock[5,3]
          cblock[4,3] = cblock[4,3] - ablock[4,1]*bblock[1,3]-
-                                    ablock[4,2]*bblock[2,3]-
-                                    ablock[4,3]*bblock[3,3]-
-                                    ablock[4,4]*bblock[4,3]-
-                                    ablock[4,5]*bblock[5,3]
+                                     ablock[4,2]*bblock[2,3]-
+                                     ablock[4,3]*bblock[3,3]-
+                                     ablock[4,4]*bblock[4,3]-
+                                     ablock[4,5]*bblock[5,3]
          cblock[5,3] = cblock[5,3] - ablock[5,1]*bblock[1,3]-
-                                    ablock[5,2]*bblock[2,3]-
-                                    ablock[5,3]*bblock[3,3]-
-                                    ablock[5,4]*bblock[4,3]-
-                                    ablock[5,5]*bblock[5,3]
+                                     ablock[5,2]*bblock[2,3]-
+                                     ablock[5,3]*bblock[3,3]-
+                                     ablock[5,4]*bblock[4,3]-
+                                     ablock[5,5]*bblock[5,3]
          cblock[1,4] = cblock[1,4] - ablock[1,1]*bblock[1,4]-
-                                    ablock[1,2]*bblock[2,4]-
-                                    ablock[1,3]*bblock[3,4]-
-                                    ablock[1,4]*bblock[4,4]-
-                                    ablock[1,5]*bblock[5,4]
+                                     ablock[1,2]*bblock[2,4]-
+                                     ablock[1,3]*bblock[3,4]-
+                                     ablock[1,4]*bblock[4,4]-
+                                     ablock[1,5]*bblock[5,4]
          cblock[2,4] = cblock[2,4] - ablock[2,1]*bblock[1,4]-
-                                    ablock[2,2]*bblock[2,4]-
-                                    ablock[2,3]*bblock[3,4]-
-                                    ablock[2,4]*bblock[4,4]-
-                                    ablock[2,5]*bblock[5,4]
+                                     ablock[2,2]*bblock[2,4]-
+                                     ablock[2,3]*bblock[3,4]-
+                                     ablock[2,4]*bblock[4,4]-
+                                     ablock[2,5]*bblock[5,4]
          cblock[3,4] = cblock[3,4] - ablock[3,1]*bblock[1,4]-
-                                    ablock[3,2]*bblock[2,4]-
-                                    ablock[3,3]*bblock[3,4]-
-                                    ablock[3,4]*bblock[4,4]-
-                                    ablock[3,5]*bblock[5,4]
+                                     ablock[3,2]*bblock[2,4]-
+                                     ablock[3,3]*bblock[3,4]-
+                                     ablock[3,4]*bblock[4,4]-
+                                     ablock[3,5]*bblock[5,4]
          cblock[4,4] = cblock[4,4] - ablock[4,1]*bblock[1,4]-
-                                    ablock[4,2]*bblock[2,4]-
-                                    ablock[4,3]*bblock[3,4]-
-                                    ablock[4,4]*bblock[4,4]-
-                                    ablock[4,5]*bblock[5,4]
+                                     ablock[4,2]*bblock[2,4]-
+                                     ablock[4,3]*bblock[3,4]-
+                                     ablock[4,4]*bblock[4,4]-
+                                     ablock[4,5]*bblock[5,4]
          cblock[5,4] = cblock[5,4] - ablock[5,1]*bblock[1,4]-
-                                    ablock[5,2]*bblock[2,4]-
-                                    ablock[5,3]*bblock[3,4]-
-                                    ablock[5,4]*bblock[4,4]-
-                                    ablock[5,5]*bblock[5,4]
+                                     ablock[5,2]*bblock[2,4]-
+                                     ablock[5,3]*bblock[3,4]-
+                                     ablock[5,4]*bblock[4,4]-
+                                     ablock[5,5]*bblock[5,4]
          cblock[1,5] = cblock[1,5] - ablock[1,1]*bblock[1,5]-
-                                    ablock[1,2]*bblock[2,5]-
-                                    ablock[1,3]*bblock[3,5]-
-                                    ablock[1,4]*bblock[4,5]-
-                                    ablock[1,5]*bblock[5,5]
+                                     ablock[1,2]*bblock[2,5]-
+                                     ablock[1,3]*bblock[3,5]-
+                                     ablock[1,4]*bblock[4,5]-
+                                     ablock[1,5]*bblock[5,5]
          cblock[2,5] = cblock[2,5] - ablock[2,1]*bblock[1,5]-
-                                    ablock[2,2]*bblock[2,5]-
-                                    ablock[2,3]*bblock[3,5]-
-                                    ablock[2,4]*bblock[4,5]-
-                                    ablock[2,5]*bblock[5,5]
+                                     ablock[2,2]*bblock[2,5]-
+                                     ablock[2,3]*bblock[3,5]-
+                                     ablock[2,4]*bblock[4,5]-
+                                     ablock[2,5]*bblock[5,5]
          cblock[3,5] = cblock[3,5] - ablock[3,1]*bblock[1,5]-
-                                    ablock[3,2]*bblock[2,5]-
-                                    ablock[3,3]*bblock[3,5]-
-                                    ablock[3,4]*bblock[4,5]-
-                                    ablock[3,5]*bblock[5,5]
+                                     ablock[3,2]*bblock[2,5]-
+                                     ablock[3,3]*bblock[3,5]-
+                                     ablock[3,4]*bblock[4,5]-
+                                     ablock[3,5]*bblock[5,5]
          cblock[4,5] = cblock[4,5] - ablock[4,1]*bblock[1,5]-
-                                    ablock[4,2]*bblock[2,5]-
-                                    ablock[4,3]*bblock[3,5]-
-                                    ablock[4,4]*bblock[4,5]-
-                                    ablock[4,5]*bblock[5,5]
+                                     ablock[4,2]*bblock[2,5]-
+                                     ablock[4,3]*bblock[3,5]-
+                                     ablock[4,4]*bblock[4,5]-
+                                     ablock[4,5]*bblock[5,5]
          cblock[5,5] = cblock[5,5] - ablock[5,1]*bblock[1,5]-
-                                    ablock[5,2]*bblock[2,5]-
-                                    ablock[5,3]*bblock[3,5]-
-                                    ablock[5,4]*bblock[4,5]-
-                                    ablock[5,5]*bblock[5,5]
-
+                                     ablock[5,2]*bblock[2,5]-
+                                     ablock[5,3]*bblock[3,5]-
+                                     ablock[5,4]*bblock[4,5]-
+                                     ablock[5,5]*bblock[5,5]
 
       return nothing
-      end
+end
 
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function binvcrhs[ lhs, c, r ]
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
-#     
-#---------------------------------------------------------------------
+function binvcrhs(lhs, c, r)
 
 #      implicit none
 
@@ -483,21 +451,14 @@ using Printf
 
 
       return nothing
-      end
+end
 
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function binvrhs[ lhs, r ]
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
-#     
-#---------------------------------------------------------------------
+function binvrhs(lhs, r)
 
 #      implicit none
 
@@ -622,7 +583,7 @@ using Printf
       coeff = lhs[5,4]
       lhs[5,5]= lhs[5,5] - coeff*lhs[4,5]
       r[5]   = r[5]   - coeff*r[4]
-
+      
 
       pivot = 1.00e0/lhs[5,5]
       r[5]   = r[5]  *pivot
@@ -639,9 +600,8 @@ using Printf
       coeff = lhs[4,5]
       r[4]   = r[4]   - coeff*r[5]
 
-
       return nothing
-      end
+end
 
 
 

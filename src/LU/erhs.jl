@@ -1,48 +1,12 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function erhs()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #
 #   compute the right hand side based on exact solution
 #
 #---------------------------------------------------------------------
 
-#      use lu_data
-#      implicit none
-
-#---------------------------------------------------------------------
-#  local variables
-#---------------------------------------------------------------------
-#      integer i, j, k, m
-#      integer iglob, jglob
-#      integer iex
-#      integer L1, L2
-#      integer ist1, iend1
-#      integer jst1, jend1
-#      DOUBLEPRECISION  dsspm
-#      DOUBLEPRECISION  xi, eta, zeta
-#      DOUBLEPRECISION  q
-#      DOUBLEPRECISION  u21, u31, u41
-#      DOUBLEPRECISION  tmp
-#      DOUBLEPRECISION  u21i, u31i, u41i, u51i
-#      DOUBLEPRECISION  u21j, u31j, u41j, u51j
-#      DOUBLEPRECISION  u21k, u31k, u41k, u51k
-#      DOUBLEPRECISION  u21im1, u31im1, u41im1, u51im1
-#      DOUBLEPRECISION  u21jm1, u31jm1, u41jm1, u51jm1
-#      DOUBLEPRECISION  u21km1, u31km1, u41km1, u51km1
+ function erhs()
 
       dsspm = dssp
-
 
       for k = 1:nz
          for j = 1:ny
@@ -537,4 +501,4 @@ using Printf
       end
 
       return nothing
-      end
+end

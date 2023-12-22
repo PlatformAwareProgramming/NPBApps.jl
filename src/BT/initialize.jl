@@ -1,27 +1,14 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function initialize()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #     This subroutine initializes the field variable u using 
 #     tri-linear transfinite interpolation of the boundary values     
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
+function initialize()
 
-#      integer c, i, j, k, m, ii, jj, kk, ix, iy, iz
-#      DOUBLEPRECISION  xi, eta, zeta, Pface[5,3,2], Pxi, Peta,  
-#           Pzeta, temp[5]
+      Pface1 = Array{Array{Float64}}(undef,2)
+      Pface2 = Array{Array{Float64}}(undef,2)
+      Pface3 = Array{Array{Float64}}(undef,2)
+      temp = Array{Float64}(undef, 5)
 
 #---------------------------------------------------------------------
 #  Later (in compute_rhs) we compute 1/u for every element. A few of 
@@ -59,28 +46,22 @@ using Printf
                   xi = float(i) * dnxm1
 
                   for ix = 1:2
-                     exact_solution(float(ix-1), eta, zeta,
-                          Pface[1,1,ix])
+                     Pface1[ix] = exact_solution(float(ix-1), eta, zeta)
                   end
 
                   for iy = 1:2
-                     exact_solution(xi, float(iy-1) , zeta,
-                          Pface[1,2,iy])
+                     Pface2[iy] = exact_solution(xi, float(iy-1), zeta)
                   end
 
                   for iz = 1:2
-                     exact_solution(xi, eta, float(iz-1),
-                          Pface[1,3,iz])
+                     Pface3[iz] = exact_solution(xi, eta, float(iz-1))
                   end
 
-                  for m = 1:5
-                     Pxi   = xi   * Pface[m,1,2] +(
-                          1.0e0-xi)   * Pface[m,1,1]
-                     Peta  = eta  * Pface[m,2,2] +(
-                          1.0e0-eta)  * Pface[m,2,1]
-                     Pzeta = zeta * Pface[m,3,2] +(
-                          1.0e0-zeta) * Pface[m,3,1]
-
+                  for m = 1:5                          
+                     Pxi   = xi   * Pface1[2][m] +(1.0e0-xi)   * Pface1[1][m]
+                     Peta  = eta  * Pface2[2][m] +(1.0e0-eta)  * Pface2[1][m]
+                     Pzeta = zeta * Pface3[2][m] +(1.0e0-zeta) * Pface3[1][m]
+    
                      u[m, ii, jj, kk, c] = Pxi + Peta + Pzeta -
                           Pxi*Peta - Pxi*Pzeta - Peta*Pzeta +
                           Pxi*Peta*Pzeta
@@ -110,7 +91,7 @@ using Printf
          jj = 0
          for j = cell_low[2, c]:cell_high[2, c]
             eta = float(j) * dnym1
-            exact_solution(xi, eta, zeta, temp)
+            temp = exact_solution(xi, eta, zeta)
             for m = 1:5
                u[m, ii, jj, kk, c] = temp[m]
             end
@@ -131,7 +112,7 @@ using Printf
          jj = 0
          for j = cell_low[2, c]:cell_high[2, c]
             eta = float(j) * dnym1
-            exact_solution(xi, eta, zeta, temp)
+            temp = exact_solution(xi, eta, zeta)
             for m = 1:5
                u[m, ii, jj, kk, c] = temp[m]
             end
@@ -152,7 +133,7 @@ using Printf
          ii = 0
          for i = cell_low[1, c]:cell_high[1, c]
             xi = float(i) * dnxm1
-            exact_solution(xi, eta, zeta, temp)
+            temp = exact_solution(xi, eta, zeta)
             for m = 1:5
                u[m, ii, jj, kk, c] = temp[m]
             end
@@ -174,7 +155,7 @@ using Printf
          ii = 0
          for i = cell_low[1, c]:cell_high[1, c]
             xi = float(i) * dnxm1
-            exact_solution(xi, eta, zeta, temp)
+            temp = exact_solution(xi, eta, zeta)
             for m = 1:5
                u[m, ii, jj, kk, c] = temp[m]
             end
@@ -195,7 +176,7 @@ using Printf
          ii = 0
          for i = cell_low[1, c]:cell_high[1, c]
             xi = float(i) *dnxm1
-            exact_solution(xi, eta, zeta, temp)
+            temp = exact_solution(xi, eta, zeta)
             for m = 1:5
                u[m, ii, jj, kk, c] = temp[m]
             end
@@ -216,7 +197,7 @@ using Printf
          ii = 0
          for i = cell_low[1, c]:cell_high[1, c]
             xi = float(i) * dnxm1
-            exact_solution(xi, eta, zeta, temp)
+            temp = exact_solution(xi, eta, zeta)
             for m = 1:5
                u[m, ii, jj, kk, c] = temp[m]
             end
@@ -226,16 +207,13 @@ using Printf
       end
 
       return nothing
-      end
+end
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function lhsinit()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
+function lhsinit()
 
 #      use bt_data
 #      implicit none
@@ -281,13 +259,13 @@ using Printf
       end
 
       return nothing
-      end
+end
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function lhsabinit(lhsa, lhsb, SIZE)
+function lhsabinit(lhsa, lhsb, SIZE)
 #      implicit none
 
 #      integer SIZE
@@ -309,7 +287,7 @@ using Printf
       end
 
       return nothing
-      end
+end
 
 
 

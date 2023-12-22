@@ -1,28 +1,8 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function exact_rhs()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #     compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
-
-#      DOUBLEPRECISION dtemp[5], xi, eta, zeta, dtpp
-#      integer          c, m, i, j, k, ip1, im1, jp1,  
-#           jm1, km1, kp1
-
+function exact_rhs()
 
 #---------------------------------------------------------------------
 #     loop over all cells owned by this node                   
@@ -50,10 +30,10 @@ using Printf
             for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                eta = float(j+cell_low[2, c]) * dnym1
 
-               for i = -2*(1-start(1, c)):cell_size[1, c]+1-2*cell_end[1, c]
+               for i = -2*(1-cell_start[1, c]):cell_size[1, c]+1-2*cell_end[1, c]
                   xi = float(i+cell_low[1, c]) * dnxm1
 
-                  exact_solution(xi, eta, zeta, dtemp)
+                  dtemp = exact_solution(xi, eta, zeta)
                   for m = 1:5
                      ue[i, m] = dtemp[m]
                   end
@@ -152,10 +132,10 @@ using Printf
             for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                xi = float(i+cell_low[1, c]) * dnxm1
 
-               for j = -2*(1-start(2, c)):cell_size[2, c]+1-2*cell_end[2, c]
+               for j = -2*(1-cell_start[2, c]):cell_size[2, c]+1-2*cell_end[2, c]
                   eta = float(j+cell_low[2, c]) * dnym1
 
-                  exact_solution(xi, eta, zeta, dtemp)
+                  dtemp = exact_solution(xi, eta, zeta)
                   for m = 1:5
                      ue[j, m] = dtemp[m]
                   end
@@ -254,10 +234,10 @@ using Printf
             for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                xi = float(i+cell_low[1, c]) * dnxm1
 
-               for k = -2*(1-start(3, c)):cell_size[3, c]+1-2*cell_end[3, c]
+               for k = -2*(1-cell_start[3, c]):cell_size[3, c]+1-2*cell_end[3, c]
                   zeta = float(k+cell_low[3, c]) * dnzm1
 
-                  exact_solution(xi, eta, zeta, dtemp)
+                  dtemp = exact_solution(xi, eta, zeta)
                   for m = 1:5
                      ue[k, m] = dtemp[m]
                   end
@@ -269,10 +249,8 @@ using Printf
                   end
 
                   cuf[k]   = buf[k, 4] * buf[k, 4]
-                  buf[k, 1] = cuf[k] + buf[k, 2] * buf[k, 2] +
-                       buf[k, 3] * buf[k, 3]
-                  q[k] = 0.5e0*(buf[k, 2]*ue[k, 2] + buf[k, 3]*ue[k, 3] +
-                       buf[k, 4]*ue[k, 4])
+                  buf[k, 1] = cuf[k] + buf[k, 2] * buf[k, 2] + buf[k, 3] * buf[k, 3]
+                  q[k] = 0.5e0*(buf[k, 2]*ue[k, 2] + buf[k, 3]*ue[k, 3] + buf[k, 4]*ue[k, 4])
                end
 
                for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
@@ -363,4 +341,4 @@ using Printf
       end
 
       return nothing
-      end
+end

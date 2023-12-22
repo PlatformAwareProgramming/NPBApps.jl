@@ -309,7 +309,7 @@ function z_solve()
 
 
              if (timeron) timer_start(t_zcomm) end
-             requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), sucessor[3], DEFAULT_TAG, comm_solve)
+             requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[3], DEFAULT_TAG, comm_solve)
              if (timeron) timer_stop(t_zcomm) end
 
           end
@@ -345,7 +345,7 @@ function z_solve()
 #---------------------------------------------------------------------
 
              if (timeron) timer_start(t_zcomm) end
-             requests[1] = MPI.Irecv!(in_buffer, sucessor[3], DEFAULT_TAG, comm_solve)
+             requests[1] = MPI.Irecv!(in_buffer, successor[3], DEFAULT_TAG, comm_solve)
              if (timeron) timer_stop(t_zcomm) end
 
 

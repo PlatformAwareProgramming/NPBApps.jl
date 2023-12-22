@@ -1,36 +1,7 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function pintgr()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use lu_data
-#      use mpinpb
-
-#      implicit none
-
-#---------------------------------------------------------------------
-#  local variables
-#---------------------------------------------------------------------
-#      integer i, j, k
-#      integer ibeg, ifin, ifin1
-#      integer jbeg, jfin, jfin1
-#      integer iglob, iglob1, iglob2
-#      integer jglob, jglob1, jglob2
-#      integer ind1, ind2
-#      DOUBLEPRECISION  frc1, frc2, frc3
-#      DOUBLEPRECISION  dummy
-
-#      integer IERROR
-
+ function pintgr()
 
 #---------------------------------------------------------------------
 #   set up the sub-domains for integeration in each processor
@@ -61,8 +32,8 @@ using Printf
 #---------------------------------------------------------------------
       for k = 0:isiz3+1
         for i = 0:isiz2+1
-          phi1(i, k) = 0.
-          phi2(i, k) = 0.
+          phi1[i, k] = 0.
+          phi2[i, k] = 0.
         end
       end
 
@@ -72,8 +43,7 @@ using Printf
             iglob = ipt + i
 
             k = ki1
-
-            phi1(i, j) = c2*(  u[5, i, j, k]-
+            phi1[i, j] = c2*(  u[5, i, j, k]-
                   0.50e+00 * (  u[2, i, j, k] ^ 2+
                                 u[3, i, j, k] ^ 2+
                                 u[4, i, j, k] ^ 2 )/
@@ -81,7 +51,7 @@ using Printf
 
             k = ki2
 
-            phi2(i, j) = c2*(  u[5, i, j, k]-
+            phi2[i, j] = c2*(  u[5, i, j, k]-
                   0.50e+00 * (  u[2, i, j, k] ^ 2+
                                 u[3, i, j, k] ^ 2+
                                 u[4, i, j, k] ^ 2 )/
@@ -98,28 +68,24 @@ using Printf
 
       for j = jbeg:jfin1
          for i = ibeg:ifin1
-            frc1 = frc1 + (  phi1(i, j)+
-                            phi1(i+1, j)+
-                            phi1(i, j+1)+
-                            phi1(i+1, j+1)+
-                            phi2(i, j)+
-                            phi2(i+1, j)+
-                            phi2(i, j+1)+
-                            phi2(i+1, j+1) )
+            frc1 = frc1 + (  phi1[i, j]+
+                            phi1[i+1, j]+
+                            phi1[i, j+1]+
+                            phi1[i+1, j+1]+
+                            phi2[i, j]+
+                            phi2[i+1, j]+
+                            phi2[i, j+1]+
+                            phi2[i+1, j+1] )
          end
       end
 
 #---------------------------------------------------------------------
 #  compute the global sum of individual contributions to frc1
 #---------------------------------------------------------------------
-      dummy = frc1
-      MPI_ALLREDUCE( dummy,
-                          frc1,
-                          1,
-                          dp_type,
-                          MPI_SUM,
-                          comm_solve,
-                          IERROR )
+      #dummy = frc1
+      #MPI_ALLREDUCE( dummy, frc1, 1, dp_type, MPI_SUM, comm_solve, IERROR )
+
+      frc1 = MPI.Allreduce(frc1, MPI.SUM, comm_solve)
 
       frc1 = dxi * deta * frc1
 
@@ -128,8 +94,8 @@ using Printf
 #---------------------------------------------------------------------
       for k = 0:isiz3+1
         for i = 0:isiz2+1
-          phi1(i, k) = 0.
-          phi2(i, k) = 0.
+          phi1[i, k] = 0.
+          phi2[i, k] = 0.
         end
       end
       jglob = jpt + jbeg
@@ -139,7 +105,7 @@ using Printf
         for k = ki1:ki2
            for i = ibeg:ifin
               iglob = ipt + i
-              phi1(i, k) = c2*(  u[5, i, jbeg, k]-
+              phi1[i, k] = c2*(  u[5, i, jbeg, k]-
                     0.50e+00 * (  u[2, i, jbeg, k] ^ 2+
                                   u[3, i, jbeg, k] ^ 2+
                                   u[4, i, jbeg, k] ^ 2 )/
@@ -155,7 +121,7 @@ using Printf
         for k = ki1:ki2
            for i = ibeg:ifin
               iglob = ipt + i
-              phi2(i, k) = c2*(  u[5, i, jfin, k]-
+              phi2[i, k] = c2*(  u[5, i, jfin, k]-
                     0.50e+00 * (  u[2, i, jfin, k] ^ 2+
                                   u[3, i, jfin, k] ^ 2+
                                   u[4, i, jfin, k] ^ 2 )/
@@ -177,28 +143,24 @@ using Printf
       frc2 = 0.0e+00
       for k = ki1:ki2-1
          for i = ibeg:ifin1
-            frc2 = frc2 + (  phi1(i, k)+
-                            phi1(i+1, k)+
-                            phi1(i, k+1)+
-                            phi1(i+1, k+1)+
-                            phi2(i, k)+
-                            phi2(i+1, k)+
-                            phi2(i, k+1)+
-                            phi2(i+1, k+1) )
+            frc2 = frc2 + (  phi1[i, k]+
+                            phi1[i+1, k]+
+                            phi1[i, k+1]+
+                            phi1[i+1, k+1]+
+                            phi2[i, k]+
+                            phi2[i+1, k]+
+                            phi2[i, k+1]+
+                            phi2[i+1, k+1] )
          end
       end
 
 #---------------------------------------------------------------------
 #  compute the global sum of individual contributions to frc2
 #---------------------------------------------------------------------
-      dummy = frc2
-      MPI_ALLREDUCE( dummy,
-                          frc2,
-                          1,
-                          dp_type,
-                          MPI_SUM,
-                          comm_solve,
-                          IERROR )
+      #dummy = frc2
+      #MPI_ALLREDUCE( dummy, frc2, 1, dp_type, MPI_SUM, comm_solve, IERROR )
+      
+      frc2 = MPI.Allreduce(frc2, MPI.SUM, comm_solve)
 
       frc2 = dxi * dzeta * frc2
 
@@ -207,8 +169,8 @@ using Printf
 #---------------------------------------------------------------------
       for k = 0:isiz3+1
         for i = 0:isiz2+1
-          phi1(i, k) = 0.
-          phi2(i, k) = 0.
+          phi1[i, k] = 0.
+          phi2[i, k] = 0.
         end
       end
       iglob = ipt + ibeg
@@ -218,7 +180,7 @@ using Printf
         for k = ki1:ki2
            for j = jbeg:jfin
               jglob = jpt + j
-              phi1(j, k) = c2*(  u[5, ibeg, j, k]-
+              phi1[j, k] = c2*(  u[5, ibeg, j, k]-
                     0.50e+00 * (  u[2, ibeg, j, k] ^ 2+
                                   u[3, ibeg, j, k] ^ 2+
                                   u[4, ibeg, j, k] ^ 2 )/
@@ -234,7 +196,7 @@ using Printf
         for k = ki1:ki2
            for j = jbeg:jfin
               jglob = jpt + j
-              phi2(j, k) = c2*(  u[5, ifin, j, k]-
+              phi2[j, k] = c2*(  u[5, ifin, j, k]-
                     0.50e+00 * (  u[2, ifin, j, k] ^ 2+
                                   u[3, ifin, j, k] ^ 2+
                                   u[4, ifin, j, k] ^ 2 )/
@@ -257,36 +219,28 @@ using Printf
 
       for k = ki1:ki2-1
          for j = jbeg:jfin1
-            frc3 = frc3 + (  phi1(j, k)+
-                            phi1(j+1, k)+
-                            phi1(j, k+1)+
-                            phi1(j+1, k+1)+
-                            phi2(j, k)+
-                            phi2(j+1, k)+
-                            phi2(j, k+1)+
-                            phi2(j+1, k+1) )
+            frc3 = frc3 + (  phi1[j, k]+
+                            phi1[j+1, k]+
+                            phi1[j, k+1]+
+                            phi1[j+1, k+1]+
+                            phi2[j, k]+
+                            phi2[j+1, k]+
+                            phi2[j, k+1]+
+                            phi2[j+1, k+1] )
          end
       end
 
 #---------------------------------------------------------------------
 #  compute the global sum of individual contributions to frc3
 #---------------------------------------------------------------------
-      dummy = frc3
-      MPI_ALLREDUCE( dummy,
-                          frc3,
-                          1,
-                          dp_type,
-                          MPI_SUM,
-                          comm_solve,
-                          IERROR )
+      #dummy = frc3
+      #MPI_ALLREDUCE( dummy, frc3, 1, dp_type, MPI_SUM, comm_solve, IERROR )
+
+      frc3 = MPI.Allreduce(frc3, MPI.SUM, comm_solve)
 
       frc3 = deta * dzeta * frc3
       frc = 0.25e+00 * ( frc1 + frc2 + frc3 )
 #      if (id.eq.0) write (*,1001) frc
 
-      return nothing
-
-# 1001 format(//5x,'surface integral = ',1pe12.5//)
-
-      return nothing
-      end
+      return frc
+end

@@ -1,24 +1,8 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function add()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #     addition of update to the vector u
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
-
-#      integer  c, i, j, k, m
+function add()
 
       for c = 1:ncells
          for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
@@ -33,4 +17,4 @@ using Printf
       end
 
       return nothing
-      end
+end

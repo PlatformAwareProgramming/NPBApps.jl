@@ -13,6 +13,7 @@ function make_set()
 #     it twice because of some include file problems).
 #---------------------------------------------------------------------
        global ncells = Int(sqrt(no_nodes))
+
 #---------------------------------------------------------------------
 #      this makes coding easier
 #---------------------------------------------------------------------
@@ -70,9 +71,9 @@ function make_set()
        predecessor[1] = mod(i-1+p, p) + p*j
        predecessor[2] = i + p*mod(j-1+p, p)
        predecessor[3] = mod(i+1, p) + p*mod(j-1+p, p)
-       sucessor[1]   = mod(i+1, p) + p*j
-       sucessor[2]   = i + p*mod(j+1, p)
-       sucessor[3]   = mod(i-1+p, p) + p*mod(j+1, p)
+       successor[1]   = mod(i+1, p) + p*j
+       successor[2]   = i + p*mod(j+1, p)
+       successor[3]   = mod(i-1+p, p) + p*mod(j+1, p)
 
 #---------------------------------------------------------------------
 # now compute the sizes of the cells                                    
@@ -90,14 +91,13 @@ function make_set()
                 cell_high[dir, c] = cell_low[dir, c]+SIZE
              else
                 cell_size[dir, c] = SIZE
-                cell_low[dir, c]  = excess*(SIZE+1)+(
-                         cell_coord[dir, c]-excess-1)*SIZE
+                cell_low[dir, c]  = excess*(SIZE+1)+(cell_coord[dir, c]-excess-1)*SIZE
                 cell_high[dir, c] = cell_low[dir, c]+SIZE-1
              end
              if cell_size[dir, c] <= 2
                 @printf(stdout, " Error: Cell size too small. Min size is 3\n", )
                 ierrcode = 1
-                MPI.Abort(mpi_comm_world, ierrcode)
+                MPI.Abort(MPI.COMM_WORLD, ierrcode)
                 exit(1)
              end
           end

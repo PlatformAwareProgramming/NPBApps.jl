@@ -1,45 +1,13 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function exchange_4(g, h, ibeg, ifin1, jbeg, jfin1)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
-#      use lu_data
-#      use mpinpb
+ function exchange_4(g, h, ibeg, ifin1, jbeg, jfin1)
 
-#      implicit none
+      dum = Array{Float64}(undef, 2*isiz02+4)
 
-#---------------------------------------------------------------------
-#  input parameters
-#---------------------------------------------------------------------
-#      integer ibeg, ifin1, jbeg, jfin1
-#      DOUBLEPRECISION  g[0:isiz2+1,0:isiz3+1],  
-#              h[0:isiz2+1,0:isiz3+1]
-
-#---------------------------------------------------------------------
-#  local variables
-#---------------------------------------------------------------------
-#      integer i, j
-#      integer ny2
-#      DOUBLEPRECISION  dum[2*isiz02+4]
-
-#      integer msgid1, msgid3
-#      integer STATUS[MPI_STATUS_SIZE]
-#      integer IERROR
-
-
+      msgid1 = Ref{MPI.Request}()
+      msgid3 = Ref{MPI.Request}()
 
       ny2 = ny + 2
 
@@ -51,16 +19,9 @@ using Printf
 #   receive from east
 #---------------------------------------------------------------------
       if jfin1 == ny
-        MPI.Irecv!( dum,
-                        2*nx,
-                        dp_type,
-                        east,
-                        from_e,
-                        comm_solve,
-                        msgid3,
-                        IERROR )
+        msgid3[] = MPI.Irecv!(view(dum, 1:2*nx), east, from_e, comm_solve)
 
-        MPI_WAIT( msgid3, STATUS, IERROR )
+        MPI.Wait(msgid3[])
 
         for i = 1:nx
           g[i,ny+1] = dum[i]
@@ -78,13 +39,7 @@ using Printf
           dum[i+nx] = h[i,1]
         end
 
-        MPI.Send( dum,
-                       2*nx,
-                       dp_type,
-                       west,
-                       from_e,
-                       comm_solve,
-                       IERROR )
+        MPI.Send(view(dum, 1:2*nx), west, from_e, comm_solve)
 
       end
 
@@ -96,16 +51,10 @@ using Printf
 #   receive from south
 #---------------------------------------------------------------------
       if ifin1 == nx
-        MPI.Irecv!( dum,
-                        2*ny2,
-                        dp_type,
-                        south,
-                        from_s,
-                        comm_solve,
-                        msgid1,
-                        IERROR )
 
-        MPI_WAIT( msgid1, STATUS, IERROR )
+        msgid1[] = MPI.Irecv!(view(dum, 1:2*ny2), south, from_s, comm_solve)
+
+        MPI.Wait(msgid1[])
 
         for j = 0:ny+1
           g[nx+1,j] = dum[j+1]
@@ -123,15 +72,9 @@ using Printf
           dum[j+ny2+1] = h[1,j]
         end
 
-        MPI.Send( dum,
-                       2*ny2,
-                       dp_type,
-                       north,
-                       from_s,
-                       comm_solve,
-                       IERROR )
+        MPI.Send(view(dum, 1:2*ny2), north, from_s, comm_solve)
 
       end
 
       return nothing
-      end
+end

@@ -1,94 +1,49 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function exchange_3(g, iex)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
-#      use lu_data
-#      use mpinpb
+ function exchange_3(g, iex)
 
-#      implicit none
-
-#---------------------------------------------------------------------
-#  input parameters
-#---------------------------------------------------------------------
-#      integer iex
-#      DOUBLEPRECISION  g[5,-1:isiz1+2,-1:isiz2+2,isiz3]
-
-#---------------------------------------------------------------------
-#  local variables
-#---------------------------------------------------------------------
-#      integer i, j, k
-#      integer ipos1, ipos2
-
-#      integer mid
-#      integer STATUS[MPI_STATUS_SIZE]
-#      integer IERROR
-
-
+      mid = Ref{MPI.Request}()
 
       if iex == 0
+        
 #---------------------------------------------------------------------
 #   communicate in the south and north directions
 #---------------------------------------------------------------------
-      if north != -1
-          MPI.Irecv!( buf1,
-                          10*ny*nz,
-                          dp_type,
-                          north,
-                          from_n,
-                          comm_solve,
-                          mid,
-                          IERROR )
-      end
+        if north != -1
+            mid[] = MPI.Irecv!(view(buf1, 1:10*ny*nz), north, from_n, comm_solve)
+        end
 
 #---------------------------------------------------------------------
 #   send south
 #---------------------------------------------------------------------
-      if south != -1
-          for k = 1:nz
-            for j = 1:ny
-              ipos1 = (k-1)*ny + j
-              ipos2 = ipos1 + ny*nz
-              buf[1, ipos1] = g[1,nx-1,j,k]
-              buf[2, ipos1] = g[2,nx-1,j,k]
-              buf[3, ipos1] = g[3,nx-1,j,k]
-              buf[4, ipos1] = g[4,nx-1,j,k]
-              buf[5, ipos1] = g[5,nx-1,j,k]
-              buf[1, ipos2] = g[1,nx,j,k]
-              buf[2, ipos2] = g[2,nx,j,k]
-              buf[3, ipos2] = g[3,nx,j,k]
-              buf[4, ipos2] = g[4,nx,j,k]
-              buf[5, ipos2] = g[5,nx,j,k]
+        if south != -1
+            for k = 1:nz
+              for j = 1:ny
+                ipos1 = (k-1)*ny + j
+                ipos2 = ipos1 + ny*nz
+                buf[1, ipos1] = g[1,nx-1,j,k]
+                buf[2, ipos1] = g[2,nx-1,j,k]
+                buf[3, ipos1] = g[3,nx-1,j,k]
+                buf[4, ipos1] = g[4,nx-1,j,k]
+                buf[5, ipos1] = g[5,nx-1,j,k]
+                buf[1, ipos2] = g[1,nx,j,k]
+                buf[2, ipos2] = g[2,nx,j,k]
+                buf[3, ipos2] = g[3,nx,j,k]
+                buf[4, ipos2] = g[4,nx,j,k]
+                buf[5, ipos2] = g[5,nx,j,k]
+              end
             end
-          end
 
-          MPI.Send( buf,
-                         10*ny*nz,
-                         dp_type,
-                         south,
-                         from_n,
-                         comm_solve,
-                         IERROR )
+            MPI.Send(view(buf, 1:10*ny*nz), south, from_n, comm_solve)
         end
 
 #---------------------------------------------------------------------
 #   receive from north
 #---------------------------------------------------------------------
         if north != -1
-          MPI_WAIT( mid, STATUS, IERROR )
+          MPI.Wait(mid[])
 
           for k = 1:nz
             for j = 1:ny
@@ -109,16 +64,9 @@ using Printf
 
         end
 
-      if south != -1
-          MPI.Irecv!( buf1,
-                          10*ny*nz,
-                          dp_type,
-                          south,
-                          from_s,
-                          comm_solve,
-                          mid,
-                          IERROR )
-      end
+        if south != -1
+           mid[] = MPI.Irecv!(view(buf1, 1:10*ny*nz), south, from_s, comm_solve)
+        end
 
 #---------------------------------------------------------------------
 #   send north
@@ -141,20 +89,14 @@ using Printf
             end
           end
 
-          MPI.Send( buf,
-                         10*ny*nz,
-                         dp_type,
-                         north,
-                         from_s,
-                         comm_solve,
-                         IERROR )
+          MPI.Send(view(buf, 1:10*ny*nz), north, from_s, comm_solve)
         end
 
 #---------------------------------------------------------------------
 #   receive from south
 #---------------------------------------------------------------------
         if south != -1
-          MPI_WAIT( mid, STATUS, IERROR )
+          MPI.Wait(mid[])
 
           for k = 1:nz
             for j = 1:ny
@@ -180,14 +122,7 @@ using Printf
 #   communicate in the east and west directions
 #---------------------------------------------------------------------
       if west != -1
-          MPI.Irecv!( buf1,
-                          10*nx*nz,
-                          dp_type,
-                          west,
-                          from_w,
-                          comm_solve,
-                          mid,
-                          IERROR )
+          mid[] = MPI.Irecv!(view(buf1, 1:10*nx*nz), west, from_w, comm_solve)
       end
 
 #---------------------------------------------------------------------
@@ -211,20 +146,14 @@ using Printf
             end
           end
 
-          MPI.Send( buf,
-                         10*nx*nz,
-                         dp_type,
-                         east,
-                         from_w,
-                         comm_solve,
-                         IERROR )
+          MPI.Send(view(buf, 1:10*nx*nz), east, from_w, comm_solve)
         end
 
 #---------------------------------------------------------------------
 #   receive from west
 #---------------------------------------------------------------------
         if west != -1
-          MPI_WAIT( mid, STATUS, IERROR )
+          MPI.Wait(mid[])
 
           for k = 1:nz
             for i = 1:nx
@@ -246,14 +175,7 @@ using Printf
         end
 
       if east != -1
-          MPI.Irecv!( buf1,
-                          10*nx*nz,
-                          dp_type,
-                          east,
-                          from_e,
-                          comm_solve,
-                          mid,
-                          IERROR )
+          mid[] = MPI.Irecv!(view(buf1, 1:10*nx*nz), east, from_e, comm_solve)
       end
 
 #---------------------------------------------------------------------
@@ -277,20 +199,14 @@ using Printf
             end
           end
 
-          MPI.Send( buf,
-                         10*nx*nz,
-                         dp_type,
-                         west,
-                         from_e,
-                         comm_solve,
-                         IERROR )
+          MPI.Send(view(buf, 1:10*nx*nz), west, from_e, comm_solve)
         end
 
 #---------------------------------------------------------------------
 #   receive from east
 #---------------------------------------------------------------------
         if east != -1
-          MPI_WAIT( mid, STATUS, IERROR )
+          MPI.Wait(mid[])
 
           for k = 1:nz
             for i = 1:nx
@@ -314,4 +230,4 @@ using Printf
       end
 
       return nothing
-      end
+end

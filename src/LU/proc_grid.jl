@@ -1,27 +1,23 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
+
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function isqrt2(i, xdim)
-
-#      implicit none
-#      integer i, xdim
-
-#      integer ydim, square
+ function isqrt2(i)
 
       xdim = -1
-      if (i <= 0) return end
+      if (i <= 0) 
+         return xdim 
+      end
 
       square = 0;
       xdim = 1
       while (square <= i)
          square = xdim*xdim
-         if (square == i) return end
+         if (square == i) 
+            return xdim 
+         end
          xdim = xdim + 1
       end
 
@@ -32,50 +28,37 @@ using Printf
          ydim = i / xdim
       end
 
-      if (xdim*ydim != i || 2*ydim < xdim) xdim = -1 end
-
-      return nothing
+      if (xdim*ydim != i || 2*ydim < xdim) 
+         xdim = -1 
       end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
+      return xdim
+end
 
-      function proc_grid()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use lu_data
-#      use mpinpb
-
-#      implicit none
-
-#---------------------------------------------------------------------
-#  local variables
-#---------------------------------------------------------------------
-#      integer xdim0, ydim0, IERROR
-#      integer xdiv, ydiv
 
 #---------------------------------------------------------------------
 #  calculate sub-domain array size
 #---------------------------------------------------------------------
-      isqrt2(no_nodes, xdiv)
+
+function proc_grid()
+
+      xdiv = isqrt2(no_nodes)
 
       if xdiv <= 0
          if (id == 0) @printf(stdout, " ERROR: could not determine proper proc_grid for nprocs = %6i\n", no_nodes) end
          @label L2000
          format(" ERROR: could not determine proper proc_grid for nprocs = ", i6)
-         MPI_ABORT( MPI_COMM_WORLD, MPI_ERR_OTHER, IERROR )
+         MPI.Abort( MPI.COMM_WORLD, MPI.ERR_OTHER )
          exit(1)
       end
 
-      ydiv = no_nodes/xdiv
-      isiz1 = isiz01/xdiv
+      ydiv = div(no_nodes,xdiv)
+      global isiz1 = div(isiz01,xdiv)
       if (isiz1*xdiv < isiz01) isiz1 = isiz1 + 1 end
-      isiz2 = isiz02/ydiv
+      global isiz2 = div(isiz02,ydiv)
       if (isiz2*ydiv < isiz02) isiz2 = isiz2 + 1 end
       nnodes_xdim = xdiv
-      isiz3 = isiz03
+      global isiz3 = isiz03
 
 #---------------------------------------------------------------------
 #
@@ -84,19 +67,19 @@ using Printf
 #---------------------------------------------------------------------
 
       xdim0  = nnodes_xdim
-      ydim0  = no_nodes/xdim0
+      ydim0  = div(no_nodes,xdim0)
 
-      ydim   = sqrt(float(num))+0.001e0
-      xdim   = num/ydim
+      ydim   = Int(sqrt(num))
+      xdim   = div(num,ydim)
+      
       while (ydim >= ydim0 && xdim*ydim != num)
          ydim = ydim - 1
-         xdim = num/ydim
+         xdim = div(num,ydim)
       end
 
-      if xdim < xdim0 || ydim < ydim0 ||
-          xdim*ydim != num
+      if xdim < xdim0 || ydim < ydim0 || xdim*ydim != num
          if (id == 0) @printf(stdout, " ERROR: could not determine proper proc_grid for nprocs = %6i\n", num) end
-         MPI_ABORT( MPI_COMM_WORLD, MPI_ERR_OTHER, IERROR )
+         MPI.Abort( MPI.COMM_WORLD, MPI.MPI_ERR_OTHER )
          exit(1)
       end
 
@@ -104,13 +87,11 @@ using Printf
          @printf(stdout, " Proc_grid for nprocs =%6i:%5i x%5i\n\n", num, xdim, ydim)
       end
       @label L2100
-      format(" Proc_grid for nprocs =", i6, ':', i5, " x",i5)
 
-      row    = mod(id, xdim) + 1
-      col    = id/xdim + 1
-
+      global row    = mod(id, xdim) + 1
+      global col    = div(id,xdim) + 1
 
       return nothing
-      end
+end
 
 

@@ -1,35 +1,17 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function make_set()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #     This function allocates space for a set of cells and fills the set     
 #     such that communication between cells on different nodes is only
 #     nearest neighbor                                                   
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer p, i, j, c, dir, SIZE, excess, ierr,ierrcode
+function make_set()
 
 #---------------------------------------------------------------------
 #     compute square root; add small number to allow for roundoff
 #     (note: this is computed in setup_mpi.f also, but prefer to do
 #     it twice because of some include file problems).
 #---------------------------------------------------------------------
-      ncells = dint(sqrt(float(no_nodes) + 0.00001e0))
+      global ncells = Int(sqrt(no_nodes))
 
 #---------------------------------------------------------------------
 #     this makes coding easier
@@ -41,7 +23,7 @@ using Printf
 #     array of cells
 #---------------------------------------------------------------------
       cell_coord[1, 1] = mod(node, p)
-      cell_coord[2, 1] = node/p
+      cell_coord[2, 1] = div(node,p)
       cell_coord[3, 1] = 0
 
 #---------------------------------------------------------------------
@@ -99,8 +81,8 @@ using Printf
 #---------------------------------------------------------------------
 #     set cell_coord range for each direction                            
 #---------------------------------------------------------------------
-         SIZE   = predecessor[dir]/p
-         excess = mod(predecessor[dir], p)
+         SIZE   = grid_points[dir]/p
+         excess = mod(grid_points[dir], p)
          for c = 1:ncells
             if cell_coord[dir, c] <= excess
                cell_size[dir, c] = SIZE+1
@@ -108,22 +90,20 @@ using Printf
                cell_high[dir, c] = cell_low[dir, c]+SIZE
             else
                cell_size[dir, c] = SIZE
-               cell_low[dir, c]  = excess*(SIZE+1)+(
-                    cell_coord[dir, c]-excess-1)*SIZE
+               cell_low[dir, c]  = excess*(SIZE+1)+(cell_coord[dir, c]-excess-1)*SIZE
                cell_high[dir, c] = cell_low[dir, c]+SIZE-1
             end
             if cell_size[dir, c] <= 2
                @printf(stdout, " Error: Cell size too small. Min size is 3\n", )
-# 50            format(' Error: Cell size too small. Min size is 3')
                ierrcode = 1
-               MPI_Abort(mpi_comm_world, ierrcode, ierr)
+               MPI.Abort(MPI.COMM_WORLD, ierrcode)
                exit(1)
             end
          end
       end
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------

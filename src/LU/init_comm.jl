@@ -1,17 +1,3 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function init_comm()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #
 #   initialize MPI and establish rank and size
@@ -21,44 +7,37 @@ using Printf
 #
 #---------------------------------------------------------------------
 
-#      use lu_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer nodedim
-#      integer IERROR
-
+ function init_comm()
 
 #---------------------------------------------------------------------
 #    initialize MPI communication
 #---------------------------------------------------------------------
-      MPI_INIT( IERROR )
+      MPI.Init()
 
 #---------------------------------------------------------------------
 #     get a process grid that requires a (nx*ny) number of procs.
 #     excess ranks are marked as inactive.
 #---------------------------------------------------------------------
-      get_active_nprocs(2, xdim, ydim, no_nodes,
-                             total_nodes, node, comm_solve, active)
+
+      global xdim, ydim, no_nodes, total_nodes, node, comm_solve, active = get_active_nprocs(MPI.COMM_WORLD, 2)
 
       if (!active) return end
 
 #---------------------------------------------------------------------
 #   establish the global rank of this process and the group size
 #---------------------------------------------------------------------
-      id = node
-      num = no_nodes
-      root = 0
+      global id = node
+      global num = no_nodes
+      global root = 0
 
-      ndim   = nodedim(num)
+      global ndim   = nodedim(num)
 
-      if !convertdouble
+ #=     if !convertdouble
          dp_type = MPI_DOUBLE_PRECISION
       else
          dp_type = MPI_REAL
       end
-
+=#
 
       return nothing
-      end
+end

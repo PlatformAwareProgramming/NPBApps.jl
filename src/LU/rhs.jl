@@ -1,44 +1,8 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function rhs()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #   compute the right hand sides
 #---------------------------------------------------------------------
 
-#      use lu_data
-#      use timing
-
-#      implicit none
-
-#---------------------------------------------------------------------
-#  local variables
-#---------------------------------------------------------------------
-#      integer i, j, k, m
-#      integer iex
-#      integer L1, L2
-#      integer ist1, iend1
-#      integer jst1, jend1
-#      DOUBLEPRECISION  q
-#      DOUBLEPRECISION  u21, u31, u41
-#      DOUBLEPRECISION  tmp
-#      DOUBLEPRECISION  u21i, u31i, u41i, u51i
-#      DOUBLEPRECISION  u21j, u31j, u41j, u51j
-#      DOUBLEPRECISION  u21k, u31k, u41k, u51k
-#      DOUBLEPRECISION  u21im1, u31im1, u41im1, u51im1
-#      DOUBLEPRECISION  u21jm1, u31jm1, u41jm1, u51jm1
-#      DOUBLEPRECISION  u21km1, u31km1, u41km1, u51km1
-
+ function rhs()
 
       if (timeron) timer_start(t_rhs) end
 
@@ -514,4 +478,4 @@ using Printf
       if (timeron) timer_stop(t_rhs) end
 
       return nothing
-      end
+end

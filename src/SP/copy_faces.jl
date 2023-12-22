@@ -160,18 +160,18 @@ function copy_faces()
 
        if (timeron) timer_start(t_exch) end
 
-       requests[1] = MPI.Irecv!(view(in_buffer,sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = sucessor[1], tag = WEST)
+       requests[1] = MPI.Irecv!(view(in_buffer,sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = successor[1], tag = WEST)
        requests[2] = MPI.Irecv!(view(in_buffer,sr[2]:sr[2]+b_size[2]-1), comm_rhs; source = predecessor[1], tag = EAST)
-       requests[3] = MPI.Irecv!(view(in_buffer,sr[3]:sr[3]+b_size[3]-1), comm_rhs; source = sucessor[2], tag = SOUTH)
+       requests[3] = MPI.Irecv!(view(in_buffer,sr[3]:sr[3]+b_size[3]-1), comm_rhs; source = successor[2], tag = SOUTH)
        requests[4] = MPI.Irecv!(view(in_buffer,sr[4]:sr[4]+b_size[4]-1), comm_rhs; source = predecessor[2], tag = NORTH)
-       requests[5] = MPI.Irecv!(view(in_buffer,sr[5]:sr[5]+b_size[5]-1), comm_rhs; source = sucessor[3], tag = BOTTOM)
+       requests[5] = MPI.Irecv!(view(in_buffer,sr[5]:sr[5]+b_size[5]-1), comm_rhs; source = successor[3], tag = BOTTOM)
        requests[6] = MPI.Irecv!(view(in_buffer,sr[6]:sr[6]+b_size[6]-1), comm_rhs; source = predecessor[3], tag = TOP)
 
-       requests[7] = MPI.Isend(view(out_buffer,ss[1]:ss[1]+b_size[1]-1), comm_rhs; dest = sucessor[1], tag = EAST)
+       requests[7] = MPI.Isend(view(out_buffer,ss[1]:ss[1]+b_size[1]-1), comm_rhs; dest = successor[1], tag = EAST)
        requests[8] = MPI.Isend(view(out_buffer,ss[2]:ss[2]+b_size[2]-1), comm_rhs; dest = predecessor[1], tag = WEST)
-       requests[9] = MPI.Isend(view(out_buffer,ss[3]:ss[3]+b_size[3]-1), comm_rhs; dest = sucessor[2], tag = NORTH)
+       requests[9] = MPI.Isend(view(out_buffer,ss[3]:ss[3]+b_size[3]-1), comm_rhs; dest = successor[2], tag = NORTH)
        requests[10] = MPI.Isend(view(out_buffer,ss[4]:ss[4]+b_size[4]-1), comm_rhs; dest = predecessor[2], tag = SOUTH)
-       requests[11] = MPI.Isend(view(out_buffer,ss[5]:ss[5]+b_size[5]-1), comm_rhs; dest = sucessor[3], tag = TOP)
+       requests[11] = MPI.Isend(view(out_buffer,ss[5]:ss[5]+b_size[5]-1), comm_rhs; dest = successor[3], tag = TOP)
        requests[12] = MPI.Isend(view(out_buffer,ss[6]:ss[6]+b_size[6]-1), comm_rhs; dest = predecessor[3], tag = BOTTOM)
 
        MPI.Waitall(requests)

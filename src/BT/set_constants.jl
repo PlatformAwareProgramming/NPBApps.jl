@@ -1,18 +1,9 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function set_constants()
+function set_constants()
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use bt_data
-#      implicit none
+      global ce = zeros(Float64, 5, 13)
 
       ce[1, 1]  = 2.0e0
       ce[1, 2]  = 0.0e0
@@ -84,125 +75,125 @@ using Printf
       ce[5, 12] = 0.3e0
       ce[5, 13] = 0.2e0
 
-      c1 = 1.4e0
-      c2 = 0.4e0
-      c3 = 0.1e0
-      c4 = 1.0e0
-      c5 = 1.4e0
+      global c1 = 1.4e0
+      global c2 = 0.4e0
+      global c3 = 0.1e0
+      global c4 = 1.0e0
+      global c5 = 1.4e0
 
-      bt = sqrt(0.5e0)
+      global bt = sqrt(0.5e0)
 
-      dnxm1 = 1.0e0 / float(predecessor[1]-1)
-      dnym1 = 1.0e0 / float(predecessor[2]-1)
-      dnzm1 = 1.0e0 / float(predecessor[3]-1)
+      global dnxm1 = 1.0e0 / float(grid_points[1]-1)
+      global dnym1 = 1.0e0 / float(grid_points[2]-1)
+      global dnzm1 = 1.0e0 / float(grid_points[3]-1)
 
-      c1c2 = c1 * c2
-      c1c5 = c1 * c5
-      c3c4 = c3 * c4
-      c1345 = c1c5 * c3c4
+      global c1c2 = c1 * c2
+      global c1c5 = c1 * c5
+      global c3c4 = c3 * c4
+      global c1345 = c1c5 * c3c4
 
-      conz1 = (1.0e0-c1c5)
+      global conz1 = (1.0e0-c1c5)
 
-      tx1 = 1.0e0 / (dnxm1 * dnxm1)
-      tx2 = 1.0e0 / (2.0e0 * dnxm1)
-      tx3 = 1.0e0 / dnxm1
+      global tx1 = 1.0e0 / (dnxm1 * dnxm1)
+      global tx2 = 1.0e0 / (2.0e0 * dnxm1)
+      global tx3 = 1.0e0 / dnxm1
 
-      ty1 = 1.0e0 / (dnym1 * dnym1)
-      ty2 = 1.0e0 / (2.0e0 * dnym1)
-      ty3 = 1.0e0 / dnym1
+      global ty1 = 1.0e0 / (dnym1 * dnym1)
+      global ty2 = 1.0e0 / (2.0e0 * dnym1)
+      global ty3 = 1.0e0 / dnym1
 
-      tz1 = 1.0e0 / (dnzm1 * dnzm1)
-      tz2 = 1.0e0 / (2.0e0 * dnzm1)
-      tz3 = 1.0e0 / dnzm1
+      global tz1 = 1.0e0 / (dnzm1 * dnzm1)
+      global tz2 = 1.0e0 / (2.0e0 * dnzm1)
+      global tz3 = 1.0e0 / dnzm1
 
-      dx1 = 0.75e0
-      dx2 = 0.75e0
-      dx3 = 0.75e0
-      dx4 = 0.75e0
-      dx5 = 0.75e0
+      global dx1 = 0.75e0
+      global dx2 = 0.75e0
+      global dx3 = 0.75e0
+      global dx4 = 0.75e0
+      global dx5 = 0.75e0
 
-      dy1 = 0.75e0
-      dy2 = 0.75e0
-      dy3 = 0.75e0
-      dy4 = 0.75e0
-      dy5 = 0.75e0
+      global dy1 = 0.75e0
+      global dy2 = 0.75e0
+      global dy3 = 0.75e0
+      global dy4 = 0.75e0
+      global dy5 = 0.75e0
 
-      dz1 = 1.0e0
-      dz2 = 1.0e0
-      dz3 = 1.0e0
-      dz4 = 1.0e0
-      dz5 = 1.0e0
+      global dz1 = 1.0e0
+      global dz2 = 1.0e0
+      global dz3 = 1.0e0
+      global dz4 = 1.0e0
+      global dz5 = 1.0e0
 
-      dxmax = max(dx3, dx4)
-      dymax = max(dy2, dy4)
-      dzmax = max(dz2, dz3)
+      global dxmax = max(dx3, dx4)
+      global dymax = max(dy2, dy4)
+      global dzmax = max(dz2, dz3)
 
-      dssp = 0.25e0 * max(dx1, max(dy1, dz1) )
+      global dssp = 0.25e0 * max(dx1, max(dy1, dz1) )
 
-      c4dssp = 4.0e0 * dssp
-      c5dssp = 5.0e0 * dssp
+      global c4dssp = 4.0e0 * dssp
+      global c5dssp = 5.0e0 * dssp
 
-      dttx1 = dt*tx1
-      dttx2 = dt*tx2
-      dtty1 = dt*ty1
-      dtty2 = dt*ty2
-      dttz1 = dt*tz1
-      dttz2 = dt*tz2
+      global dttx1 = dt*tx1
+      global dttx2 = dt*tx2
+      global dtty1 = dt*ty1
+      global dtty2 = dt*ty2
+      global dttz1 = dt*tz1
+      global dttz2 = dt*tz2
 
-      c2dttx1 = 2.0e0*dttx1
-      c2dtty1 = 2.0e0*dtty1
-      c2dttz1 = 2.0e0*dttz1
+      global c2dttx1 = 2.0e0*dttx1
+      global c2dtty1 = 2.0e0*dtty1
+      global c2dttz1 = 2.0e0*dttz1
 
-      dtdssp = dt*dssp
+      global dtdssp = dt*dssp
 
-      comz1  = dtdssp
-      comz4  = 4.0e0*dtdssp
-      comz5  = 5.0e0*dtdssp
-      comz6  = 6.0e0*dtdssp
+      global comz1  = dtdssp
+      global comz4  = 4.0e0*dtdssp
+      global comz5  = 5.0e0*dtdssp
+      global comz6  = 6.0e0*dtdssp
 
-      c3c4tx3 = c3c4*tx3
-      c3c4ty3 = c3c4*ty3
-      c3c4tz3 = c3c4*tz3
+      global c3c4tx3 = c3c4*tx3
+      global c3c4ty3 = c3c4*ty3
+      global c3c4tz3 = c3c4*tz3
 
-      dx1tx1 = dx1*tx1
-      dx2tx1 = dx2*tx1
-      dx3tx1 = dx3*tx1
-      dx4tx1 = dx4*tx1
-      dx5tx1 = dx5*tx1
+      global dx1tx1 = dx1*tx1
+      global dx2tx1 = dx2*tx1
+      global dx3tx1 = dx3*tx1
+      global dx4tx1 = dx4*tx1
+      global dx5tx1 = dx5*tx1
 
-      dy1ty1 = dy1*ty1
-      dy2ty1 = dy2*ty1
-      dy3ty1 = dy3*ty1
-      dy4ty1 = dy4*ty1
-      dy5ty1 = dy5*ty1
+      global dy1ty1 = dy1*ty1
+      global dy2ty1 = dy2*ty1
+      global dy3ty1 = dy3*ty1
+      global dy4ty1 = dy4*ty1
+      global dy5ty1 = dy5*ty1
 
-      dz1tz1 = dz1*tz1
-      dz2tz1 = dz2*tz1
-      dz3tz1 = dz3*tz1
-      dz4tz1 = dz4*tz1
-      dz5tz1 = dz5*tz1
+      global dz1tz1 = dz1*tz1
+      global dz2tz1 = dz2*tz1
+      global dz3tz1 = dz3*tz1
+      global dz4tz1 = dz4*tz1
+      global dz5tz1 = dz5*tz1
 
-      c2iv  = 2.5e0
-      con43 = 4.0e0/3.0e0
-      con16 = 1.0e0/6.0e0
+      global c2iv  = 2.5e0
+      global con43 = 4.0e0/3.0e0
+      global con16 = 1.0e0/6.0e0
 
-      xxcon1 = c3c4tx3*con43*tx3
-      xxcon2 = c3c4tx3*tx3
-      xxcon3 = c3c4tx3*conz1*tx3
-      xxcon4 = c3c4tx3*con16*tx3
-      xxcon5 = c3c4tx3*c1c5*tx3
+      global xxcon1 = c3c4tx3*con43*tx3
+      global xxcon2 = c3c4tx3*tx3
+      global xxcon3 = c3c4tx3*conz1*tx3
+      global xxcon4 = c3c4tx3*con16*tx3
+      global xxcon5 = c3c4tx3*c1c5*tx3
 
-      yycon1 = c3c4ty3*con43*ty3
-      yycon2 = c3c4ty3*ty3
-      yycon3 = c3c4ty3*conz1*ty3
-      yycon4 = c3c4ty3*con16*ty3
-      yycon5 = c3c4ty3*c1c5*ty3
+      global yycon1 = c3c4ty3*con43*ty3
+      global yycon2 = c3c4ty3*ty3
+      global yycon3 = c3c4ty3*conz1*ty3
+      global yycon4 = c3c4ty3*con16*ty3
+      global yycon5 = c3c4ty3*c1c5*ty3
 
-      zzcon1 = c3c4tz3*con43*tz3
-      zzcon2 = c3c4tz3*tz3
-      zzcon3 = c3c4tz3*conz1*tz3
-      zzcon4 = c3c4tz3*con16*tz3
-      zzcon5 = c3c4tz3*c1c5*tz3
+      global zzcon1 = c3c4tz3*con43*tz3
+      global zzcon2 = c3c4tz3*tz3
+      global zzcon3 = c3c4tz3*conz1*tz3
+      global zzcon4 = c3c4tz3*con16*tz3
+      global zzcon5 = c3c4tz3*c1c5*tz3
 
       return nothing
-      end
+end

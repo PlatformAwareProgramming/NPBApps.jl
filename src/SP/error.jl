@@ -5,12 +5,8 @@
 
 function error_norm(rms)
 
-       rms_work = Array{Float64}(undef,5)
+       rms_work = zeros(Float64,5)
        u_exact = Array{Float64}(undef,5)
-
-       for m = 1:5
-          rms_work[m] = 0.0e0
-       end
 
        for c = 1:ncells
           kk = 0
@@ -52,11 +48,7 @@ end
 
 function rhs_norm(rms)
 
-       rms_work = Array{Float64}(undef,5)
-
-       for m = 1:5
-          rms_work[m] = 0.0e0
-       end
+       rms_work = zeros(Float64, 5)
 
        for c = 1:ncells
           for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
@@ -81,6 +73,6 @@ function rhs_norm(rms)
        end
 
        return nothing
-       end
+end
 
 

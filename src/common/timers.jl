@@ -132,6 +132,5 @@ function check_timer_flag()
          end
       end
 
-      return nothing
 end
 

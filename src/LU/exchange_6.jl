@@ -1,43 +1,12 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function exchange_6(g, jbeg, jfin1)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
-#      use lu_data
-#      use mpinpb
+ function exchange_6(g, jbeg, jfin1)
 
-#      implicit none
+      dum = Array{Float64}(undef, isiz03)
 
-#---------------------------------------------------------------------
-#  input parameters
-#---------------------------------------------------------------------
-#      integer jbeg, jfin1
-#      DOUBLEPRECISION  g[0:isiz2+1,0:isiz3+1]
-
-#---------------------------------------------------------------------
-#  local parameters
-#---------------------------------------------------------------------
-#      integer k
-#      DOUBLEPRECISION  dum[isiz03]
-
-#      integer msgid3
-#      integer STATUS[MPI_STATUS_SIZE]
-#      integer IERROR
-
-
+      msgid3 = Ref{MPI.Request}()
 
 #---------------------------------------------------------------------
 #   communicate in the east and west directions
@@ -47,16 +16,10 @@ using Printf
 #   receive from east
 #---------------------------------------------------------------------
       if jfin1 == ny
-        MPI.Irecv!( dum,
-                        nz,
-                        dp_type,
-                        east,
-                        from_e,
-                        comm_solve,
-                        msgid3,
-                        IERROR )
 
-        MPI_WAIT( msgid3, STATUS, IERROR )
+        msgid3[] = MPI.Irecv!(view(dum, 1:nz), east, from_e, comm_solve)
+
+        MPI.Wait(msgid3[])
 
         for k = 1:nz
           g[ny+1,k] = dum[k]
@@ -72,15 +35,9 @@ using Printf
           dum[k] = g[1,k]
         end
 
-        MPI.Send( dum,
-                       nz,
-                       dp_type,
-                       west,
-                       from_e,
-                       comm_solve,
-                       IERROR )
+        MPI.Send(view(dum, 1:nz), west, from_e, comm_solve)
 
       end
 
       return nothing
-      end
+end

@@ -13,16 +13,6 @@
 #     active   - .true. if this process is active; .false. otherwise
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 function get_active_nprocs(comm_in, pkind)
-#      implicit none
-#      integer pkind, np1, np2, npa
-#      integer nprocs, RANK, comm_out
-#      logical active
-
-#      include("mpif.h")
-
-#      integer comm_in, n, np1w, np2w, npaw
-#      integer ic, ios
-#      character(40) val
 
 # nprocs and rank in comm_in
       nprocs = MPI.Comm_size(comm_in) # ios = ?
@@ -66,7 +56,7 @@ function get_active_nprocs(comm_in, pkind)
       comm_out = comm_in
       active = true
       if (nprocs == npa) 
-         return np1, np2, npa, nprocs, RANK, comm_out, active
+         return Int(np1), Int(np2), Int(npa), nprocs, RANK, comm_out, active
       end
 
 # npa < nprocs, need to check if a strict NPROCS enforcement is required
@@ -115,6 +105,6 @@ function get_active_nprocs(comm_in, pkind)
 
       comm_out = MPI.Comm_split(comm_in, ic, RANK)  # ios = ?
       
-      return np1, np2, npa, nprocs, RANK, comm_out, activev
+      return Int(np1), Int(np2), Int(npa), nprocs, RANK, comm_out, activev
 
 end

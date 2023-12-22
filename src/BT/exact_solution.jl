@@ -1,25 +1,10 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function exact_solution(xi, eta, zeta, dtemp)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #     this function returns the exact solution at point xi, eta, zeta  
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
+function exact_solution(xi, eta, zeta)
 
-#      DOUBLEPRECISION  xi, eta, zeta, dtemp[5]
-#      integer m
+      dtemp = Array{Float64}(undef, 5)
 
       for m = 1:5
          dtemp[m] =  ce[m, 1] +
@@ -29,7 +14,7 @@ using Printf
            zeta*ce[m, 13])))
       end
 
-      return nothing
-      end
+      return dtemp
+end
 
 

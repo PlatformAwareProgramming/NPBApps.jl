@@ -2,7 +2,7 @@
 #   block-diagonal matrix-vector multiplication              
 #---------------------------------------------------------------------
 
-       function ninvr(c)
+function ninvr(c)
 
 #---------------------------------------------------------------------
 #      treat only one cell                           

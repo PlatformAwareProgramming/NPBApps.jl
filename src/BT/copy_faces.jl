@@ -1,18 +1,5 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
 
 #---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function copy_faces()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
-#     
 # This function copies the face values of a variable defined on a set 
 # of cells to the overlap locations of the adjacent sets of cells. 
 # Because a set of cells interfaces in each direction with exactly one 
@@ -22,43 +9,41 @@ using Printf
 # adds so much overhead that it's not clearly useful. 
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
+function copy_faces()
 
-#      implicit none
-
-#      integer i, j, k, c, m, requests[0:11], p0, p1,  
-#           p2, p3, p4, p5, b_size[0:5], ss[0:5],  
-#           sr[0:5], ERROR, statuses[MPI_STATUS_SIZE, 0:11]
+      requests = Array{MPI.Request}(undef,12)
+      ss = Array{Int}(undef,6)
+      sr = Array{Int}(undef,6)
+      b_size = Array{Int}(undef,6)
 
 #---------------------------------------------------------------------
 #     exit immediately if there are no faces to be copied           
 #---------------------------------------------------------------------
       if no_nodes == 1
-         compute_rhs
+         compute_rhs()
          return nothing
-      end
+end
 
-      ss[0] = start_send_east
-      ss[1] = start_send_west
-      ss[2] = start_send_north
-      ss[3] = start_send_south
-      ss[4] = start_send_top
-      ss[5] = start_send_bottom
+      ss[1] = start_send_east
+      ss[2] = start_send_west
+      ss[3] = start_send_north
+      ss[4] = start_send_south
+      ss[5] = start_send_top
+      ss[6] = start_send_bottom
 
-      sr[0] = start_recv_east
-      sr[1] = start_recv_west
-      sr[2] = start_recv_north
-      sr[3] = start_recv_south
-      sr[4] = start_recv_top
-      sr[5] = start_recv_bottom
+      sr[1] = start_recv_east
+      sr[2] = start_recv_west
+      sr[3] = start_recv_north
+      sr[4] = start_recv_south
+      sr[5] = start_recv_top
+      sr[6] = start_recv_bottom
 
-      b_size[0] = east_size
-      b_size[1] = west_size
-      b_size[2] = north_size
-      b_size[3] = south_size
-      b_size[4] = top_size
-      b_size[5] = bottom_size
+      b_size[1] = east_size
+      b_size[2] = west_size
+      b_size[3] = north_size
+      b_size[4] = south_size
+      b_size[5] = top_size
+      b_size[6] = bottom_size
 
 #---------------------------------------------------------------------
 #     because the difference stencil for the diagonalized scheme is 
@@ -84,7 +69,7 @@ using Printf
                for j = 0:cell_size[2, c]-1
                   for i = cell_size[1, c]-2:cell_size[1, c]-1
                      for m = 1:5
-                        out_buffer[ss[0]+p0] = u[m, i, j, k, c]
+                        out_buffer[ss[1]+p0] = u[m, i, j, k, c]
                         p0 = p0 + 1
                      end
                   end
@@ -100,7 +85,7 @@ using Printf
                for j = 0:cell_size[2, c]-1
                   for i = 0:1
                      for m = 1:5
-                        out_buffer[ss[1]+p1] = u[m, i, j, k, c]
+                        out_buffer[ss[2]+p1] = u[m, i, j, k, c]
                         p1 = p1 + 1
                      end
                   end
@@ -117,7 +102,7 @@ using Printf
                for j = cell_size[2, c]-2:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        out_buffer[ss[2]+p2] = u[m, i, j, k, c]
+                        out_buffer[ss[3]+p2] = u[m, i, j, k, c]
                         p2 = p2 + 1
                      end
                   end
@@ -133,7 +118,7 @@ using Printf
                for j = 0:1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        out_buffer[ss[3]+p3] = u[m, i, j, k, c]
+                        out_buffer[ss[4]+p3] = u[m, i, j, k, c]
                         p3 = p3 + 1
                      end
                   end
@@ -149,7 +134,7 @@ using Printf
                for j = 0:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        out_buffer[ss[4]+p4] = u[m, i, j, k, c]
+                        out_buffer[ss[5]+p4] = u[m, i, j, k, c]
                         p4 = p4 + 1
                      end
                   end
@@ -165,7 +150,7 @@ using Printf
                for j = 0:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        out_buffer[ss[5]+p5] = u[m, i, j, k, c]
+                        out_buffer[ss[6]+p5] = u[m, i, j, k, c]
                         p5 = p5 + 1
                      end
                   end
@@ -180,46 +165,23 @@ using Printf
       if (timeron) timer_stop(t_bpack) end
 
       if (timeron) timer_start(t_exch) end
-      MPI.Irecv!(in_buffer[sr[0]], b_size[0],
-           dp_type, successor[1], WEST,
-           comm_rhs, requests[0], ERROR)
-      MPI.Irecv!(in_buffer[sr[1]], b_size[1],
-           dp_type, predecessor[1], EAST,
-           comm_rhs, requests[1], ERROR)
-      MPI.Irecv!(in_buffer[sr[2]], b_size[2],
-           dp_type, successor[2], SOUTH,
-           comm_rhs, requests[2], ERROR)
-      MPI.Irecv!(in_buffer[sr[3]], b_size[3],
-           dp_type, predecessor[2], NORTH,
-           comm_rhs, requests[3], ERROR)
-      MPI.Irecv!(in_buffer[sr[4]], b_size[4],
-           dp_type, successor[3], BOTTOM,
-           comm_rhs, requests[4], ERROR)
-      MPI.Irecv!(in_buffer[sr[5]], b_size[5],
-           dp_type, predecessor[3], TOP,
-           comm_rhs, requests[5], ERROR)
 
-      MPI.Isend(out_buffer[ss[0]], b_size[0],
-           dp_type, successor[1],   EAST,
-           comm_rhs, requests[6], ERROR)
-      MPI.Isend(out_buffer[ss[1]], b_size[1],
-           dp_type, predecessor[1], WEST,
-           comm_rhs, requests[7], ERROR)
-      MPI.Isend(out_buffer[ss[2]], b_size[2],
-           dp_type, successor[2],   NORTH,
-           comm_rhs, requests[8], ERROR)
-      MPI.Isend(out_buffer[ss[3]], b_size[3],
-           dp_type, predecessor[2], SOUTH,
-           comm_rhs, requests[9], ERROR)
-      MPI.Isend(out_buffer[ss[4]], b_size[4],
-           dp_type, successor[3],   TOP,
-           comm_rhs,   requests[10], ERROR)
-      MPI.Isend(out_buffer[ss[5]], b_size[5],
-           dp_type, predecessor[3], BOTTOM,
-           comm_rhs, requests[11], ERROR)
+      requests[1] = MPI.Irecv!(view(in_buffer,sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = successor[1], tag = WEST)
+      requests[2] = MPI.Irecv!(view(in_buffer,sr[2]:sr[2]+b_size[2]-1), comm_rhs; source = predecessor[1], tag = EAST)
+      requests[3] = MPI.Irecv!(view(in_buffer,sr[3]:sr[3]+b_size[3]-1), comm_rhs; source = successor[2], tag = SOUTH)
+      requests[4] = MPI.Irecv!(view(in_buffer,sr[4]:sr[4]+b_size[4]-1), comm_rhs; source = predecessor[2], tag = NORTH)
+      requests[5] = MPI.Irecv!(view(in_buffer,sr[5]:sr[5]+b_size[5]-1), comm_rhs; source = successor[3], tag = BOTTOM)
+      requests[6] = MPI.Irecv!(view(in_buffer,sr[6]:sr[6]+b_size[6]-1), comm_rhs; source = predecessor[3], tag = TOP)
 
+      requests[7] = MPI.Isend(view(out_buffer,ss[1]:ss[1]+b_size[1]-1), comm_rhs; dest = successor[1], tag = EAST)
+      requests[8] = MPI.Isend(view(out_buffer,ss[2]:ss[2]+b_size[2]-1), comm_rhs; dest = predecessor[1], tag = WEST)
+      requests[9] = MPI.Isend(view(out_buffer,ss[3]:ss[3]+b_size[3]-1), comm_rhs; dest = successor[2], tag = NORTH)
+      requests[10] = MPI.Isend(view(out_buffer,ss[4]:ss[4]+b_size[4]-1), comm_rhs; dest = predecessor[2], tag = SOUTH)
+      requests[11] = MPI.Isend(view(out_buffer,ss[5]:ss[5]+b_size[5]-1), comm_rhs; dest = successor[3], tag = TOP)
+      requests[12] = MPI.Isend(view(out_buffer,ss[6]:ss[6]+b_size[6]-1), comm_rhs; dest = predecessor[3], tag = BOTTOM)
 
-      mpi_waitall(12, requests, statuses, ERROR)
+      MPI.Waitall(requests)
+
       if (timeron) timer_stop(t_exch) end
 
 #---------------------------------------------------------------------
@@ -240,7 +202,7 @@ using Printf
                for j = 0:cell_size[2, c]-1
                   for i = -2:-1
                      for m = 1:5
-                        u[m, i, j, k, c] = in_buffer[sr[1]+p0]
+                        u[m, i, j, k, c] = in_buffer[sr[2]+p0]
                         p0 = p0 + 1
                      end
                   end
@@ -253,7 +215,7 @@ using Printf
                for j = 0:cell_size[2, c]-1
                   for i = cell_size[1, c]:cell_size[1, c]+1
                      for m = 1:5
-                        u[m, i, j, k, c] = in_buffer[sr[0]+p1]
+                        u[m, i, j, k, c] = in_buffer[sr[1]+p1]
                         p1 = p1 + 1
                      end
                   end
@@ -266,7 +228,7 @@ using Printf
                for j = -2:-1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        u[m, i, j, k, c] = in_buffer[sr[3]+p2]
+                        u[m, i, j, k, c] = in_buffer[sr[4]+p2]
                         p2 = p2 + 1
                      end
                   end
@@ -280,7 +242,7 @@ using Printf
                for j = cell_size[2, c]:cell_size[2, c]+1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        u[m, i, j, k, c] = in_buffer[sr[2]+p3]
+                        u[m, i, j, k, c] = in_buffer[sr[3]+p3]
                         p3 = p3 + 1
                      end
                   end
@@ -293,7 +255,7 @@ using Printf
                for j = 0:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        u[m, i, j, k, c] = in_buffer[sr[5]+p4]
+                        u[m, i, j, k, c] = in_buffer[sr[6]+p4]
                         p4 = p4 + 1
                      end
                   end
@@ -306,7 +268,7 @@ using Printf
                for j = 0:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        u[m, i, j, k, c] = in_buffer[sr[4]+p5]
+                        u[m, i, j, k, c] = in_buffer[sr[5]+p5]
                         p5 = p5 + 1
                      end
                   end
@@ -323,7 +285,7 @@ using Printf
 #---------------------------------------------------------------------
 #     do the rest of the rhs that uses the copied face values          
 #---------------------------------------------------------------------
-      compute_rhs
+      compute_rhs()
 
       return nothing
-      end
+end

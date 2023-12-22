@@ -1,24 +1,7 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function setup_btio()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      DOUBLEPRECISION d5[5]
-#      integer frec_sz, m, ierr
+function setup_btio()
 
 #     determine a proper record_length to use
       if node == root
@@ -47,16 +30,13 @@ using Printf
       idump_sub = 0
 
       return nothing
-      end
+end
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function output_timestep()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
+function output_timestep()
 
 #      use bt_data
 #      implicit none
@@ -95,12 +75,12 @@ using Printf
       end
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function acc_sub_norms(idump_cur)
+function acc_sub_norms(idump_cur)
 
 #      use bt_data
 #      use mpinpb
@@ -145,30 +125,24 @@ using Printf
       end
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function btio_cleanup()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
+ function btio_cleanup()
 
 #      implicit none
 
       CLOSE(unit = 99)
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function accumulate_norms(xce_acc)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
+ function accumulate_norms(xce_acc)
 
 #      use bt_data
 #      implicit none
@@ -198,4 +172,4 @@ using Printf
       end
 
       return nothing
-      end
+end

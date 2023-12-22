@@ -1,26 +1,7 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function bcast_inputs()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use lu_data
-#      use mpinpb
-#      use timing
-
-#      implicit none
-
-#---------------------------------------------------------------------
-#  local variables
-#---------------------------------------------------------------------
-#      integer ierr
+ function bcast_inputs()
 
 #---------------------------------------------------------------------
 #   root broadcasts the data
@@ -31,19 +12,20 @@ using Printf
 #   broadcast the data once, just use a separate broadcast for
 #   each piece. 
 #---------------------------------------------------------------------
-      MPI_BCAST(ipr, 1, MPI_INTEGER, root, comm_solve, ierr)
-      MPI_BCAST(inorm, 1, MPI_INTEGER, root, comm_solve, ierr)
-      MPI_BCAST(itmax, 1, MPI_INTEGER, root, comm_solve, ierr)
-      MPI_BCAST(dt, 1, dp_type, root, comm_solve, ierr)
-      MPI_BCAST(omega, 1, dp_type, root, comm_solve, ierr)
-      MPI_BCAST(tolrsd, 5, dp_type, root, comm_solve, ierr)
-      MPI_BCAST(nx0, 1, MPI_INTEGER, root, comm_solve, ierr)
-      MPI_BCAST(ny0, 1, MPI_INTEGER, root, comm_solve, ierr)
-      MPI_BCAST(nz0, 1, MPI_INTEGER, root, comm_solve, ierr)
-      MPI_BCAST(timeron, 1, MPI_LOGICAL, root, comm_solve,
-                     ierr)
+      ipr = MPI.bcast(ipr, comm_solve; root = root)
+      inorm = MPI.bcast(inorm, comm_solve; root = root)
+      itmax = MPI.bcast(itmax, comm_solve; root = root)
+      dt = MPI.bcast(dt, comm_solve; root = root)
+      omega = MPI.bcast(omega, comm_solve; root = root)
+      tolrsd = MPI.bcast(tolrsd, comm_solve; root = root)
+      nx0 = MPI.bcast(nx0, comm_solve; root = root)
+      ny0 = MPI.bcast(ny0, comm_solve; root = root)
+      nz0 = MPI.bcast(nz0, comm_solve; root = root)
+      timeron = MPI.bcast(timeron, comm_solve; root = root)
 
       return nothing
-      end
+end
+
+
 
 

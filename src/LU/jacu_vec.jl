@@ -1,41 +1,8 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function jacu[k]
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #   compute the upper triangular part of the jacobian matrix
 #---------------------------------------------------------------------
 
-#      use lu_data
-#      use timing
-
-#      implicit none
-
-
-#---------------------------------------------------------------------
-#  input parameters
-#---------------------------------------------------------------------
-#      integer k
-
-#---------------------------------------------------------------------
-#  local variables
-#---------------------------------------------------------------------
-#      integer i, j
-#      DOUBLEPRECISION  r43
-#      DOUBLEPRECISION  c1345
-#      DOUBLEPRECISION  c34
-#      DOUBLEPRECISION  tmp1, tmp2, tmp3
-
+ function jacu(k)
 
       if (timeron) timer_start(t_jacu) end
 
@@ -390,4 +357,4 @@ using Printf
       if (timeron) timer_stop(t_jacu) end
 
       return nothing
-      end
+end

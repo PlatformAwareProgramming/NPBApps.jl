@@ -1,8 +1,3 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 #
@@ -10,8 +5,6 @@ using Printf
 #
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
-
-      module bt_data
 
 #---------------------------------------------------------------------
 # The following include file is generated automatically by the
@@ -23,78 +16,23 @@ using Printf
 #      niter_default: default number of iterations for this problem size
 #---------------------------------------------------------------------
 
-      include("npbparams.h")
+const aa = 1
+const bb = 2
+const cc = 3
+const BLOCK_SIZE = 5
 
-#      integer           aa, bb, cc, BLOCK_SIZE
-                 aa = 1; bb = 2; cc = 3; BLOCK_SIZE = 5
+grid_points = zeros(Integer, 3)
 
-#      integer           ncells, grid_points[3]
-#      DOUBLEPRECISION  elapsed_time
+const EAST = 2000 
+const WEST = 3000      
+const NORTH = 4000 
+const SOUTH = 5000
+const BOTTOM = 6000 
+const TOP = 7000
 
-#      DOUBLEPRECISION  tx1, tx2, tx3, ty1, ty2, ty3, tz1, tz2, tz3,  
-#                        dx1, dx2, dx3, dx4, dx5, dy1, dy2, dy3, dy4,  
-#                        dy5, dz1, dz2, dz3, dz4, dz5, dssp, dt,  
-#                        ce[5,13], dxmax, dymax, dzmax, xxcon1, xxcon2,  
-#                        xxcon3, xxcon4, xxcon5, dx1tx1, dx2tx1, dx3tx1,  
-#                        dx4tx1, dx5tx1, yycon1, yycon2, yycon3, yycon4,  
-#                        yycon5, dy1ty1, dy2ty1, dy3ty1, dy4ty1, dy5ty1,  
-#                        zzcon1, zzcon2, zzcon3, zzcon4, zzcon5, dz1tz1,  
-#                        dz2tz1, dz3tz1, dz4tz1, dz5tz1, dnxm1, dnym1,  
-#                        dnzm1, c1c2, c1c5, c3c4, c1345, conz1, c1, c2,  
-#                        c3, c4, c5, c4dssp, c5dssp, dtdssp, dttx1, bt,  
-#                        dttx2, dtty1, dtty2, dttz1, dttz2, c2dttx1,  
-#                        c2dtty1, c2dttz1, comz1, comz4, comz5, comz6,  
-#                        c3c4tx3, c3c4ty3, c3c4tz3, c2iv, con43, con16
-
-#      integer           EAST, WEST, NORTH, SOUTH,  
-#                        BOTTOM, TOP
-
-                 EAST = 2000; WEST = 3000;      NORTH = 4000; SOUTH = 5000;
-                 BOTTOM = 6000; TOP = 7000
-
-#      integer maxcells, IMAX, JMAX, KMAX, MAX_CELL_DIM, BUF_SIZE
-
-#      integer predecessor[3], successor[3], grid_size[3]
-#      integer, allocatable ::  
-#              cell_coord[:,:], cell_low[:,:],  
-#              cell_high[:,:], cell_size[:,:],  
-#              start[:,:], end[:,:],  
-#              slice[:,:]
-
-#      DOUBLEPRECISION, allocatable ::  
-#              us[    :end,:,:,:],  
-#              vs[    :end,:,:,:],  
-#              ws[    :end,:,:,:],  
-#              qs[    :end,:,:,:],  
-#              rho_i[    :end,:,:,:],  
-#              square[    :end,:,:,:],  
-#              forcing[  :end,:,:,:,:],  
-#              u[  :end,:,:,:,:],  
-#              rhs[  :end,:,:,:,:],  
-#              lhsc[:,:,:,:,:,:],  
-#              backsub_info[:,:,:,:],  
-#              in_buffer[:], out_buffer[:]
-
-#      DOUBLEPRECISION, allocatable ::  
-#              cv[:], rhon[:],  
-#              rhos[:], rhoq[:],  
-#              cuf[:], q[:],  
-#              ue[:,:], buf[:,:]
-
-#      DOUBLEPRECISION, allocatable ::  
-#              fjac[:, :, :end],  
-#              njac[:, :, :end],  
-#              lhsa[:, :, :end],  
-#              lhsb[:, :, :end]
-
-#      integer west_size, east_size, bottom_size, top_size,  
-#              north_size, south_size, start_send_west,  
-#              start_send_east, start_send_south, start_send_north,  
-#              start_send_bottom, start_send_top, start_recv_west,  
-#              start_recv_east, start_recv_south, start_recv_north,  
-#              start_recv_bottom, start_recv_top
-
-#      DOUBLEPRECISION tmp_block[5,5], b_inverse[5,5], tmp_vec[5]
+predecessor = zeros(Int64, 3)
+successor = zeros(Int64,3)
+grid_size = zeros(Int64, 3)
 
 #---------------------------------------------------------------------
 #     These are used by btio
@@ -105,26 +43,32 @@ using Printf
 #      DOUBLEPRECISION SUM[niter_default], xce_sub[5]
 #      integer(kind=8) :: iseek
 
-
 #---------------------------------------------------------------------
 #     Timer constants
 #---------------------------------------------------------------------
-#      integer t_total, t_io, t_rhs, t_xsolve, t_ysolve, t_zsolve,  
-#              t_bpack, t_exch, t_xcomm, t_ycomm, t_zcomm,  
-#              t_comp, t_comm, t_enorm, t_iov, t_last
-                 t_total = 1; t_io = 2; t_rhs = 3; t_xsolve = 4; t_ysolve = 5;
-              t_zsolve = 6; t_bpack = 7; t_exch = 8; t_xcomm = 9;
-              t_ycomm = 10; t_zcomm = 11; t_comp = 12; t_comm = 13;
-              t_enorm = 12; t_iov = 13; t_last = 13
-#      logical timeron
 
-      end
+const t_total = 1
+const t_io = 2
+const t_rhs = 3
+const t_xsolve = 4
+const t_ysolve = 5
+const t_zsolve = 6
+const t_bpack = 7
+const t_exch = 8
+const t_xcomm = 9
+const t_ycomm = 10
+const t_zcomm = 11
+const t_comp = 12
+const t_comm = 13
+const t_enorm = 12
+const t_iov = 13
+const t_last = 13
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function alloc_space()
+ function alloc_space()
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
@@ -133,70 +77,95 @@ using Printf
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
+      global MAX_CELL_DIM = div(problem_size,maxcells)+1
 
-#      implicit none
+      global IMAX = MAX_CELL_DIM
+      global JMAX = MAX_CELL_DIM
+      global KMAX = MAX_CELL_DIM
 
-#      integer ios, ierr
+      global BUF_SIZE = MAX_CELL_DIM*MAX_CELL_DIM*(maxcells-1)*60+1
 
-      MAX_CELL_DIM = (problem_size/maxcells)+1
+      global cell_coord = zeros(Int64, 3, maxcells)
+      global cell_low = zeros(Int64, 3, maxcells)
+      global cell_high = zeros(Int64, 3, maxcells)
+      global cell_size = zeros(Int64, 3, maxcells)
+      global cell_start = zeros(Int64, 3, maxcells)
+      global cell_end = zeros(Int64, 3, maxcells)
+      global slice = zeros(Int64, 3, maxcells)
 
-      IMAX = MAX_CELL_DIM
-      JMAX = MAX_CELL_DIM
-      KMAX = MAX_CELL_DIM
 
-      BUF_SIZE = MAX_CELL_DIM*MAX_CELL_DIM*(maxcells-1)*60+1
+      forcing0 = zeros(Float64, 5, IMAX, JMAX, KMAX, maxcells)
+      global forcing = OffsetArray(forcing0, 1:5, 0:IMAX-1, 0:JMAX-1, 0:KMAX-1, 1:maxcells)            
 
-      allocate(
-               cell_coord[3, maxcells], cell_low[3, maxcells],
-               cell_high[3, maxcells], cell_size[3, maxcells],
-               cell_start[3, maxcells], cell_end[3, maxcells],
-               slice[3, maxcells],
-               STAT = ios)
+      u0 = zeros(Float64, 5, IMAX+4, JMAX+4, KMAX + 4, maxcells)
+      global u = OffsetArray(u0, 1:5, -2:IMAX+1, -2:JMAX+1, -2:KMAX+1, 1:maxcells)
 
-      if (ios == 0) allocate(
-         forcing[5,   0:IMAX-1, 0:JMAX-1, 0:KMAX-1, maxcells],
-         u[5,  -2:IMAX+1, -2:JMAX+1, -2:KMAX+1, maxcells],
-         rhs[5,  -1:IMAX-1, -1:JMAX-1, -1:KMAX-1, maxcells],
-          lhsc[5, 5, -1:IMAX-1, -1:JMAX-1, -1:KMAX-1, maxcells],
-         backsub_info[5, 0:MAX_CELL_DIM, 0:MAX_CELL_DIM, maxcells],
-         in_buffer[BUF_SIZE], out_buffer[BUF_SIZE],
-               STAT = ios)
-      end
+      rhs0 = zeros(Float64, 5, IMAX+1, JMAX+1, KMAX+1, maxcells)
+      global rhs = OffsetArray(rhs0, 1:5, -1:IMAX-1, -1:JMAX-1, -1:KMAX-1, 1:maxcells)
 
-      if (ios == 0) allocate(
-               cv(-2:MAX_CELL_DIM+1),  rhon[-2:MAX_CELL_DIM+1],
-               rhos[-2:MAX_CELL_DIM+1],  rhoq[-2:MAX_CELL_DIM+1],
-               cuf[-2:MAX_CELL_DIM+1],     q[-2:MAX_CELL_DIM+1],
-               ue[-2:MAX_CELL_DIM+1, 5], buf[-2:MAX_CELL_DIM+1, 5],
-               STAT = ios)
-      end
+      lhsc0 = zeros(Float64, 5, 5, IMAX+1, JMAX+1, KMAX+1, maxcells)
+      global lhsc = OffsetArray(lhsc0, 1:5, 1:5, -1:IMAX-1, -1:JMAX-1, -1:KMAX-1, 1:maxcells)
 
-      if (ios == 0) allocate(
-               fjac[5, 5, -2:MAX_CELL_DIM+1],
-               njac[5, 5, -2:MAX_CELL_DIM+1],
-                lhsa[5, 5, -1:MAX_CELL_DIM],
-                lhsb[5, 5, -1:MAX_CELL_DIM],
-               STAT = ios)
-      end
+      backsub_info0 = zeros(Float64, 5, MAX_CELL_DIM+1, MAX_CELL_DIM+1, maxcells)
+      global backsub_info = OffsetArray(backsub_info0, 1:5, 0:MAX_CELL_DIM, 0:MAX_CELL_DIM, 1:maxcells)
 
-      if (ios == 0) allocate(
-               us[-1:IMAX, -1:JMAX, -1:KMAX, maxcells],
-               vs[-1:IMAX, -1:JMAX, -1:KMAX, maxcells],
-               ws[-1:IMAX, -1:JMAX, -1:KMAX, maxcells],
-               qs[-1:IMAX, -1:JMAX, -1:KMAX, maxcells],
-               rho_i(-1:IMAX, -1:JMAX, -1:KMAX, maxcells),
-               square[-1:IMAX, -1:JMAX, -1:KMAX, maxcells],
-               STAT = ios)
-      end
+      global in_buffer = Array{Float64}(undef, BUF_SIZE)
+      global out_buffer = Array{Float64}(undef, BUF_SIZE)
 
-      if ios != 0
-         println(stdout, "Error encountered in allocating space")
-         MPI_Abort(MPI_COMM_WORLD, MPI_ERR_OTHER, ierr)
-         exit(1)
-      end
+      cv0 = zeros(Float64, MAX_CELL_DIM + 4)
+      global cv = OffsetArray(cv0, -2:MAX_CELL_DIM+1)
 
+      rhon0 = zeros(Float64, MAX_CELL_DIM + 4)
+      global rhon = OffsetArray(rhon0, -2:MAX_CELL_DIM+1)
+
+      rhos0 = zeros(Float64, MAX_CELL_DIM + 4)
+      global rhos = OffsetArray(rhos0, -2:MAX_CELL_DIM+1)
+      
+      rhoq0 = zeros(Float64, MAX_CELL_DIM + 4)
+      global rhoq = OffsetArray(rhoq0, -2:MAX_CELL_DIM+1)
+
+      cuf0 = zeros(Float64, MAX_CELL_DIM + 4)
+      global cuf = OffsetArray(cuf0, -2:MAX_CELL_DIM+1)
+
+      q0 = zeros(Float64, MAX_CELL_DIM + 4)
+      global q = OffsetArray(q0, -2:MAX_CELL_DIM+1)
+      
+      ue0 = zeros(Float64, MAX_CELL_DIM + 4, 5)
+      global ue = OffsetArray(ue0, -2:MAX_CELL_DIM+1, 1:5)
+
+      buf0 = zeros(Float64, MAX_CELL_DIM + 4, 5)
+      global buf = OffsetArray(buf0, -2:MAX_CELL_DIM+1, 1:5)
+
+      fjac0 = zeros(Float64, 5, 5, MAX_CELL_DIM + 4)
+      global fjac = OffsetArray(fjac0, 1:5, 1:5, -2:MAX_CELL_DIM+1)
+
+      njac0 = zeros(Float64, 5, 5, MAX_CELL_DIM + 4)
+      global njac = OffsetArray(njac0, 1:5, 1:5, -2:MAX_CELL_DIM+1)
+
+      lhsa0 = zeros(Float64, 5, 5, MAX_CELL_DIM + 2)
+      global lhsa = OffsetArray(lhsa0, 1:5, 1:5, -1:MAX_CELL_DIM)
+
+      lhsb0 = zeros(Float64, 5, 5, MAX_CELL_DIM + 2)
+      global lhsb = OffsetArray(lhsb0, 1:5, 1:5, -1:MAX_CELL_DIM)            
+
+      us0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
+      global us = OffsetArray(us0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      
+      vs0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
+      global vs = OffsetArray(vs0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+
+      ws0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
+      global ws = OffsetArray(ws0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+
+      qs0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
+      global qs = OffsetArray(qs0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      
+      rho_i0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
+      global rho_i = OffsetArray(rho_i0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+
+      square0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
+      global square = OffsetArray(square0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      
       return nothing
-      end
+end
 

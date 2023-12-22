@@ -296,7 +296,7 @@ function x_solve()
 # can't receive data yet because buffer size will be wrong 
 #---------------------------------------------------------------------
              if (timeron) timer_start(t_xcomm) end
-             requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), sucessor[1], DEFAULT_TAG, comm_solve)
+             requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[1], DEFAULT_TAG, comm_solve)
              if (timeron) timer_stop(t_xcomm) end
 
           end
@@ -330,7 +330,7 @@ function x_solve()
 #            solution of the previous two stations     
 #---------------------------------------------------------------------
              if (timeron) timer_start(t_xcomm) end
-             requests[1] = MPI.Irecv!(in_buffer, sucessor[1], DEFAULT_TAG, comm_solve)
+             requests[1] = MPI.Irecv!(in_buffer, successor[1], DEFAULT_TAG, comm_solve)
              if (timeron) timer_stop(t_xcomm) end
 
 
@@ -346,7 +346,7 @@ function x_solve()
 #            wait for pending communication to complete
 #---------------------------------------------------------------------
              if (timeron) timer_start(t_xcomm) end
-             #mpi_waitall(2, requests, statuses, ERROR)
+             #MPI.Waitall(2, requests, statuses, ERROR)
              MPI.Waitall(requests)
              if (timeron) timer_stop(t_xcomm) end
 

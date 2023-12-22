@@ -313,7 +313,7 @@ function y_solve()
 #            pack and send the buffer
 #---------------------------------------------------------------------
              if (timeron) timer_start(t_ycomm) end
-             requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), sucessor[2], DEFAULT_TAG, comm_solve)
+             requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[2], DEFAULT_TAG, comm_solve)
              if (timeron) timer_stop(t_ycomm) end
 
           end
@@ -349,7 +349,7 @@ function y_solve()
 #---------------------------------------------------------------------
 
              if (timeron) timer_start(t_ycomm) end
-             requests[1] = MPI.Irecv!(in_buffer, sucessor[2], DEFAULT_TAG, comm_solve)
+             requests[1] = MPI.Irecv!(in_buffer, successor[2], DEFAULT_TAG, comm_solve)
              if (timeron) timer_stop(t_ycomm) end
 
 
@@ -365,7 +365,7 @@ function y_solve()
 #            wait for pending communication to complete
 #---------------------------------------------------------------------
              if (timeron) timer_start(t_ycomm) end
-             #mpi_waitall(2, requests, statuses, ERROR)
+             #MPI.Waitall(2, requests, statuses, ERROR)
              MPI.Waitall(requests)
              if (timeron) timer_stop(t_ycomm) end
 

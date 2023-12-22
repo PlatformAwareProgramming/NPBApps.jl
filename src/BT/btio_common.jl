@@ -1,20 +1,9 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
+
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function clear_timestep()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use bt_data
-#      implicit none
-
-#      integer cio, kio, jio, ix
+ function clear_timestep()
 
       for cio = 1:ncells
           for kio = 0:cell_size[3, cio]-1
@@ -31,5 +20,5 @@ using Printf
       end
 
       return nothing
-      end
+end
 

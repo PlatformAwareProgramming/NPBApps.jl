@@ -1,16 +1,3 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function z_solve()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #     Performs line solves in Z direction by first factoring
 #     the block-tridiagonal matrix into an upper triangular matrix, 
@@ -21,14 +8,10 @@ using Printf
 #     of the sweep.
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
+function z_solve()
 
-#      implicit none
-
-#      integer c, kstart, stage,  
-#           FIRST, LAST, recv_id, ERROR, r_status[MPI_STATUS_SIZE],  
-#           isize,jsize,ksize,send_id
+      send_id = Ref{MPI.Request}()
+      recv_id = Ref{MPI.Request}()
 
       kstart = 0
 
@@ -65,7 +48,7 @@ using Printf
 #---------------------------------------------------------------------
             FIRST = 0
             if (timeron) timer_start(t_zcomm) end
-            z_receive_solve_info(recv_id, c)
+            recv_id[] = z_receive_solve_info(c)
 #---------------------------------------------------------------------
 #     overlap computations and communications
 #---------------------------------------------------------------------
@@ -73,8 +56,8 @@ using Printf
 #---------------------------------------------------------------------
 #     wait for completion
 #---------------------------------------------------------------------
-            mpi_wait(send_id, r_status, ERROR)
-            mpi_wait(recv_id, r_status, ERROR)
+            MPI.Wait(send_id[])
+            MPI.Wait(recv_id[])
             if (timeron) timer_stop(t_zcomm) end
 #---------------------------------------------------------------------
 #     install C'(kstart+1) and rhs'(kstart+1) to be used in this cell
@@ -83,7 +66,9 @@ using Printf
             z_solve_cell(FIRST, LAST, c)
          end
 
-         if (LAST == 0) z_send_solve_info(send_id, c) end
+         if (LAST == 0) 
+             send_id[] = z_send_solve_info(c) 
+         end
       end
 
 #---------------------------------------------------------------------
@@ -102,37 +87,30 @@ using Printf
             z_backsubstitute(FIRST, LAST, c)
          else
             if (timeron) timer_start(t_zcomm) end
-            z_receive_backsub_info(recv_id, c)
-            mpi_wait(send_id, r_status, ERROR)
-            mpi_wait(recv_id, r_status, ERROR)
+            recv_id[] = z_receive_backsub_info(c)
+            MPI.Wait(send_id[])
+            MPI.Wait(recv_id[])
             if (timeron) timer_stop(t_zcomm) end
             z_unpack_backsub_info(c)
             z_backsubstitute(FIRST, LAST, c)
          end
-         if (FIRST == 0) z_send_backsub_info(send_id, c) end
+         if (FIRST == 0) 
+            send_id[] = z_send_backsub_info(c) 
+         end
       end
 
       if (timeron) timer_stop(t_zsolve) end
 
       return nothing
-      end
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function z_unpack_solve_info(c)
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     unpack C'(-1) and rhs'(-1) for
 #     all i and j
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
-
-#      integer i,j,m,n,ptr,c,kstart
+function z_unpack_solve_info(c)
 
       kstart = 0
       ptr = 0
@@ -152,28 +130,15 @@ using Printf
       end
 
       return nothing
-      end
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function z_send_solve_info(send_id, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     pack up and send C'(kend) and rhs'(kend) for
 #     all i and j
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer i,j,m,n,ksize,ptr,c,ip,jp
-#      integer ERROR,send_id,buffer_size
+function z_send_solve_info(c)
 
       ksize = cell_size[3, c]-1
       ip = cell_coord[1, c] - 1
@@ -204,34 +169,18 @@ using Printf
 #     send buffer 
 #---------------------------------------------------------------------
       if (timeron) timer_start(t_zcomm) end
-      MPI.Isend(in_buffer, buffer_size,
-           dp_type, successor[3],
-           BOTTOM+ip+jp*NCELLS, comm_solve,
-           send_id, ERROR)
+      send_id = MPI.Isend(view(in_buffer,1:buffer_size), successor[3], BOTTOM+ip+jp*ncells, comm_solve)
       if (timeron) timer_stop(t_zcomm) end
 
-      return nothing
-      end
+      return send_id
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function z_send_backsub_info(send_id, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     pack up and send u[jstart] for all i and j
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer i,j,n,ptr,c,kstart,ip,jp
-#      integer ERROR,send_id,buffer_size
+function z_send_backsub_info(c)
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -251,31 +200,18 @@ using Printf
       end
 
       if (timeron) timer_start(t_zcomm) end
-      MPI.Isend(in_buffer, buffer_size,
-           dp_type, predecessor[3],
-           TOP+ip+jp*NCELLS, comm_solve,
-           send_id, ERROR)
+      send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[3],TOP+ip+jp*ncells, comm_solve)
       if (timeron) timer_stop(t_zcomm) end
 
-      return nothing
-      end
+      return send_id
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function z_unpack_backsub_info(c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     unpack u[ksize] for all i and j
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
-
-#      integer i,j,n,ptr,c
+function z_unpack_backsub_info(c)
 
       ptr = 0
       for j = 0:JMAX-1
@@ -288,77 +224,38 @@ using Printf
       end
 
       return nothing
-      end
+end
 
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function z_receive_backsub_info(recv_id, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     post mpi receives
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer ERROR,recv_id,ip,jp,c,buffer_size
+function z_receive_backsub_info(c)
 
       ip = cell_coord[1, c] - 1
       jp = cell_coord[2, c] - 1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*BLOCK_SIZE
-      MPI.Irecv!(out_buffer, buffer_size,
-           dp_type, successor[3],
-           TOP+ip+jp*NCELLS, comm_solve,
-           recv_id, ERROR)
+      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), successor[3], TOP+ip+jp*ncells, comm_solve)
 
-      return nothing
-      end
+      return recv_id
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function z_receive_solve_info(recv_id, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     post mpi receives 
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer ip,jp,recv_id,ERROR,c,buffer_size
+function z_receive_solve_info(c)
 
       ip = cell_coord[1, c] - 1
       jp = cell_coord[2, c] - 1
-      buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(
-           BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
-      MPI.Irecv!(out_buffer, buffer_size,
-           dp_type, predecessor[3],
-           BOTTOM+ip+jp*NCELLS, comm_solve,
-           recv_id, ERROR)
+      buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
+      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), predecessor[3], BOTTOM+ip+jp*ncells, comm_solve)
 
-      return nothing
-      end
+      return recv_id
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function z_backsubstitute(FIRST, LAST, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     back solve: if last cell, then generate u[ksize]=rhs[ksize]
@@ -367,11 +264,7 @@ using Printf
 #     after call u[kstart] will be sent to next cell
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
-
-#      integer FIRST, LAST, c, i, k
-#      integer m,n,j,jsize,isize,ksize,kstart
+function z_backsubstitute(FIRST, LAST, c)
 
       kstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -407,15 +300,8 @@ using Printf
       end
 
       return nothing
-      end
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function z_solve_cell(FIRST, LAST, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     performs guaussian elimination on this cell.
@@ -427,13 +313,9 @@ using Printf
 #     c'(KMAX) and rhs'(KMAX) will be sent to next cell.
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
+function z_solve_cell(FIRST, LAST, c)
 
-#      DOUBLEPRECISION tmp1, tmp2, tmp3
-#      integer FIRST,LAST,c
-#      integer i,j,k,isize,ksize,jsize,kstart
-#      DOUBLEPRECISION utmp[6,-2:KMAX+1]
+      utmp = OffsetArray(zeros(Float64, 6, JMAX+4), 1:6, -2:JMAX+1)
 
       kstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -728,9 +610,7 @@ using Printf
 #     multiply c[i,j,kstart] by b_inverse and copy back to c
 #     multiply rhs[kstart] by b_inverse(kstart) and copy to rhs
 #---------------------------------------------------------------------
-               binvcrhs(  lhsb[1, 1, kstart],
-                               lhsc[1, 1, i, j, kstart, c],
-                              rhs[1, i, j, kstart, c] )
+               binvcrhs(view(lhsb, 1:5, 1:5, kstart), view(lhsc, 1:5, 1:5, i, j, kstart, c), view(rhs, 1:5, i, j, kstart, c))
 
             end
 
@@ -745,24 +625,19 @@ using Printf
 #     
 #     rhs[k] = rhs[k] - A*rhs[k-1]
 #---------------------------------------------------------------------
-               matvec_sub( lhsa[1, 1, k],
-                               rhs[1, i, j, k-1, c], rhs[1, i, j, k, c])
+               matvec_sub(view(lhsa, 1:5, 1:5, k), view(rhs, 1:5, i, j, k-1, c), view(rhs, 1:5, i, j, k, c))
 
 #---------------------------------------------------------------------
 #      b[k] =  b[k] - C(k-1)*A(k)
 #     call matmul_sub(aa,i,j,k,c,cc,i,j,k-1,c,bb,i,j,k,c)
 #---------------------------------------------------------------------
-               matmul_sub( lhsa[1, 1, k],
-                                lhsc[1, 1, i, j, k-1, c],
-                                lhsb[1, 1, k])
+               matmul_sub(view(lhsa, 1:5, 1:5, k), view(lhsc, 1:5, 1:5, i, j, k-1, c), view(lhsb, 1:5, 1:5, k))
 
 #---------------------------------------------------------------------
 #     multiply c[i,j,k] by b_inverse and copy back to c
 #     multiply rhs[i,j,1] by b_inverse(i,j,1) and copy to rhs
 #---------------------------------------------------------------------
-               binvcrhs(  lhsb[1, 1, k],
-                               lhsc[1, 1, i, j, k, c],
-                              rhs[1, i, j, k, c] )
+               binvcrhs(view(lhsb, 1:5, 1:5, k), view(lhsc, 1:5, 1:5, i, j, k, c), view(rhs, 1:5, i, j, k, c))
 
             end
 
@@ -774,23 +649,19 @@ using Printf
 #---------------------------------------------------------------------
 #     rhs[ksize] = rhs[ksize] - A*rhs[ksize-1]
 #---------------------------------------------------------------------
-               matvec_sub( lhsa[1, 1, ksize],
-                               rhs[1, i, j, ksize-1, c], rhs[1, i, j, ksize, c])
+               matvec_sub(view(lhsa, 1:5, 1:5, ksize), view(rhs, 1:5, i, j, ksize-1, c), view(rhs, 1:5, i, j, ksize, c))
 
 #---------------------------------------------------------------------
 #      b[ksize] =  b[ksize] - C(ksize-1)*A(ksize)
 #     call matmul_sub(aa,i,j,ksize,c,
 #     $              cc,i,j,ksize-1,c,bb,i,j,ksize,c)
 #---------------------------------------------------------------------
-               matmul_sub( lhsa[1, 1, ksize],
-                                lhsc[1, 1, i, j, ksize-1, c],
-                                lhsb[1, 1, ksize])
+               matmul_sub(view(lhsa, 1:5, 1:5, ksize), view(lhsc, 1:5, 1:5, i, j, ksize-1, c), view(lhsb, 1:5, 1:5, ksize))
 
 #---------------------------------------------------------------------
 #     multiply rhs[ksize] by b_inverse(ksize) and copy to rhs
 #---------------------------------------------------------------------
-               binvrhs(  lhsb[1, 1, ksize],
-                             rhs[1, i, j, ksize, c] )
+               binvrhs(view(lhsb, 1:5, 1:5, ksize), view(rhs, 1:5, i, j, ksize, c))
 
             end
          end
@@ -798,7 +669,7 @@ using Printf
 
 
       return nothing
-      end
+end
 
 
 

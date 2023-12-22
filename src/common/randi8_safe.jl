@@ -1,10 +1,3 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-      function randlc(x, a)
-
 #---------------------------------------------------------------------
 #
 #   This routine returns a uniform pseudorandom double precision number in the
@@ -20,11 +13,9 @@ using Printf
 #   the new seed x_1, so that subsequent calls to RANDLC using the same
 #   arguments will generate a continuous sequence.
 
-#      implicit none
-#      DOUBLEPRECISION x, a
-#      integer(kind=8) Lx, La, a1, a2, x1, x2, xa
-#      DOUBLEPRECISION d2m46
-                d2m46 = 0.5e0^46
+function randlc(x, a)
+
+      d2m46 = 0.5e0^46
 
       Lx = x
       La = A
@@ -37,20 +28,15 @@ using Printf
       x    = float(Lx)
       randlc = d2m46*x
       return nothing
-      end
+end
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
+function VRANLC(N, X, A, Y)
 
-      function VRANLC(N, X, A, Y)
-#      implicit none
-#      integer n, i
-#      DOUBLEPRECISION x, a, y[*]
-#      integer(kind=8) Lx, La, a1, a2, x1, x2, xa
-#      DOUBLEPRECISION d2m46
-                d2m46 = 0.5e0^46
+      d2m46 = 0.5e0^46
 
       Lx = X
       La = A
@@ -65,5 +51,5 @@ using Printf
       end
       x = float(Lx)
       return nothing
-      end
+end
 

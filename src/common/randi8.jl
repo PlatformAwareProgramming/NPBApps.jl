@@ -1,9 +1,3 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-      function randlc(x, a)
 
 #---------------------------------------------------------------------
 #
@@ -20,14 +14,11 @@ using Printf
 #   the new seed x_1, so that subsequent calls to RANDLC using the same
 #   arguments will generate a continuous sequence.
 
-#      implicit none
-#      DOUBLEPRECISION x, a
-#      integer(kind=8) i246m1, Lx, La
-#      DOUBLEPRECISION d2m46
+function randlc(x, a)
 
-                d2m46 = 0.5e0^46
+      d2m46 = 0.5e0^46
 
-                i246m1 = truncComplex(Int, Z"00003FFFFFFFFFFF", 8)
+      i246m1 = truncComplex(Int, Z"00003FFFFFFFFFFF", 8)
 
       Lx = X
       La = A
@@ -36,28 +27,22 @@ using Printf
       randlc = d2m46*float(Lx)
       x    = float(Lx)
       return nothing
-      end
+end
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-
-      function VRANLC(N, X, A, Y)
-#      implicit none
-#      integer n, i
-#      DOUBLEPRECISION x, a, y[*]
-#      integer(kind=8) i246m1, Lx, La
-#      DOUBLEPRECISION d2m46
+function VRANLC(N, X, A, Y)
 
 # This doesn't work, because the compiler does the calculation in 32
 # bits and overflows. No standard way (without f90 stuff) to specify
 # that the rhs should be done in 64 bit arithmetic. 
 #      parameter(i246m1=2**46-1)
 
-                d2m46 = 0.5e0^46
+      d2m46 = 0.5e0^46
 
-                i246m1 = truncComplex(Int, Z"00003FFFFFFFFFFF", 8)
+      i246m1 = truncComplex(Int, Z"00003FFFFFFFFFFF", 8)
 
       Lx = X
       La = A
@@ -68,5 +53,5 @@ using Printf
       x    = float(Lx)
 
       return nothing
-      end
+end
 

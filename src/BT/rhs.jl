@@ -1,23 +1,7 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function compute_rhs()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use bt_data
-#      implicit none
-
-#      integer c, i, j, k, m
-#      DOUBLEPRECISION rho_inv, uijk, up1, um1, vijk, vp1, vm1,  
-#           wijk, wp1, wm1
-
+ function compute_rhs()
 
       if (timeron) timer_start(t_rhs) end
 #---------------------------------------------------------------------
@@ -33,7 +17,7 @@ using Printf
             for j = -1:cell_size[2, c]
                for i = -1:cell_size[1, c]
                   rho_inv = 1.0e0/u[1, i, j, k, c]
-                  rho_i(i, j, k, c) = rho_inv
+                  rho_i[i, j, k, c] = rho_inv
                   us[i, j, k, c] = u[2, i, j, k, c] * rho_inv
                   vs[i, j, k, c] = u[3, i, j, k, c] * rho_inv
                   ws[i, j, k, c] = u[4, i, j, k, c] * rho_inv
@@ -111,9 +95,9 @@ using Printf
                        qs[i-1, j, k, c]) +
                        xxcon4 * (up1*up1 -       2.0e0*uijk*uijk +
                        um1*um1) +
-                       xxcon5 * (u[5, i+1, j, k, c]*rho_i(i+1, j, k, c) -
-                       2.0e0*u[5, i, j, k, c]*rho_i(i, j, k, c) +
-                       u[5, i-1, j, k, c]*rho_i(i-1, j, k, c)) -
+                       xxcon5 * (u[5, i+1, j, k, c]*rho_i[i+1, j, k, c] -
+                       2.0e0*u[5, i, j, k, c]*rho_i[i, j, k, c] +
+                       u[5, i-1, j, k, c]*rho_i[i-1, j, k, c]) -
                        tx2 * ( (c1*u[5, i+1, j, k, c] -
                        c2*square[i+1, j, k, c])*up1 -(
                        c1*u[5, i-1, j, k, c] -
@@ -147,7 +131,7 @@ using Printf
 
          for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
             for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
-               for i = 3*start(1, c):cell_size[1, c]-3*cell_end[1, c]-1
+               for i = 3*cell_start[1, c]:cell_size[1, c]-3*cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] = rhs[m, i, j, k, c] - dssp *(
                             u[m, i-2, j, k, c] - 4.0e0*u[m, i-1, j, k, c] +
@@ -222,9 +206,9 @@ using Printf
                        qs[i, j-1, k, c]) +
                        yycon4 * (vp1*vp1       - 2.0e0*vijk*vijk +
                        vm1*vm1) +
-                       yycon5 * (u[5, i, j+1, k, c]*rho_i(i, j+1, k, c) -
-                       2.0e0*u[5, i, j, k, c]*rho_i(i, j, k, c) +
-                       u[5, i, j-1, k, c]*rho_i(i, j-1, k, c)) -
+                       yycon5 * (u[5, i, j+1, k, c]*rho_i[i, j+1, k, c] -
+                       2.0e0*u[5, i, j, k, c]*rho_i[i, j, k, c] +
+                       u[5, i, j-1, k, c]*rho_i[i, j-1, k, c]) -
                        ty2 * ((c1*u[5, i, j+1, k, c] -
                        c2*square[i, j+1, k, c]) * vp1 -(
                        c1*u[5, i, j-1, k, c] -
@@ -259,7 +243,7 @@ using Printf
          end
 
          for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
-            for j = 3*start(2, c):cell_size[2, c]-3*cell_end[2, c]-1
+            for j = 3*cell_start[2, c]:cell_size[2, c]-3*cell_end[2, c]-1
                for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] = rhs[m, i, j, k, c] - dssp *(
@@ -337,9 +321,9 @@ using Printf
                        qs[i, j, k-1, c]) +
                        zzcon4 * (wp1*wp1 - 2.0e0*wijk*wijk +
                        wm1*wm1) +
-                       zzcon5 * (u[5, i, j, k+1, c]*rho_i(i, j, k+1, c) -
-                       2.0e0*u[5, i, j, k, c]*rho_i(i, j, k, c) +
-                       u[5, i, j, k-1, c]*rho_i(i, j, k-1, c)) -
+                       zzcon5 * (u[5, i, j, k+1, c]*rho_i[i, j, k+1, c] -
+                       2.0e0*u[5, i, j, k, c]*rho_i[i, j, k, c] +
+                       u[5, i, j, k-1, c]*rho_i[i, j, k-1, c]) -
                        tz2 * ( (c1*u[5, i, j, k+1, c] -
                        c2*square[i, j, k+1, c])*wp1 -(
                        c1*u[5, i, j, k-1, c] -
@@ -375,7 +359,7 @@ using Printf
             end
          end
 
-         for k = 3*start(3, c):cell_size[3, c]-3*cell_end[3, c]-1
+         for k = 3*cell_start[3, c]:cell_size[3, c]-3*cell_end[3, c]-1
             for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
@@ -427,7 +411,7 @@ using Printf
       if (timeron) timer_stop(t_rhs) end
 
       return nothing
-      end
+end
 
 
 

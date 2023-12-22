@@ -1,80 +1,69 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
 #---------------------------------------------------------------------
+#   set up coefficients
 #---------------------------------------------------------------------
 
-      function setcoeff()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use lu_data
-#      implicit none
+ function setcoeff()
 
 #---------------------------------------------------------------------
 #  local variables
 #---------------------------------------------------------------------
 
 
-#---------------------------------------------------------------------
-#   set up coefficients
-#---------------------------------------------------------------------
-      dxi = 1.0e+00 / ( nx0 - 1 )
-      deta = 1.0e+00 / ( ny0 - 1 )
-      dzeta = 1.0e+00 / ( nz0 - 1 )
+      global dxi = 1.0e+00 / ( nx0 - 1 )
+      global deta = 1.0e+00 / ( ny0 - 1 )
+      global dzeta = 1.0e+00 / ( nz0 - 1 )
 
-      tx1 = 1.0e+00 / ( dxi * dxi )
-      tx2 = 1.0e+00 / ( 2.0e+00 * dxi )
-      tx3 = 1.0e+00 / dxi
+      global tx1 = 1.0e+00 / ( dxi * dxi )
+      global tx2 = 1.0e+00 / ( 2.0e+00 * dxi )
+      global tx3 = 1.0e+00 / dxi
 
-      ty1 = 1.0e+00 / ( deta * deta )
-      ty2 = 1.0e+00 / ( 2.0e+00 * deta )
-      ty3 = 1.0e+00 / deta
+      global ty1 = 1.0e+00 / ( deta * deta )
+      global ty2 = 1.0e+00 / ( 2.0e+00 * deta )
+      global ty3 = 1.0e+00 / deta
 
-      tz1 = 1.0e+00 / ( dzeta * dzeta )
-      tz2 = 1.0e+00 / ( 2.0e+00 * dzeta )
-      tz3 = 1.0e+00 / dzeta
+      global tz1 = 1.0e+00 / ( dzeta * dzeta )
+      global tz2 = 1.0e+00 / ( 2.0e+00 * dzeta )
+      global tz3 = 1.0e+00 / dzeta
 
-      ii1 = 2
-      ii2 = nx0 - 1
-      ji1 = 2
-      ji2 = ny0 - 2
-      ki1 = 3
-      ki2 = nz0 - 1
+      global ii1 = 2
+      global ii2 = nx0 - 1
+      global ji1 = 2
+      global ji2 = ny0 - 2
+      global ki1 = 3
+      global ki2 = nz0 - 1
 
 #---------------------------------------------------------------------
 #   diffusion coefficients
 #---------------------------------------------------------------------
-      dx1 = 0.75e+00
-      dx2 = dx1
-      dx3 = dx1
-      dx4 = dx1
-      dx5 = dx1
+      global dx1 = 0.75e+00
+      global dx2 = dx1
+      global dx3 = dx1
+      global dx4 = dx1
+      global dx5 = dx1
 
-      dy1 = 0.75e+00
-      dy2 = dy1
-      dy3 = dy1
-      dy4 = dy1
-      dy5 = dy1
+      global dy1 = 0.75e+00
+      global dy2 = dy1
+      global dy3 = dy1
+      global dy4 = dy1
+      global dy5 = dy1
 
-      dz1 = 1.00e+00
-      dz2 = dz1
-      dz3 = dz1
-      dz4 = dz1
-      dz5 = dz1
+      global dz1 = 1.00e+00
+      global dz2 = dz1
+      global dz3 = dz1
+      global dz4 = dz1
+      global dz5 = dz1
 
 #---------------------------------------------------------------------
 #   fourth difference dissipation
 #---------------------------------------------------------------------
-      dssp = ( max(dx1, dy1, dz1 ) ) / 4.0e+00
+      global dssp = ( max(dx1, dy1, dz1 ) ) / 4.0e+00
 
 #---------------------------------------------------------------------
 #   coefficients of the exact solution to the first pde
 #---------------------------------------------------------------------
+
+      global ce = zeros(Float64, 5, 13)
+
       ce[1, 1] = 2.0e+00
       ce[1, 2] = 0.0e+00
       ce[1, 3] = 0.0e+00
@@ -158,6 +147,6 @@ using Printf
       ce[5, 13] = 2.0e-01
 
       return nothing
-      end
+end
 
 

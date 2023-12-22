@@ -92,22 +92,24 @@ function verify(class)
 #   compute the error norm and the residual norm, and exit if not printing
 #---------------------------------------------------------------------
         error_norm(xce)
+        
         copy_faces()
 
         rhs_norm(xcr)
 
-        for m = 1:5
-           xcr[m] = xcr[m] / dt
-        end
+        #for m = 1:5
+        #   xcr[m] = xcr[m] / dt
+        #end
+
+        # VECTORIZED
+        xcr .= xcr ./ dt
 
         if (node != 0) return end
 
         verified = true
-
-        for m = 1:5
-           xcrref[m] = 1.0
-           xceref[m] = 1.0
-        end
+       
+        xcrref .= 1.0
+        xceref .= 1.0
 
 #---------------------------------------------------------------------
 #    reference data for 12X12X12 grids after 100 time steps, with DT = 1.50d-02
@@ -328,12 +330,16 @@ function verify(class)
 #---------------------------------------------------------------------
 #    Compute the difference of solution values and the known reference values.
 #---------------------------------------------------------------------
-        for m = 1:5
+        #=for m = 1:5
 
            xcrdif[m] = abs((xcr[m]-xcrref[m])/xcrref[m])
            xcedif[m] = abs((xce[m]-xceref[m])/xceref[m])
 
-        end
+        end=#
+ 
+        # VETORIZED
+        xcrdif = abs.((xcr .- xcrref)./xcrref)
+        xcedif = abs.((xce .- xceref)./xceref)
 
 #---------------------------------------------------------------------
 #    Output the comparison of computed results to known cases.

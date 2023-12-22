@@ -1,42 +1,12 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function ssor(niter)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #   to perform pseudo-time stepping SSOR iterations
 #   for five nonlinear pde's.
 #---------------------------------------------------------------------
 
-#      use lu_data
-#      use mpinpb
-#      use timing
+ function ssor(niter)
 
-#      implicit none
-
-#      integer  niter
-
-#---------------------------------------------------------------------
-#  local variables
-#---------------------------------------------------------------------
-#      integer i, j, k, m
-#      integer istep, iex
-#      DOUBLEPRECISION  tmp
-#      DOUBLEPRECISION  delunm[5], tv[5,isiz1]
-
-#      external timer_read
-#      DOUBLEPRECISION wtime, timer_read
-
-#      integer IERROR
-
+      delunm = Array{Float64}(undef, 5) 
+      tv = Array{Float64}(undef, 5, isiz1) 
 
 #---------------------------------------------------------------------
 #   begin pseudo-time stepping iterations
@@ -51,7 +21,7 @@ using Printf
          for m = 1:5
             for k = 1:5
                a[k, m, i] = 0.0e0
-                b[k, m, i] = 0.0e0
+               b[k, m, i] = 0.0e0
                c[k, m, i] = 0.0e0
                d[k, m, i] = 0.0e0
             end
@@ -61,7 +31,7 @@ using Printf
 #---------------------------------------------------------------------
 #   compute the steady-state residuals
 #---------------------------------------------------------------------
-      rhs
+      rhs()
 
 #---------------------------------------------------------------------
 #   compute the L2 norms of newton iteration residuals
@@ -74,7 +44,7 @@ using Printf
          timer_clear(i)
       end
 
-      MPI_BARRIER( comm_solve, IERROR )
+      MPI.Barrier(comm_solve)
 
       timer_clear(1)
       timer_start(1)
@@ -85,11 +55,10 @@ using Printf
       for istep = 1:niter
 
          if id == 0
-            if mod( istep, 20) == 0 ||
-                  istep == itmax ||
-                  istep == 1
-               if (niter > 1) @printf(stdout, " Time step %4i\n", istep) end
-# 200           format(' Time step ', i4)
+            if mod(istep, 20) == 0 || istep == itmax || istep == 1
+               if (niter > 1) 
+                  @printf(stdout, " Time step %4i\n", istep) 
+               end
             end
          end
 
@@ -161,7 +130,7 @@ using Printf
 #---------------------------------------------------------------------
 #   form the strictly upper triangular part of the jacobian matrix
 #---------------------------------------------------------------------
-               jacu[j, k]
+               jacu(j, k)
 
 #---------------------------------------------------------------------
 #   perform the upper triangular solution
@@ -193,8 +162,7 @@ using Printf
             for j = jst:jend
                for i = ist:iend
                   for m = 1:5
-                     u[ m, i, j, k ] = u[ m, i, j, k ]+
-                           tmp * rsd[ m, i, j, k ]
+                     u[ m, i, j, k ] = u[ m, i, j, k ] + tmp * rsd[ m, i, j, k ]
                   end
                end
             end
@@ -203,10 +171,8 @@ using Printf
 #---------------------------------------------------------------------
 #   compute the max-norms of newton iteration corrections
 #---------------------------------------------------------------------
-         if mod( istep, inorm ) == 0
-            l2norm( isiz1, isiz2, isiz3, nx0, ny0, nz0,
-                         ist, iend, jst, jend,
-                         rsd, delunm )
+         if mod(istep, inorm) == 0
+            l2norm(isiz1, isiz2, isiz3, nx0, ny0, nz0, ist, iend, jst, jend, rsd, delunm)
 #            if ( ipr .eq. 1 .and. id .eq. 0 ) then
 #                write (*,1006) ( delunm(m), m = 1, 5 )
 #            else if ( ipr .eq. 2 .and. id .eq. 0 ) then
@@ -217,29 +183,26 @@ using Printf
 #---------------------------------------------------------------------
 #   compute the steady-state residuals
 #---------------------------------------------------------------------
-         rhs
+         rhs()
 
 #---------------------------------------------------------------------
 #   compute the max-norms of newton iteration residuals
 #---------------------------------------------------------------------
-         if ( mod( istep, inorm ) == 0 ) ||(
-               istep == itmax )
-            l2norm( isiz1, isiz2, isiz3, nx0, ny0, nz0,
-                         ist, iend, jst, jend,
-                         rsd, rsdnm )
+         if (mod(istep, inorm) == 0) || (istep == itmax)
+            l2norm( isiz1, isiz2, isiz3, nx0, ny0, nz0, ist, iend, jst, jend, rsd, rsdnm)
 #            if ( ipr .eq. 1.and.id.eq.0 ) then
-#                write (*,1007) ( rsdnm(m), m = 1, 5 )
+#                write (*,1007) ( rsdnm[m], m = 1, 5 )
 #            end if
          end
 
 #---------------------------------------------------------------------
 #   check the newton-iteration residuals against the tolerance levels
 #---------------------------------------------------------------------
-         if ( rsdnm(1) < tolrsd[1] ) &&(
-               rsdnm(2) < tolrsd[2] ) &&(
-               rsdnm(3) < tolrsd[3] ) &&(
-               rsdnm(4) < tolrsd[4] ) &&(
-               rsdnm(5) < tolrsd[5] )
+         if ( rsdnm[1] < tolrsd[1] ) &&(
+               rsdnm[2] < tolrsd[2] ) &&(
+               rsdnm[3] < tolrsd[3] ) &&(
+               rsdnm[4] < tolrsd[4] ) &&(
+               rsdnm[5] < tolrsd[5] )
             if id == 0
                @printf(stdout, " \n convergence was achieved after %4i pseudo-time steps\n", istep)
             end
@@ -253,17 +216,9 @@ using Printf
       wtime = timer_read(1)
 
 
-      MPI_ALLREDUCE( wtime,
-                          maxtime,
-                          1,
-                          MPI_DOUBLE_PRECISION,
-                          MPI_MAX,
-                          comm_solve,
-                          IERROR )
-
-
-
-      return nothing
+      #MPI_ALLREDUCE( wtime, maxtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, comm_solve, IERROR )
+      
+      global maxtime = MPI.Allreduce(wtime, MPI.MAX, comm_solve)
 
 # 1001 format(1x/5x,'pseudo-time SSOR iteration no.=',i4/)
 # 1004 format(1x/1x,'convergence was achieved after ',i4,  		         ' pseudo-time steps' )
@@ -271,4 +226,4 @@ using Printf
 # 1007 format(1x/1x,'RMS-norm of steady-state residual for ',  		       'first pde  = ',1pe12.5/,  		       1x,'RMS-norm of steady-state residual for ',  		       'second pde = ',1pe12.5/,  		       1x,'RMS-norm of steady-state residual for ',  		       'third pde  = ',1pe12.5/,  		       1x,'RMS-norm of steady-state residual for ',  		       'fourth pde = ',1pe12.5/,  		       1x,'RMS-norm of steady-state residual for ',  		       'fifth pde  = ',1pe12.5)
 
       return nothing
-      end
+end

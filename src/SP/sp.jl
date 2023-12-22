@@ -50,7 +50,7 @@ t_recs = ["total", "rhs", "xsolve", "ysolve", "zsolve",
           " totcomp", " totcomm"]
 
 #---------------------------------------------------------------------
-function SP()
+function go()
 #---------------------------------------------------------------------
 
        setup_mpi()
@@ -77,6 +77,7 @@ function SP()
             grid_points[1] = parse(Int, readline(f))
             grid_points[2] = parse(Int, readline(f))
             grid_points[3] = parse(Int, readline(f))
+            close(f)
           else
             @printf(stdout, " No input file inputsp.data. Using compiled defaults\n", )
             global niter = niter_default
@@ -161,8 +162,7 @@ function SP()
        for STEP = 1:niter
 
           if node == root
-             if mod(STEP, 20) == 0 ||
-                 STEP == 1
+             if mod(STEP, 20) == 0 || STEP == 1
                 @printf(stdout, " Time step %4i\n", STEP)
               end
           end
@@ -190,7 +190,7 @@ function SP()
          print_results("SP", class, grid_points[1],
            grid_points[2], grid_points[3], niter, no_nodes,
            total_nodes, tmax, mflops, "          floating point",
-           verified, npbversion, compiletime, cs1, cs2, cs3, cs4, cs5, cs6, "(none)")
+           verified, npbversion)
        end
 
        if (!timeron) @goto L999 end

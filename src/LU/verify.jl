@@ -1,115 +1,43 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-        function set_class(class)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #  set problem class based on problem size
 #---------------------------------------------------------------------
 
-#        use lu_data
-#        implicit none
+ function set_class()
 
-#        character class
-
-
-        if (nx0  == 12     ) &&(
-             ny0  == 12     ) &&(
-             nz0  == 12     ) &&(
-             itmax   == 50    )
-
+        if (nx0 == 12) && (ny0 == 12) && (nz0 == 12) && (itmax == 50)
            class = "S"
-
-        elseif (nx0 == 33) &&(
-                 ny0 == 33) &&(
-                 nz0 == 33) &&(
-                 itmax  == 300)
-
+        elseif (nx0 == 33) && (ny0 == 33) && (nz0 == 33) && (itmax  == 300)
            class = "W"   #SPEC95fp size
-
-        elseif (nx0 == 64) &&(
-                 ny0 == 64) &&(
-                 nz0 == 64) &&(
-                 itmax  == 250)
-
+        elseif (nx0 == 64) &&(ny0 == 64) &&(nz0 == 64) && (itmax  == 250)
            class = "A"
-
-        elseif (nx0 == 102) &&(
-                 ny0 == 102) &&(
-                 nz0 == 102) &&(
-                 itmax  == 250)
-
+        elseif (nx0 == 102) && (ny0 == 102) && (nz0 == 102) && (itmax  == 250)
            class = "B"
-
-        elseif (nx0 == 162) &&(
-                 ny0 == 162) &&(
-                 nz0 == 162) &&(
-                 itmax  == 250)
-
+        elseif (nx0 == 162) && (ny0 == 162) && (nz0 == 162) && (itmax  == 250)
            class = "C"
-
-        elseif (nx0 == 408) &&(
-                 ny0 == 408) &&(
-                 nz0 == 408) &&(
-                 itmax  == 300)
-
+        elseif (nx0 == 408) &&(ny0 == 408) && (nz0 == 408) && (itmax  == 300)
            class = "D"
-
-        elseif (nx0 == 1020) &&(
-                 ny0 == 1020) &&(
-                 nz0 == 1020) &&(
-                 itmax  == 300)
-
+        elseif (nx0 == 1020) && (ny0 == 1020) && (nz0 == 1020) && (itmax  == 300)
            class = "E"
-
-        elseif (nx0 == 2560) &&(
-                 ny0 == 2560) &&(
-                 nz0 == 2560) &&(
-                 itmax  == 300)
-
+        elseif (nx0 == 2560) && (ny0 == 2560) && (nz0 == 2560) && (itmax  == 300)
            class = "F"
-
         else
-
            class = "U"
-
         end
 
-        return nothing
-        end
+        return class
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-        function verify(xcr, xce, xci, class, verified)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #  verification routine                         
 #---------------------------------------------------------------------
 
+ function verify(xcr, xce, xci, class)
 
-#        use lu_data
-#        implicit none
-
-#        DOUBLEPRECISION xcr[5], xce[5], xci
-#        DOUBLEPRECISION xcrref[5],xceref[5],xciref,  
-#                         xcrdif[5],xcedif[5],xcidif,  
-#                         epsilon, dtref
-#        integer m
-#        character class
-#        logical verified
+         xcrref = Array{Float64}(undef, 5)
+         xceref = Array{Float64}(undef, 5)
+         xcrdif = Array{Float64}(undef, 5)
+         xcedif = Array{Float64}(undef, 5)
 
 #---------------------------------------------------------------------
 #   tolerance level
@@ -126,7 +54,7 @@ using Printf
 
         if class == "S"
 
-           dtref = 5.0e-1
+         dtref = 5.0e-1
 #---------------------------------------------------------------------
 #   Reference values of RMS-norms of residual, for the (12X12X12) grid,
 #   after 50 time steps, with  DT = 5.0d-01
@@ -152,7 +80,6 @@ using Printf
 #   after 50 time steps, with DT = 5.0d-01
 #---------------------------------------------------------------------
          xciref = 7.8418928865937083e+00
-
 
         elseif class == "W"
 
@@ -212,7 +139,6 @@ using Printf
 #   after 250 time steps, with DT = 2.0d+00
 #---------------------------------------------------------------------
          xciref = 2.6030925604886277e+01
-
 
         elseif class == "B"
 
@@ -379,10 +305,9 @@ using Printf
 #    Compute the difference of solution values and the known reference values.
 #---------------------------------------------------------------------
         for m = 1:5
-
            xcrdif[m] = abs((xcr[m]-xcrref[m])/xcrref[m])
            xcedif[m] = abs((xce[m]-xceref[m])/xceref[m])
-
+                
         end
         xcidif = abs((xci - xciref)/xciref)
 
@@ -393,18 +318,14 @@ using Printf
 
         if class != "U"
            @printf(stdout, "\n Verification being performed for class %s\n", class)
-# 1990      format(/, ' Verification being performed for class ', a)
            @printf(stdout, " Accuracy setting for epsilon = %20.13E\n", epsilon)
-# 2000      format(' Accuracy setting for epsilon = ', E20.13)
            verified = (abs(dt-dtref) <= epsilon)
            if !verified
               class = "U"
               @printf(stdout, " DT does not match the reference value of %15.8E\n", dtref)
-# 1000         format(' DT does not match the reference value of ',  		                       E15.8)
            end
         else
            @printf(stdout, " Unknown class\n", )
-# 1995      format(' Unknown class')
         end
 
 
@@ -414,8 +335,6 @@ using Printf
            @printf(stdout, " RMS-norms of residual\n", )
         end
 
-# 2001   format(' Comparison of RMS-norms of residual')
-# 2005   format(' RMS-norms of residual')
         for m = 1:5
            if class == "U"
               @printf(stdout, "          %2i  %20.13E\n", m, xcr[m])
@@ -432,8 +351,6 @@ using Printf
         else
            @printf(stdout, " RMS-norms of solution error\n", )
         end
-# 2002   format(' Comparison of RMS-norms of solution error')
-# 2006   format(' RMS-norms of solution error')
 
         for m = 1:5
            if class == "U"
@@ -446,18 +363,11 @@ using Printf
            end
         end
 
-# 2010   format(' FAILURE: ', i2, 2x, E20.13, E20.13, E20.13)
-# 2011   format('          ', i2, 2x, E20.13, E20.13, E20.13)
-# 2015   format('          ', i2, 2x, E20.13)
-
         if class != "U"
            @printf(stdout, " Comparison of surface integral\n", )
         else
            @printf(stdout, " Surface integral\n", )
         end
-# 2025   format(' Comparison of surface integral')
-# 2026   format(' Surface integral')
-
 
         if class == "U"
            @printf(stdout, "              %20.13E\n", xci)
@@ -468,26 +378,15 @@ using Printf
            @printf(stdout, " FAILURE:     %20.13E%20.13E%20.13E\n", xci, xciref, xcidif)
         end
 
-# 2030   format('          ', 4x, E20.13)
-# 2031   format(' FAILURE: ', 4x, E20.13, E20.13, E20.13)
-# 2032   format('          ', 4x, E20.13, E20.13, E20.13)
-
-
-
         if class == "U"
            @printf(stdout, " No reference values provided\n", )
            @printf(stdout, " No verification performed\n", )
-# 2022      format(' No reference values provided')
-# 2023      format(' No verification performed')
         elseif verified
            @printf(stdout, " Verification Successful\n", )
-# 2020      format(' Verification Successful')
         else
            @printf(stdout, " Verification failed\n", )
-# 2021      format(' Verification failed')
         end
 
-        return nothing
+        return verified
 
-
-        end
+end

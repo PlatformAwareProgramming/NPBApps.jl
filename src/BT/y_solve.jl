@@ -1,15 +1,3 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function y_solve()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     Performs line solves in Y direction by first factoring
@@ -21,15 +9,10 @@ using Printf
 #     of the sweep.
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
+function y_solve()
 
-#      implicit none
-
-#      integer  
-#           c, jstart, stage,  
-#           FIRST, LAST, recv_id, ERROR, r_status[MPI_STATUS_SIZE],  
-#           isize,jsize,ksize,send_id
+      send_id = Ref{MPI.Request}()
+      recv_id = Ref{MPI.Request}()
 
       jstart = 0
 
@@ -67,7 +50,7 @@ using Printf
 #---------------------------------------------------------------------
             FIRST = 0
             if (timeron) timer_start(t_ycomm) end
-            y_receive_solve_info(recv_id, c)
+            recv_id[] = y_receive_solve_info(c)
 #---------------------------------------------------------------------
 #     overlap computations and communications
 #---------------------------------------------------------------------
@@ -75,8 +58,8 @@ using Printf
 #---------------------------------------------------------------------
 #     wait for completion
 #---------------------------------------------------------------------
-            mpi_wait(send_id, r_status, ERROR)
-            mpi_wait(recv_id, r_status, ERROR)
+            MPI.Wait(send_id[])
+            MPI.Wait(recv_id[])
             if (timeron) timer_stop(t_ycomm) end
 #---------------------------------------------------------------------
 #     install C'(jstart+1) and rhs'(jstart+1) to be used in this cell
@@ -85,7 +68,9 @@ using Printf
             y_solve_cell(FIRST, LAST, c)
          end
 
-         if (LAST == 0) y_send_solve_info(send_id, c) end
+         if (LAST == 0) 
+            send_id[] = y_send_solve_info(c) 
+         end
       end
 
 #---------------------------------------------------------------------
@@ -104,38 +89,30 @@ using Printf
             y_backsubstitute(FIRST, LAST, c)
          else
             if (timeron) timer_start(t_ycomm) end
-            y_receive_backsub_info(recv_id, c)
-            mpi_wait(send_id, r_status, ERROR)
-            mpi_wait(recv_id, r_status, ERROR)
+            recv_id[] = y_receive_backsub_info(c)
+            MPI.Wait(send_id[])
+            MPI.Wait(recv_id[])
             if (timeron) timer_stop(t_ycomm) end
             y_unpack_backsub_info(c)
             y_backsubstitute(FIRST, LAST, c)
          end
-         if (FIRST == 0) y_send_backsub_info(send_id, c) end
+         if (FIRST == 0) 
+            send_id[] = y_send_backsub_info(c) 
+         end
       end
 
       if (timeron) timer_stop(t_ysolve) end
 
       return nothing
-      end
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function y_unpack_solve_info(c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     unpack C'(-1) and rhs'(-1) for
 #     all i and k
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
-
-#      integer i,k,m,n,ptr,c,jstart
+function y_unpack_solve_info(c)
 
       jstart = 0
       ptr = 0
@@ -155,28 +132,15 @@ using Printf
       end
 
       return nothing
-      end
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function y_send_solve_info(send_id, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     pack up and send C'(jend) and rhs'(jend) for
 #     all i and k
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer i,k,m,n,jsize,ptr,c,ip,kp
-#      integer ERROR,send_id,buffer_size
+function y_send_solve_info(c)
 
       jsize = cell_size[2, c]-1
       ip = cell_coord[1, c] - 1
@@ -207,34 +171,18 @@ using Printf
 #     send buffer 
 #---------------------------------------------------------------------
       if (timeron) timer_start(t_ycomm) end
-      MPI.Isend(in_buffer, buffer_size,
-           dp_type, successor[2],
-           SOUTH+ip+kp*NCELLS, comm_solve,
-           send_id, ERROR)
+      send_id = MPI.Isend(view(in_buffer,1:buffer_size),successor[2],SOUTH+ip+kp*ncells, comm_solve)
       if (timeron) timer_stop(t_ycomm) end
 
-      return nothing
-      end
+      return send_id
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function y_send_backsub_info(send_id, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     pack up and send u[jstart] for all i and k
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer i,k,n,ptr,c,jstart,ip,kp
-#      integer ERROR,send_id,buffer_size
+function y_send_backsub_info(c)
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -253,31 +201,18 @@ using Printf
          end
       end
       if (timeron) timer_start(t_ycomm) end
-      MPI.Isend(in_buffer, buffer_size,
-           dp_type, predecessor[2],
-           NORTH+ip+kp*NCELLS, comm_solve,
-           send_id, ERROR)
+      send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[2], NORTH+ip+kp*ncells, comm_solve)
       if (timeron) timer_stop(t_ycomm) end
 
-      return nothing
-      end
+      return send_id
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function y_unpack_backsub_info(c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     unpack u[jsize] for all i and k
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
-
-#      integer i,k,n,ptr,c
+function y_unpack_backsub_info(c)
 
       ptr = 0
       for k = 0:KMAX-1
@@ -290,75 +225,37 @@ using Printf
       end
 
       return nothing
-      end
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function y_receive_backsub_info(recv_id, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     post mpi receives
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer ERROR,recv_id,ip,kp,c,buffer_size
+function y_receive_backsub_info(c)
 
       ip = cell_coord[1, c] - 1
       kp = cell_coord[3, c] - 1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*BLOCK_SIZE
-      MPI.Irecv!(out_buffer, buffer_size,
-           dp_type, successor[2],
-           NORTH+ip+kp*NCELLS, comm_solve,
-           recv_id, ERROR)
-      return nothing
-      end
+      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), successor[2], NORTH+ip+kp*ncells, comm_solve)
+      return recv_id
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function y_receive_solve_info(recv_id, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     post mpi receives 
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer ip,kp,recv_id,ERROR,c,buffer_size
+function y_receive_solve_info(c)
 
       ip = cell_coord[1, c] - 1
       kp = cell_coord[3, c] - 1
-      buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(
-           BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
-      MPI.Irecv!(out_buffer, buffer_size,
-           dp_type, predecessor[2],
-           SOUTH+ip+kp*NCELLS,  comm_solve,
-           recv_id, ERROR)
+      buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
+      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), predecessor[2], SOUTH+ip+kp*ncells, comm_solve)
 
-      return nothing
-      end
+      return recv_id
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function y_backsubstitute(FIRST, LAST, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     back solve: if last cell, then generate u[jsize]=rhs[jsize]
@@ -367,11 +264,7 @@ using Printf
 #     after call u[jstart] will be sent to next cell
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
-
-#      integer FIRST, LAST, c, i, k
-#      integer m,n,j,jsize,isize,ksize,jstart
+function y_backsubstitute(FIRST, LAST, c)
 
       jstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -407,15 +300,8 @@ using Printf
       end
 
       return nothing
-      end
+end
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function y_solve_cell(FIRST, LAST, c)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #     performs guaussian elimination on this cell.
@@ -427,13 +313,9 @@ using Printf
 #     c'(JMAX) and rhs'(JMAX) will be sent to next cell
 #---------------------------------------------------------------------
 
-#      use bt_data
-#      implicit none
+function y_solve_cell(FIRST, LAST, c)
 
-#      DOUBLEPRECISION tmp1, tmp2, tmp3
-#      integer FIRST,LAST,c
-#      integer i,j,k,isize,ksize,jsize,jstart
-#      DOUBLEPRECISION utmp[6,-2:JMAX+1]
+      utmp = OffsetArray(zeros(Float64, 6, JMAX+4), 1:6, -2:JMAX+1)
 
       jstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -727,9 +609,7 @@ using Printf
 #     multiply c[i,jstart,k] by b_inverse and copy back to c
 #     multiply rhs[jstart] by b_inverse(jstart) and copy to rhs
 #---------------------------------------------------------------------
-               binvcrhs(  lhsb[1, 1, jstart],
-                               lhsc[1, 1, i, jstart, k, c],
-                              rhs[1, i, jstart, k, c] )
+               binvcrhs(view(lhsb, 1:5, 1:5, jstart), view(lhsc, 1:5, 1:5, i, jstart, k, c), view(rhs, 1:5, i, jstart, k, c))
 
             end
 
@@ -744,23 +624,18 @@ using Printf
 #     
 #     rhs[j] = rhs[j] - A*rhs[j-1]
 #---------------------------------------------------------------------
-               matvec_sub( lhsa[1, 1, j],
-                               rhs[1, i, j-1, k, c], rhs[1, i, j, k, c])
+               matvec_sub(view(lhsa, 1:5, 1:5, j), view(rhs, 1:5, i, j-1, k, c), view(rhs, 1:5, i, j, k, c))
 
 #---------------------------------------------------------------------
 #      b[j] =  b[j] - C(j-1)*A(j)
 #---------------------------------------------------------------------
-               matmul_sub( lhsa[1, 1, j],
-                                lhsc[1, 1, i, j-1, k, c],
-                                lhsb[1, 1, j])
+               matmul_sub(view(lhsa, 1:5, 1:5, j), view(lhsc, 1:5, 1:5, i, j-1, k, c), view(lhsb, 1:5, 1:5, j))
 
 #---------------------------------------------------------------------
 #     multiply c[i,j,k] by b_inverse and copy back to c
 #     multiply rhs[i,1,k] by b_inverse(i,1,k) and copy to rhs
 #---------------------------------------------------------------------
-               binvcrhs(  lhsb[1, 1, j],
-                               lhsc[1, 1, i, j, k, c],
-                              rhs[1, i, j, k, c] )
+               binvcrhs(view(lhsb, 1:5, 1:5, j), view(lhsc, 1:5, 1:5, i, j, k, c), view(rhs, 1:5, i, j, k, c) )
 
             end
 
@@ -772,23 +647,19 @@ using Printf
 #---------------------------------------------------------------------
 #     rhs[jsize] = rhs[jsize] - A*rhs[jsize-1]
 #---------------------------------------------------------------------
-               matvec_sub( lhsa[1, 1, jsize],
-                               rhs[1, i, jsize-1, k, c], rhs[1, i, jsize, k, c])
+               matvec_sub(view(lhsa, 1:5, 1:5, jsize), view(rhs,1:5, i, jsize-1, k, c), view(rhs, 1:5, i, jsize, k, c))
 
 #---------------------------------------------------------------------
 #      b[jsize] =  b[jsize] - C(jsize-1)*A(jsize)
 #     call matmul_sub(aa,i,jsize,k,c,
 #     $              cc,i,jsize-1,k,c,bb,i,jsize,k,c)
 #---------------------------------------------------------------------
-               matmul_sub( lhsa[1, 1, jsize],
-                                lhsc[1, 1, i, jsize-1, k, c],
-                                lhsb[1, 1, jsize])
+               matmul_sub(view(lhsa, 1:5, 1:5, jsize), view(lhsc, 1:5, 1:5, i, jsize-1, k, c), view(lhsb, 1:5, 1:5, jsize))
 
 #---------------------------------------------------------------------
 #     multiply rhs[jsize] by b_inverse(jsize) and copy to rhs
 #---------------------------------------------------------------------
-               binvrhs(  lhsb[1, 1, jsize],
-                             rhs[1, i, jsize, k, c] )
+               binvrhs(view(lhsb,1:5, 1:5, jsize), view(rhs, 1:5, i, jsize, k, c))
 
             end
          end
@@ -796,7 +667,7 @@ using Printf
 
 
       return nothing
-      end
+end
 
 
 

@@ -1,12 +1,3 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-#---------------------------------------------------------------------
-      function randlc(x, a)
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 #
 #   This routine returns a uniform pseudorandom double precision number in the
@@ -30,11 +21,10 @@ using Printf
 #
 #---------------------------------------------------------------------
 
-#      implicit none
+function randlc(x, a)
 
-#      DOUBLEPRECISION r23,r46,t23,t46,a,x,t1,t2,t3,t4,a1,a2,x1,x2,z
-                 r23 = 0.5e0 ^ 23; r46 = r23 ^ 2; t23 = 2.0e0 ^ 23;
-        t46 = t23 ^ 2
+      r23 = 0.5e0 ^ 23; r46 = r23 ^ 2; t23 = 2.0e0 ^ 23;
+      t46 = t23 ^ 2
 
 #---------------------------------------------------------------------
 #   Break A into two parts such that A = 2^23 * A1 + A2.
@@ -61,17 +51,8 @@ using Printf
       x = t3 - t46 * t4
       randlc = r46 * x
       return nothing
-      end
+end
 
-
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-      function vranlc(n, x, a, y)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 #   This routine generates N uniform pseudorandom double precision numbers in
@@ -95,17 +76,10 @@ using Printf
 #   David H. Bailey    August 30, 1990
 #---------------------------------------------------------------------
 
-#      integer n
-#      DOUBLEPRECISION x, a, y[*]
+function vranlc(n, x, a, y)
 
-#      DOUBLEPRECISION r23, r46, t23, t46
-#      integer nv
-                 r23 = 2.0e0 ^ Complex(-23); r46 = r23 * r23; t23 = 2.0e0 ^ 23;
-           t46 = t23 * t23; nv = 64
-#      DOUBLEPRECISION  xv[nv], t1, t2, t3, t4, an, a1, a2, x1, x2, yy
-#      integer n1, i, j
-#      external randlc
-#      DOUBLEPRECISION randlc
+      r23 = 2.0e0 ^ Complex(-23); r46 = r23 * r23; t23 = 2.0e0 ^ 23;
+      t46 = t23 * t23; nv = 64
 
 #---------------------------------------------------------------------
 #     Compute the first NV elements of the sequence using RANDLC.
@@ -186,7 +160,7 @@ using Printf
       x = xv[n1]
 
       return nothing
-      end
+end
 
 #----- end of program ------------------------------------------------
 

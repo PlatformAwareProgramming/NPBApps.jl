@@ -1,24 +1,7 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
-
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function setup_btio()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      character(128) newfilenm
-#      integer m
+ function setup_btio()
 
       if node < 10000
           @printf(newfilenm, "%s.%04i\n", filenm, node)
@@ -40,20 +23,12 @@ using Printf
       idump_sub = 0
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function output_timestep()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use bt_data
-#      implicit none
-
-#      integer ix, iio, jio, kio, cio, aio
+function output_timestep()
 
       for cio = 1:ncells
           println(99, ((((u[aio, ix, jio, kio, cio], aio = 1, 5),
@@ -75,22 +50,12 @@ using Printf
       end
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function acc_sub_norms(idump_cur)
-
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer idump_cur
-
-#      integer ix, jio, kio, cio, ii, m, ichunk
-#      DOUBLEPRECISION xce_single[5]
+function acc_sub_norms(idump_cur)
 
       ichunk = idump_cur - idump_sub + 1
       for ii = 0:idump_sub-1
@@ -110,27 +75,22 @@ using Printf
       end
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function btio_cleanup()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      implicit none
+function btio_cleanup()
 
       CLOSE(unit = 99)
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function accumulate_norms(xce_acc)
+function accumulate_norms(xce_acc)
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
@@ -176,4 +136,4 @@ using Printf
       end
 
       return nothing
-      end
+end

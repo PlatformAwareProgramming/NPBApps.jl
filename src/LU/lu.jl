@@ -1,8 +1,3 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
-
 #-------------------------------------------------------------------------!
 #                                                                         !
 #        N  A  S     P A R A L L E L     B E N C H M A R K S  3.4         !
@@ -48,33 +43,19 @@ using Printf
 #---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
-      function applu()
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
 #
 #   driver for the performance evaluation of the solver for
 #   five coupled parabolic/elliptic partial differential equations.
 #
 #---------------------------------------------------------------------
 
-#      use lu_data
-#      use mpinpb
-#      use timing
+#---------------------------------------------------------------------
+ function go()
+#---------------------------------------------------------------------
 
-#      implicit none
-
-#      character class
-#      logical verified
-#      DOUBLEPRECISION mflops, timer_read
-#      integer i, ierr
-#      DOUBLEPRECISION tsum[t_last+2], t1[t_last+2],  
-#                       tming[t_last+2], tmaxg[t_last+2]
-#      character        t_recs[t_last+2]
-
-           t_recs = "total", "rhs", "blts", "buts", "#jacld", "#jacu",
-                  "exch", "lcomm", "ucomm", "rcomm",
-                  " totcomp", " totcomm"
+      t_recs = "total", "rhs", "blts", "buts", "#jacld", "#jacu",
+            "exch", "lcomm", "ucomm", "rcomm",
+            " totcomp", " totcomm"
 
 #---------------------------------------------------------------------
 #   initialize communications
@@ -85,7 +66,7 @@ using Printf
 #---------------------------------------------------------------------
 #   read input data
 #---------------------------------------------------------------------
-      read_input(class)
+      class = read_input()
 
       for i = 1:t_last
          timer_clear(i)
@@ -155,13 +136,13 @@ using Printf
 #---------------------------------------------------------------------
 #   compute the surface integral
 #---------------------------------------------------------------------
-      pintgr()
-
+      frc = pintgr()
+      
 #---------------------------------------------------------------------
 #   verification test
 #---------------------------------------------------------------------
       if id == 0
-         verify( rsdnm, errnm, frc, class, verified )
+         verified = verify( rsdnm, errnm, frc, class)
          mflops = 1.0e-6*float(itmax)*(1984.77*float( nx0 )*
               float( ny0 )*
               float( nz0 )-
@@ -173,8 +154,7 @@ using Printf
          print_results("LU", class, nx0,
            ny0, nz0, itmax, no_nodes, total_nodes,
            maxtime, mflops, "          floating point", verified,
-           npbversion, compiletime, cs1, cs2, cs3, cs4, cs5, cs6,
-           "(none)")
+           npbversion)
 
       end
 
@@ -187,12 +167,9 @@ using Printf
       t1[t_last+2] = t1[t_lcomm]+t1[t_ucomm]+t1[t_rcomm]+t1[t_exch]
       t1[t_last+1] = t1[t_total] - t1[t_last+2]
 
-      MPI_Reduce(t1, tsum,  t_last+2, dp_type, MPI_SUM,
-                      0, comm_solve, ierr)
-      MPI_Reduce(t1, tming, t_last+2, dp_type, MPI_MIN,
-                      0, comm_solve, ierr)
-      MPI_Reduce(t1, tmaxg, t_last+2, dp_type, MPI_MAX,
-                      0, comm_solve, ierr)
+      tsum = MPI.Reduce(t1, MPI.SUM, 0, comm_solve)
+      tming = MPI.Reduce(t1, MPI.MIN, 0, comm_solve)
+      tmaxg = MPI.Reduce(t1, MPI.MAX, 0, comm_solve)
 
       if id == 0
          @printf(stdout, " nprocs =%6i           minimum     maximum     average\n", no_nodes)
@@ -203,12 +180,11 @@ using Printf
             end
          end
       end
-# 800  format(' nprocs =', i6, 11x, 'minimum', 5x, 'maximum',  		             5x, 'average')
-# 810  format(' timer ', i2, '(', A8, ') :', 3(2x,f10.4))
 
       @label L999
-      mpi_finalize(ierr)
-      return nothing
-      end
+      MPI.Finalize()
+
+     return nothing
+end
 
 

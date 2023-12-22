@@ -1,31 +1,10 @@
-using FortranFiles
-using OffsetArrays
-using Parameters
-using Printf
+
 
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function setup_btio()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use bt_data
-#      use mpinpb
-
-#      implicit none
-
-#      integer ierr
-#      integer mstatus[MPI_STATUS_SIZE]
-#      integer sizes[4], starts[4], subsizes[4]
-#      integer cell_btype[maxcells], cell_ftype[maxcells]
-#      integer cell_blength[maxcells]
-#      integer info
-#      character*20 cb_nodes, cb_size
-#      integer c, m
-#      integer cell_disp[maxcells]
+ function setup_btio()
 
        mpi_bcast(collbuf_nodes, 1, MPI_INTEGER,
                       root, comm_setup, ierr)
@@ -169,12 +148,12 @@ using Printf
 
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function output_timestep()
+ function output_timestep()
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
@@ -210,12 +189,12 @@ using Printf
       end
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function acc_sub_norms(idump_cur)
+ function acc_sub_norms(idump_cur)
 
 #      use bt_data
 #      use mpinpb
@@ -252,12 +231,12 @@ using Printf
       end
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-      function btio_cleanup()
+ function btio_cleanup()
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
@@ -272,13 +251,13 @@ using Printf
       MPI_File_close(fp, ierr)
 
       return nothing
-      end
+end
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
 
-      function accumulate_norms(xce_acc)
+ function accumulate_norms(xce_acc)
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
@@ -320,5 +299,5 @@ using Printf
       end
 
       return nothing
-      end
+end
 

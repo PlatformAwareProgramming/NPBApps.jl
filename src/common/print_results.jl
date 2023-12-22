@@ -2,8 +2,7 @@
 
 function print_results(name, class, n1, n2, n3, niter,
                      nprocs_active, nprocs_total,
-                     t, mops, optype, verified, npbversion,
-                     compiletime, cs1, cs2, cs3, cs4, cs5, cs6, cs7)
+                     t, mops, optype, verified, npbversion)
 
          @printf(stdout, "\n\n %2s Benchmark Completed.\n", name)
 
@@ -41,14 +40,6 @@ function print_results(name, class, n1, n2, n3, niter,
          end
 
          @printf(stdout, " Version         =             %12s\n", npbversion)
-#         @printf(stdout, " Compile date    =             %12s\n", compiletime)
-#         @printf(stdout, "\n Compile options:\n    MPIFC        = %s\n", cs1)
-#         @printf(stdout, "    FLINK        = %s\n", cs2)
-#         @printf(stdout, "    FMPI_LIB     = %s\n", cs3)
-#         @printf(stdout, "    FMPI_INC     = %s\n", cs4)
-#         @printf(stdout, "    FFLAGS       = %s\n", cs5)
-#         @printf(stdout, "    FLINKFLAGS   = %s\n", cs6)
-#         @printf(stdout, "    RAND         = %s\n", cs7)
          @printf(stdout, "\n\n Please send feedbacks and/or the results of this run to:\n\n NPB Development Team \n Internet: npb@nas.nasa.gov\n\n\n", )
 
          return nothing

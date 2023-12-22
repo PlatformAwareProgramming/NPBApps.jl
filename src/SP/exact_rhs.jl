@@ -45,11 +45,8 @@ function exact_rhs()
                    end
 
                    cuf[i]   = buf[i, 2] * buf[i, 2]
-                   buf[i, 1] = cuf[i] + buf[i, 3] * buf[i, 3] +
-                              buf[i, 4] * buf[i, 4]
-                   q[i] = 0.5e0*(buf[i, 2]*ue[i, 2] + buf[i, 3]*ue[i, 3] +
-                                 buf[i, 4]*ue[i, 4])
-
+                   buf[i, 1] = cuf[i] + buf[i, 3] * buf[i, 3] + buf[i, 4] * buf[i, 4]
+                   q[i] = 0.5e0*(buf[i, 2]*ue[i, 2] + buf[i, 3]*ue[i, 3] + buf[i, 4]*ue[i, 4])
                 end
 
                 for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1

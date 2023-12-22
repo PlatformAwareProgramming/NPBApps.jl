@@ -28,7 +28,7 @@ const BOTTOM = 6000
 const TOP = 7000
 
 predecessor = zeros(Int64, 3)
-sucessor = zeros(Int64,3)
+successor = zeros(Int64,3)
 grid_size = zeros(Int64, 3)
 
 

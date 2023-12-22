@@ -63,8 +63,6 @@ function compute_buffer_size(dim)
        global start_recv_bottom = start_recv_north  + north_size
        global start_recv_top    = start_recv_bottom + bottom_size
 
-
-
 return nothing
        
 end
