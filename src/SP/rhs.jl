@@ -2,7 +2,57 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-function compute_rhs()
+function compute_rhs(ncells,
+                     cell_size,
+                     cell_start,
+                     cell_end,
+                     u,
+                     rhs,
+                     rho_i,
+                     us,
+                     vs,
+                     ws,
+                     square,
+                     qs,
+                     ainv,
+                     speed,
+                     forcing,
+                     tx2,
+                     ty2,
+                     tz2,
+                     c1,
+                     c2,
+                     c1c2,
+                     dx1tx1,
+                     dx2tx1,
+                     dx3tx1, 
+                     dx4tx1,
+                     dx5tx1,
+                     dy1ty1,
+                     dy2ty1,
+                     dy3ty1,
+                     dy4ty1,
+                     dy5ty1,
+                     dz1tz1,
+                     dz2tz1,
+                     dz3tz1,
+                     dz4tz1,
+                     dz5tz1,
+                     xxcon2,
+                     xxcon3,
+                     xxcon4,
+                     xxcon5,
+                     yycon2,
+                     yycon3,
+                     yycon4,
+                     yycon5,
+                     zzcon2,
+                     zzcon3,
+                     zzcon4,
+                     zzcon5,
+                     dssp,
+                     con43,
+                     )
 
        if (timeron) timer_start(t_rhs) end
 #---------------------------------------------------------------------
@@ -326,10 +376,8 @@ function compute_rhs()
                    rhs[i, j, k, 5, c] = rhs[i, j, k, 5, c] + dz5tz1 *(
                          u[i, j, k+1, 5, c] - 2.0e0*u[i, j, k, 5, c] +
                           u[i, j, k-1, 5, c]) +
-                         zzcon3 * (qs[i, j, k+1, c] - 2.0e0*qs[i, j, k, c] +
-                                   qs[i, j, k-1, c]) +
-                         zzcon4 * (wp1*wp1 - 2.0e0*wijk*wijk +
-                                   wm1*wm1) +
+                         zzcon3 * (qs[i, j, k+1, c] - 2.0e0*qs[i, j, k, c] + qs[i, j, k-1, c]) +
+                         zzcon4 * (wp1*wp1 - 2.0e0*wijk*wijk + wm1*wm1) +
                          zzcon5 * (u[i, j, k+1, 5, c]*rho_i[i, j, k+1, c] -
                                    2.0e0*u[i, j, k, 5, c]*rho_i[i, j, k, c] +
                                    u[i, j, k-1, 5, c]*rho_i[i, j, k-1, c]) -
@@ -393,8 +441,7 @@ function compute_rhs()
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                       rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                           u[i, j, k-2, m, c] - 4.0e0*u[i, j, k-1, m, c] +
-                            5.0e0*u[i, j, k, m, c] )
+                           u[i, j, k-2, m, c] - 4.0e0*u[i, j, k-1, m, c] + 5.0e0*u[i, j, k, m, c] )
                    end
                 end
              end

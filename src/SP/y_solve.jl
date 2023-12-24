@@ -6,22 +6,40 @@
 # systems for the y-lines. Boundary conditions are non-periodic
 #---------------------------------------------------------------------
 
-function y_solve(ncells,
-                 successor,
-                 predecessor,
-                 slice,
-                 cell_size,
-                 cell_start,
-                 cell_end,
-                 cell_coord,
-                 lhs,
-                 rhs,
-                 in_buffer,
-                 out_buffer,
-                 comm_solve)
+function y_solve(_::Val{ncells}, # ::Int64,
+                 successor, # ::Vector{Int64},
+                 predecessor, # ::Vector{Int64},
+                 slice, # ::Array{Int64,2},
+                 cell_size, # ::Array{Int64,2},
+                 cell_start, # ::Array{Int64,2},
+                 cell_end, # ::Array{Int64,2},
+                 cell_coord, # ::Array{Int64,2},
+                 lhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
+                 rhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
+                 rho_i, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 vs, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 speed, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 con43, # ::Float64, 
+                 c3c4, # ::Float64, 
+                 c1c5, # ::Float64, 
+                 dy3, # ::Float64, 
+                 dy5, # ::Float64, 
+                 dy1, # ::Float64, 
+                 dymax, # ::Float64, 
+                 dtty2, # ::Float64, 
+                 comz5, # ::Float64, 
+                 comz4, # ::Float64, 
+                 comz1, # ::Float64, 
+                 comz6, # ::Float64,
+                 in_buffer, # ::Vector{Float64},
+                 out_buffer, # ::Vector{Float64},
+                 comm_solve, # ::MPI.Comm
+                 requests,
+                 s,
+                 ) where ncells
 
-       requests = Array{MPI.Request}(undef,2)
-       s = Array{Float64}(undef,5)
+#       requests = Array{MPI.Request}(undef,2)
+#       s = Array{Float64}(undef,5)
 
 #---------------------------------------------------------------------
 # now do a sweep on a layer-by-layer basis, i.e. sweeping through cells
@@ -63,7 +81,17 @@ function y_solve(ncells,
 #            communication has already been started. 
 #            compute the left hand side while waiting for the msg
 #---------------------------------------------------------------------
-             lhsy(c)
+             lhsy(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  lhs,
+                  rho_i,
+                  vs,
+                  speed,
+                  con43, c3c4, c1c5, 
+                  dy3, dy5, dy1, dymax, dtty2, 
+                  comz5, comz4, comz1, comz6)
 
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
@@ -146,8 +174,18 @@ function y_solve(ncells,
 #---------------------------------------------------------------------
 #            if this IS the first cell, we still compute the lhs
 #---------------------------------------------------------------------
-             lhsy(c)
-          end
+             lhsy(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  lhs,
+                  rho_i,
+                  vs,
+                  speed,
+                  con43, c3c4, c1c5, 
+                  dy3, dy5, dy1, dymax, dtty2, 
+                  comz5, comz4, comz1, comz6)
+               end
 
 #---------------------------------------------------------------------
 #         perform the Thomas algorithm; first, FORWARD ELIMINATION     
@@ -371,7 +409,12 @@ function y_solve(ncells,
 #            cell that was just finished                
 #---------------------------------------------------------------------
 
-             pinvr(slice[2, stage+1])
+             pinvr(slice[2, stage+1],
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  rhs,
+                  bt)
 
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
@@ -524,7 +567,14 @@ function y_solve(ncells,
 #---------------------------------------------------------------------
 #         If this was the last stage, do the block-diagonal inversion          
 #---------------------------------------------------------------------
-          if (stage == 1) pinvr(c) end
+          if (stage == 1) 
+            pinvr(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  rhs,
+                  bt) 
+         end
 
        end
 

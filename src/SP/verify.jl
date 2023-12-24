@@ -93,13 +93,62 @@ function verify(class)
 #---------------------------------------------------------------------
         error_norm(xce)
         
-        copy_faces()
+        copy_faces(Val(ncells),
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  u,
+                  rhs,
+                  rho_i,
+                  us,
+                  vs,
+                  ws,
+                  square,
+                  qs,
+                  ainv,
+                  speed,
+                  forcing,
+                  tx2,
+                  ty2,
+                  tz2,
+                  c1,
+                  c2,
+                  c1c2,
+                  dx1tx1,
+                  dx2tx1,
+                  dx3tx1, 
+                  dx4tx1,
+                  dx5tx1,
+                  dy1ty1,
+                  dy2ty1,
+                  dy3ty1,
+                  dy4ty1,
+                  dy5ty1,
+                  dz1tz1,
+                  dz2tz1,
+                  dz3tz1,
+                  dz4tz1,
+                  dz5tz1,
+                  xxcon2,
+                  xxcon3,
+                  xxcon4,
+                  xxcon5,
+                  yycon2,
+                  yycon3,
+                  yycon4,
+                  yycon5,
+                  zzcon2,
+                  zzcon3,
+                  zzcon4,
+                  zzcon5,
+                  dssp,
+                  con43,
+                  in_buffer,
+                  out_buffer,
+                  Array{MPI.Request}(undef,12),
+                  )
 
         rhs_norm(xcr)
-
-        #for m = 1:5
-        #   xcr[m] = xcr[m] / dt
-        #end
 
         # VECTORIZED
         xcr .= xcr ./ dt

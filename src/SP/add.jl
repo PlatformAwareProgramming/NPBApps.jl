@@ -3,7 +3,12 @@
 # addition of update to the vector u
 #---------------------------------------------------------------------
 
-function add()
+function add(_::Val{ncells},
+             cell_size,
+             cell_start,
+             cell_end,
+             u,
+             rhs) where ncells
 
        for c = 1:ncells
           for m = 1:5

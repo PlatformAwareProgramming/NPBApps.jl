@@ -2,7 +2,19 @@
 #   block-diagonal matrix-vector multiplication                       
 #---------------------------------------------------------------------
 
-function tzetar(c)
+function tzetar(c,
+               cell_size,
+               cell_start,
+               cell_end,
+               rhs,
+               us,
+               vs,
+               ws,
+               qs,
+               speed,
+               ainv,
+               bt,
+               c2iv)
 
 #---------------------------------------------------------------------
 #      treat only one cell                                             

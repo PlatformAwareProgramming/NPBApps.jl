@@ -8,41 +8,123 @@
 # adds so much overhead that it's not clearly useful. 
 #---------------------------------------------------------------------
 
-function copy_faces()         
+function copy_faces(_::Val{ncells},
+                     cell_size,
+                     cell_start,
+                     cell_end,
+                     u,
+                     rhs,
+                     rho_i,
+                     us,
+                     vs,
+                     ws,
+                     square,
+                     qs,
+                     ainv,
+                     speed,
+                     forcing,
+                     tx2,
+                     ty2,
+                     tz2,
+                     c1,
+                     c2,
+                     c1c2,
+                     dx1tx1,
+                     dx2tx1,
+                     dx3tx1, 
+                     dx4tx1,
+                     dx5tx1,
+                     dy1ty1,
+                     dy2ty1,
+                     dy3ty1,
+                     dy4ty1,
+                     dy5ty1,
+                     dz1tz1,
+                     dz2tz1,
+                     dz3tz1,
+                     dz4tz1,
+                     dz5tz1,
+                     xxcon2,
+                     xxcon3,
+                     xxcon4,
+                     xxcon5,
+                     yycon2,
+                     yycon3,
+                     yycon4,
+                     yycon5,
+                     zzcon2,
+                     zzcon3,
+                     zzcon4,
+                     zzcon5,
+                     dssp,
+                     con43,
+                     in_buffer,
+                     out_buffer,
+                     requests) where ncells  
 
-       requests = Array{MPI.Request}(undef,12)
-       ss = Array{Int}(undef,6)
-       sr = Array{Int}(undef,6)
-       b_size = Array{Int}(undef,6)
 
 #---------------------------------------------------------------------
 #      exit immediately if there are no faces to be copied           
 #---------------------------------------------------------------------
        if no_nodes == 1
-          compute_rhs()
+          compute_rhs(ncells,
+                     cell_size,
+                     cell_start,
+                     cell_end,
+                     u,
+                     rhs,
+                     rho_i,
+                     us,
+                     vs,
+                     ws,
+                     square,
+                     qs,
+                     ainv,
+                     speed,
+                     forcing,
+                     tx2,
+                     ty2,
+                     tz2,
+                     c1,
+                     c2,
+                     c1c2,
+                     dx1tx1,
+                     dx2tx1,
+                     dx3tx1, 
+                     dx4tx1,
+                     dx5tx1,
+                     dy1ty1,
+                     dy2ty1,
+                     dy3ty1,
+                     dy4ty1,
+                     dy5ty1,
+                     dz1tz1,
+                     dz2tz1,
+                     dz3tz1,
+                     dz4tz1,
+                     dz5tz1,
+                     xxcon2,
+                     xxcon3,
+                     xxcon4,
+                     xxcon5,
+                     yycon2,
+                     yycon3,
+                     yycon4,
+                     yycon5,
+                     zzcon2,
+                     zzcon3,
+                     zzcon4,
+                     zzcon5,
+                     dssp,
+                     con43)
           return nothing
        end
 
-       ss[1] = start_send_east
-       ss[2] = start_send_west
-       ss[3] = start_send_north
-       ss[4] = start_send_south
-       ss[5] = start_send_top
-       ss[6] = start_send_bottom
+       #requests = Array{MPI.Request}(undef,12)
 
-       sr[1] = start_recv_east
-       sr[2] = start_recv_west
-       sr[3] = start_recv_north
-       sr[4] = start_recv_south
-       sr[5] = start_recv_top
-       sr[6] = start_recv_bottom
-
-       b_size[1] = east_size   
-       b_size[2] = west_size   
-       b_size[3] = north_size  
-       b_size[4] = south_size  
-       b_size[5] = top_size    
-       b_size[6] = bottom_size 
+       ss = SA[start_send_east start_send_west start_send_north start_send_south start_send_top start_send_bottom]
+       sr = SA[start_recv_east start_recv_west start_recv_north start_recv_south start_recv_top start_recv_bottom]
+       b_size = SA[east_size west_size north_size south_size top_size bottom_size]
 
 #---------------------------------------------------------------------
 # because the difference stencil for the diagonalized scheme is 
@@ -273,7 +355,56 @@ function copy_faces()
 #---------------------------------------------------------------------
 # now that we have all the data, compute the rhs
 #---------------------------------------------------------------------
-       compute_rhs()
+       compute_rhs(ncells,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  u,
+                  rhs,
+                  rho_i,
+                  us,
+                  vs,
+                  ws,
+                  square,
+                  qs,
+                  ainv,
+                  speed,
+                  forcing,
+                  tx2,
+                  ty2,
+                  tz2,
+                  c1,
+                  c2,
+                  c1c2,
+                  dx1tx1,
+                  dx2tx1,
+                  dx3tx1, 
+                  dx4tx1,
+                  dx5tx1,
+                  dy1ty1,
+                  dy2ty1,
+                  dy3ty1,
+                  dy4ty1,
+                  dy5ty1,
+                  dz1tz1,
+                  dz2tz1,
+                  dz3tz1,
+                  dz4tz1,
+                  dz5tz1,
+                  xxcon2,
+                  xxcon3,
+                  xxcon4,
+                  xxcon5,
+                  yycon2,
+                  yycon3,
+                  yycon4,
+                  yycon5,
+                  zzcon2,
+                  zzcon3,
+                  zzcon4,
+                  zzcon5,
+                  dssp,
+                  con43)
 
 return nothing
 end

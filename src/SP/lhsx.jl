@@ -2,7 +2,17 @@
 # This function computes the left hand side for the three x-factors  
 #---------------------------------------------------------------------
 
-function lhsx(c)
+function lhsx(c,
+              cell_size,
+              cell_start,
+              cell_end,
+              lhs,
+              rho_i,
+              us,
+              speed,
+              dx2, dx5, con43, c3c4, c1c5, dxmax, dx1, dttx1, dttx2,
+              comz5, comz4, comz1, comz6
+              )
 
 #---------------------------------------------------------------------
 #      treat only cell c             
@@ -84,18 +94,14 @@ function lhsx(c)
           for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
              for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                 lhs[i, j, k, 1+5, c]  = lhs[i, j, k, 1, c]
-                lhs[i, j, k, 2+5, c]  = lhs[i, j, k, 2, c] -
-                                  dttx2 * speed[i-1, j, k, c]
+                lhs[i, j, k, 2+5, c]  = lhs[i, j, k, 2, c] - dttx2 * speed[i-1, j, k, c]
                 lhs[i, j, k, 3+5, c]  = lhs[i, j, k, 3, c]
-                lhs[i, j, k, 4+5, c]  = lhs[i, j, k, 4, c] +
-                                  dttx2 * speed[i+1, j, k, c]
-                lhs[i, j, k, 5+5, c] = lhs[i, j, k, 5, c]
+                lhs[i, j, k, 4+5, c]  = lhs[i, j, k, 4, c] + dttx2 * speed[i+1, j, k, c]
+                lhs[i, j, k, 5+5, c]  = lhs[i, j, k, 5, c]
                 lhs[i, j, k, 1+10, c] = lhs[i, j, k, 1, c]
-                lhs[i, j, k, 2+10, c] = lhs[i, j, k, 2, c] +
-                                  dttx2 * speed[i-1, j, k, c]
+                lhs[i, j, k, 2+10, c] = lhs[i, j, k, 2, c] + dttx2 * speed[i-1, j, k, c]
                 lhs[i, j, k, 3+10, c] = lhs[i, j, k, 3, c]
-                lhs[i, j, k, 4+10, c] = lhs[i, j, k, 4, c] -
-                                  dttx2 * speed[i+1, j, k, c]
+                lhs[i, j, k, 4+10, c] = lhs[i, j, k, 4, c] - dttx2 * speed[i+1, j, k, c]
                 lhs[i, j, k, 5+10, c] = lhs[i, j, k, 5, c]
              end
           end

@@ -7,6 +7,7 @@ module SP
     using Parameters
     using Printf
     using MPI
+    using StaticArrays
 
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")

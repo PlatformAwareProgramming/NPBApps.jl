@@ -5,22 +5,41 @@
 # systems for the z-lines. Boundary conditions are non-periodic
 #---------------------------------------------------------------------
 
-function z_solve(ncells,
-                 successor,
-                 predecessor,
-                 slice,
-                 cell_size,
-                 cell_start,
-                 cell_end,
-                 cell_coord,
-                 lhs,
-                 rhs,
-                 in_buffer,
-                 out_buffer,
-                 comm_solve)
+function z_solve(_::Val{ncells}, # ::Int64,
+                 successor, # ::Vector{Int64},
+                 predecessor, # ::Vector{Int64},
+                 slice, # ::Array{Int64,2},
+                 cell_size, # ::Array{Int64,2},
+                 cell_start, # ::Array{Int64,2},
+                 cell_end, # ::Array{Int64,2},
+                 cell_coord, # ::Array{Int64,2},
+                 lhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
+                 rhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
+                 rho_i, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 ws, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 speed, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 dz4, # ::Float64, 
+                 dz5, # ::Float64,
+                 dz1, # ::Float64, 
+                 con43, # ::Float64, 
+                 c3c4, # ::Float64, 
+                 c1c5, # ::Float64, 
+                 dttz2, # ::Float64, 
+                 dttz1, # ::Float64, 
+                 dzmax, # ::Float64,
+                 comz5, # ::Float64, 
+                 comz4, # ::Float64, 
+                 comz1, # ::Float64, 
+                 comz6, # ::Float64,
+                 in_buffer, # ::Vector{Float64},
+                 out_buffer, # ::Vector{Float64},
+                 comm_solve, # ::MPI.Comm
+                 requests,
+                 s,
+                 ) where ncells
 
-       requests = Array{MPI.Request}(undef,2)
-       s = Array{Float64}(undef,5)
+#       requests = Array{MPI.Request}(undef,2)
+#       s = Array{Float64}(undef,5)
 
 #---------------------------------------------------------------------
 # now do a sweep on a layer-by-layer basis, i.e. sweeping through cells
@@ -63,7 +82,16 @@ function z_solve(ncells,
 #            communication has already been started. 
 #            compute the left hand side while waiting for the msg
 #---------------------------------------------------------------------
-             lhsz(c)
+             lhsz(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  lhs,
+                  rho_i,
+                  ws,
+                  speed,
+                  dz4, dz5, dz1, con43, c3c4, c1c5, dttz2, dttz1, dzmax,
+                  comz5, comz4, comz1, comz6)
 
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
@@ -145,7 +173,16 @@ function z_solve(ncells,
 #---------------------------------------------------------------------
 #            if this IS the first cell, we still compute the lhs
 #---------------------------------------------------------------------
-             lhsz(c)
+             lhsz(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  lhs,
+                  rho_i,
+                  ws,
+                  speed,
+                  dz4, dz5, dz1, con43, c3c4, c1c5, dttz2, dttz1, dzmax,
+                  comz5, comz4, comz1, comz6)
           end
 
 #---------------------------------------------------------------------
@@ -345,8 +382,7 @@ function z_solve(ncells,
           ip        = cell_coord[1, c]-1
           jp        = cell_coord[2, c]-1
 
-          buffer_size = (isize-cell_start[1, c]-cell_end[1, c]) *(
-                        jsize-cell_start[2, c]-cell_end[2, c])
+          buffer_size = (isize-cell_start[1, c]-cell_end[1, c]) *(jsize-cell_start[2, c]-cell_end[2, c])
 
           if stage != ncells
 
@@ -367,7 +403,19 @@ function z_solve(ncells,
 #            cell that was just finished                
 #---------------------------------------------------------------------
 
-             tzetar(slice[3, stage+1])
+             tzetar(slice[3, stage+1],
+                     cell_size,
+                     cell_start,
+                     cell_end,
+                     rhs,
+                     us,
+                     vs,
+                     ws,
+                     qs,
+                     speed,
+                     ainv,
+                     bt,
+                     c2iv)
 
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
@@ -516,7 +564,21 @@ function z_solve(ncells,
 #---------------------------------------------------------------------
 #         If this was the last stage, do the block-diagonal inversion
 #---------------------------------------------------------------------
-          if (stage == 1) tzetar(c) end
+          if (stage == 1) 
+            tzetar(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  rhs,
+                  us,
+                  vs,
+                  ws,
+                  qs,
+                  speed,
+                  ainv,
+                  bt,
+                  c2iv) 
+         end
 
        end
 

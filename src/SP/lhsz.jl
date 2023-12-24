@@ -2,7 +2,16 @@
 # This function computes the left hand side for the three z-factors   
 #---------------------------------------------------------------------
 
-function lhsz(c)
+function lhsz(c,
+               cell_size,
+               cell_start,
+               cell_end,
+               lhs,
+               rho_i,
+               ws,
+               speed,
+               dz4, dz5, dz1, con43, c3c4, c1c5, dttz2, dttz1, dzmax,
+               comz5, comz4, comz1, comz6)
 
 #---------------------------------------------------------------------
 #      treat only cell c                                         

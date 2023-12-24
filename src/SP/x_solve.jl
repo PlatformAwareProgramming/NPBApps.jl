@@ -5,22 +5,41 @@
 # systems for the x-lines. Boundary conditions are non-periodic
 #---------------------------------------------------------------------
 
-function x_solve(ncells,
-                 successor,
-                 predecessor,
-                 slice,
-                 cell_size,
-                 cell_start,
-                 cell_end,
-                 cell_coord,
-                 lhs,
-                 rhs,
-                 in_buffer,
-                 out_buffer,
-                 comm_solve)
+function x_solve(_::Val{ncells}, # ::Int64,
+                 successor, # ::Vector{Int64},
+                 predecessor, # ::Vector{Int64},
+                 slice, # ::Array{Int64,2},
+                 cell_size, # ::Array{Int64,2},
+                 cell_start, # ::Array{Int64,2},
+                 cell_end, # ::Array{Int64,2},
+                 cell_coord, # ::Array{Int64,2},
+                 lhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
+                 rhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
+                 rho_i, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 us, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 speed, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 dx2, # ::Float64, 
+                 dx5, # ::Float64, 
+                 con43, # ::Float64, 
+                 c3c4, # ::Float64, 
+                 c1c5, # ::Float64, 
+                 dxmax, # ::Float64, 
+                 dx1, # ::Float64, 
+                 dttx1, # ::Float64, 
+                 dttx2, # ::Float64,
+                 comz5, # ::Float64, 
+                 comz4, # ::Float64, 
+                 comz1, # ::Float64, 
+                 comz6, # ::Float64,
+                 in_buffer, # ::Vector{Float64},
+                 out_buffer, # ::Vector{Float64},
+                 comm_solve, # ::MPI.Comm
+                 requests,
+                 s,
+                 ) where ncells
 
-       requests = Array{MPI.Request}(undef,2)
-       s = Array{Float64}(undef,5)
+#       requests = Array{MPI.Request}(undef,2)
+#       s = Array{Float64}(undef,5)
 
 #---------------------------------------------------------------------
 #      OK, now we know that there are multiple processors
@@ -68,7 +87,16 @@ function x_solve(ncells,
 #            communication has already been started. 
 #            compute the left hand side while waiting for the msg
 #---------------------------------------------------------------------
-             lhsx(c)
+             lhsx(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  lhs,
+                  rho_i,
+                  us,
+                  speed,
+                  dx2, dx5, con43, c3c4, c1c5, dxmax, dx1, dttx1, dttx2,
+                  comz5, comz4, comz1, comz6)
 
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
@@ -147,7 +175,16 @@ function x_solve(ncells,
 #---------------------------------------------------------------------
 #            if this IS the first cell, we still compute the lhs
 #---------------------------------------------------------------------
-             lhsx(c)
+             lhsx(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  lhs,
+                  rho_i,
+                  us,
+                  speed,
+                  dx2, dx5, con43, c3c4, c1c5, dxmax, dx1, dttx1, dttx2,
+                  comz5, comz4, comz1, comz6)
           end
 
 #---------------------------------------------------------------------
@@ -345,20 +382,23 @@ function x_solve(ncells,
              requests[1] = MPI.Irecv!(in_buffer, successor[1], DEFAULT_TAG, comm_solve)
              if (timeron) timer_stop(t_xcomm) end
 
-
 #---------------------------------------------------------------------
 #            communication has already been started
 #            while waiting, do the block-diagonal inversion for the 
 #            cell that was just finished                
 #---------------------------------------------------------------------
 
-             ninvr(slice[1, stage+1])
+             ninvr(slice[1, stage+1],
+                   cell_size,
+                   cell_start,
+                   cell_end,
+                   rhs,
+                   bt)
 
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
 #---------------------------------------------------------------------
              if (timeron) timer_start(t_xcomm) end
-             #MPI.Waitall(2, requests, statuses, ERROR)
              MPI.Waitall(requests)
              if (timeron) timer_stop(t_xcomm) end
 
@@ -490,7 +530,14 @@ function x_solve(ncells,
 #---------------------------------------------------------------------
 #         If this was the last stage, do the block-diagonal inversion          
 #---------------------------------------------------------------------
-          if (stage == 1) ninvr(c) end
+          if (stage == 1) 
+            ninvr(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  rhs,
+                  bt) 
+          end
 
        end
 

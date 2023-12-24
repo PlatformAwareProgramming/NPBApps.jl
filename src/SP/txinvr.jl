@@ -2,7 +2,20 @@
 # block-diagonal matrix-vector multiplication                  
 #---------------------------------------------------------------------
 
-function txinvr()
+function txinvr(_::Val{ncells},
+                cell_size,
+                cell_start,
+                cell_end,
+                rho_i,
+                us,
+                vs,
+                ws,
+                qs,
+                speed,
+                ainv,
+                rhs,
+                c2,
+                bt) where ncells
 
 #---------------------------------------------------------------------
 #      loop over all cells owned by this node          
@@ -25,8 +38,7 @@ function txinvr()
                    r4 = rhs[i, j, k, 4, c]
                    r5 = rhs[i, j, k, 5, c]
 
-                   t1 = c2 * ac2inv * ( qs[i, j, k, c]*r1 - uu*r2  -
-                        vv*r3 - ww*r4 + r5 )
+                   t1 = c2 * ac2inv * ( qs[i, j, k, c]*r1 - uu*r2  -  vv*r3 - ww*r4 + r5 )
                    t2 = bt * ru1 * ( uu * r1 - r2 )
                    t3 = ( bt * ru1 * ac ) * t1
 
