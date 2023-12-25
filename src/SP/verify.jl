@@ -93,10 +93,14 @@ function verify(class)
 #---------------------------------------------------------------------
         error_norm(xce)
         
-        copy_faces(Val(ncells),
+        copy_faces(Val(no_nodes),
+                  Val(ncells),
+                  successor, # ::Vector{Int64},
+                  predecessor, # ::Vector{Int64},
                   cell_size,
                   cell_start,
                   cell_end,
+                  cell_coord,
                   u,
                   rhs,
                   rho_i,
@@ -108,6 +112,7 @@ function verify(class)
                   ainv,
                   speed,
                   forcing,
+                  dt,
                   tx2,
                   ty2,
                   tz2,
@@ -146,6 +151,8 @@ function verify(class)
                   in_buffer,
                   out_buffer,
                   Array{MPI.Request}(undef,12),
+                  timeron,
+                  comm_rhs,
                   )
 
         rhs_norm(xcr)

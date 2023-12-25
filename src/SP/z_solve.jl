@@ -15,8 +15,15 @@ function z_solve(_::Val{ncells}, # ::Int64,
                  cell_coord, # ::Array{Int64,2},
                  lhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
                  rhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
+                 u,
+                 us,
+                 vs,
+                 qs,
+                 ainv,
                  rho_i, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
                  ws, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 rhos,
+                 cv,
                  speed, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
                  dz4, # ::Float64, 
                  dz5, # ::Float64,
@@ -31,11 +38,13 @@ function z_solve(_::Val{ncells}, # ::Int64,
                  comz4, # ::Float64, 
                  comz1, # ::Float64, 
                  comz6, # ::Float64,
+                 c2dttz1,
                  in_buffer, # ::Vector{Float64},
                  out_buffer, # ::Vector{Float64},
                  comm_solve, # ::MPI.Comm
                  requests,
                  s,
+                 timeron
                  ) where ncells
 
 #       requests = Array{MPI.Request}(undef,2)
@@ -62,11 +71,9 @@ function z_solve(_::Val{ncells}, # ::Int64,
           ip        = cell_coord[1, c]-1
           jp        = cell_coord[2, c]-1
 
-          buffer_size = (isize-cell_start[1, c]-cell_end[1, c]) *(
-                        jsize-cell_start[2, c]-cell_end[2, c])
+          buffer_size = (isize-cell_start[1, c]-cell_end[1, c]) *(jsize-cell_start[2, c]-cell_end[2, c])
 
           if stage != 1
-
 
 #---------------------------------------------------------------------
 #            if this is not the first processor in this row of cells, 
@@ -82,16 +89,18 @@ function z_solve(_::Val{ncells}, # ::Int64,
 #            communication has already been started. 
 #            compute the left hand side while waiting for the msg
 #---------------------------------------------------------------------
-             lhsz(c,
+              lhsz(c,
                   cell_size,
                   cell_start,
                   cell_end,
                   lhs,
                   rho_i,
                   ws,
+                  rhos,
+                  cv,
                   speed,
                   dz4, dz5, dz1, con43, c3c4, c1c5, dttz2, dttz1, dzmax,
-                  comz5, comz4, comz1, comz6)
+                  comz5, comz4, comz1, comz6, c2dttz1)
 
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
@@ -173,16 +182,18 @@ function z_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
 #            if this IS the first cell, we still compute the lhs
 #---------------------------------------------------------------------
-             lhsz(c,
+           lhsz(c,
                   cell_size,
                   cell_start,
                   cell_end,
                   lhs,
                   rho_i,
                   ws,
+                  rhos,
+                  cv,
                   speed,
                   dz4, dz5, dz1, con43, c3c4, c1c5, dttz2, dttz1, dzmax,
-                  comz5, comz4, comz1, comz6)
+                  comz5, comz4, comz1, comz6, c2dttz1)
           end
 
 #---------------------------------------------------------------------
@@ -408,6 +419,7 @@ function z_solve(_::Val{ncells}, # ::Int64,
                      cell_start,
                      cell_end,
                      rhs,
+                     u,
                      us,
                      vs,
                      ws,
@@ -570,6 +582,7 @@ function z_solve(_::Val{ncells}, # ::Int64,
                   cell_start,
                   cell_end,
                   rhs,
+                  u,
                   us,
                   vs,
                   ws,

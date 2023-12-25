@@ -8,6 +8,8 @@ module SP
     using Printf
     using MPI
     using StaticArrays
+    using Traceur
+    using JET       
 
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")

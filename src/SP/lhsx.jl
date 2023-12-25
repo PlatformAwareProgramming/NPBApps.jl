@@ -9,8 +9,11 @@ function lhsx(c,
               lhs,
               rho_i,
               us,
+              rhon,
+              cv,
               speed,
               dx2, dx5, con43, c3c4, c1c5, dxmax, dx1, dttx1, dttx2,
+              c2dttx1,
               comz5, comz4, comz1, comz6
               )
 

@@ -9,9 +9,11 @@ function lhsy(c,
             lhs,
             rho_i,
             vs,
+            rhoq,
+            cv,
             speed,
-            con43, c3c4, c1c5, 
-            dy3, dy5, dy1, dymax, dtty2, 
+            con43, c3c4, c1c5, c2dtty1,
+            dy3, dy5, dy1, dymax, dtty1, dtty2, 
             comz5, comz4, comz1, comz6)
 
 #---------------------------------------------------------------------

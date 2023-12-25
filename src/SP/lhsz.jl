@@ -9,9 +9,11 @@ function lhsz(c,
                lhs,
                rho_i,
                ws,
+               rhos,
+               cv,
                speed,
                dz4, dz5, dz1, con43, c3c4, c1c5, dttz2, dttz1, dzmax,
-               comz5, comz4, comz1, comz6)
+               comz5, comz4, comz1, comz6, c2dttz1)
 
 #---------------------------------------------------------------------
 #      treat only cell c                                         

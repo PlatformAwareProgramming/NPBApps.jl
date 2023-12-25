@@ -144,7 +144,8 @@ function go()
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
-       adi(Val(ncells),
+       adi(Val(no_nodes),
+            Val(ncells),
             slice,
             cell_size,
             cell_start,
@@ -155,6 +156,10 @@ function go()
             lhs,
             rho_i,
             us,
+            cv,
+            rhoq,
+            rhon,
+            rhos,
             vs,
             ws,
             square,
@@ -162,6 +167,7 @@ function go()
             ainv,
             speed,
             forcing,
+            dt,
             tx2,
             ty2,
             tz2,
@@ -197,16 +203,17 @@ function go()
             zzcon5,
             dssp,
             con43,
-            dx2, dx5, c3c4, c1c5, dxmax, dx1, dttx1, dttx2,
+            dx2, dx5, c3c4, c1c5, c2dtty1, dxmax, dx1, dttx1, dttx2,
             comz5, comz4, comz1, comz6,
-            dy3, dy5, dy1, dymax, dtty2, 
+            dy3, dy5, dy1, dymax, dtty1, dtty2, 
             dz4, dz5, dz1, dttz2, dttz1, dzmax,
             bt,
             successor,
             predecessor,
             in_buffer,
             out_buffer,
-            comm_solve)
+            comm_solve,
+            comm_rhs)
 
        initialize()
 
@@ -230,7 +237,8 @@ function go()
               end
           end
 
-          adi(Val(ncells),
+          adi( Val(no_nodes),
+               Val(ncells),
                slice,
                cell_size,
                cell_start,
@@ -241,6 +249,10 @@ function go()
                lhs,
                rho_i,
                us,
+               cv,
+               rhoq,
+               rhon,
+               rhos,
                vs,
                ws,
                square,
@@ -248,6 +260,7 @@ function go()
                ainv,
                speed,
                forcing,
+               dt,
                tx2,
                ty2,
                tz2,
@@ -283,16 +296,17 @@ function go()
                zzcon5,
                dssp,
                con43,
-               dx2, dx5, c3c4, c1c5, dxmax, dx1, dttx1, dttx2,
+               dx2, dx5, c3c4, c1c5, c2dtty1, dxmax, dx1, dttx1, dttx2,
                comz5, comz4, comz1, comz6,
-               dy3, dy5, dy1, dymax, dtty2, 
+               dy3, dy5, dy1, dymax, dtty1, dtty2, 
                dz4, dz5, dz1, dttz2, dttz1, dzmax,
                bt,
                successor,
                predecessor,
                in_buffer,
                out_buffer,
-               comm_solve)
+               comm_solve,
+               comm_rhs)
 
        end
 

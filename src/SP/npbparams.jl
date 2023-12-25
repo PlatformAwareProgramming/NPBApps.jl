@@ -7,7 +7,7 @@
 #  
 
 const problem_size = 12
-const niter_default = 100
+const niter_default = 1
 const dt_default = 0.015
 const convertdouble = false
 const compiletime = "22 Nov 2023"

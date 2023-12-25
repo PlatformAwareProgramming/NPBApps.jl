@@ -17,12 +17,15 @@ function x_solve(_::Val{ncells}, # ::Int64,
                  rhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
                  rho_i, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
                  us, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
-                 speed, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 rhon,
+                 cv,
+                speed, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
                  dx2, # ::Float64, 
                  dx5, # ::Float64, 
                  con43, # ::Float64, 
                  c3c4, # ::Float64, 
                  c1c5, # ::Float64, 
+                 c2dttx1,
                  dxmax, # ::Float64, 
                  dx1, # ::Float64, 
                  dttx1, # ::Float64, 
@@ -36,6 +39,7 @@ function x_solve(_::Val{ncells}, # ::Int64,
                  comm_solve, # ::MPI.Comm
                  requests,
                  s,
+                 timeron
                  ) where ncells
 
 #       requests = Array{MPI.Request}(undef,2)
@@ -94,8 +98,11 @@ function x_solve(_::Val{ncells}, # ::Int64,
                   lhs,
                   rho_i,
                   us,
+                  rhon,
+                  cv,
                   speed,
                   dx2, dx5, con43, c3c4, c1c5, dxmax, dx1, dttx1, dttx2,
+                  c2dttx1,
                   comz5, comz4, comz1, comz6)
 
 #---------------------------------------------------------------------
@@ -182,8 +189,11 @@ function x_solve(_::Val{ncells}, # ::Int64,
                   lhs,
                   rho_i,
                   us,
+                  rhon,
+                  cv,
                   speed,
                   dx2, dx5, con43, c3c4, c1c5, dxmax, dx1, dttx1, dttx2,
+                  c2dttx1,
                   comz5, comz4, comz1, comz6)
           end
 

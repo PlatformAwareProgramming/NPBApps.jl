@@ -18,14 +18,18 @@ function y_solve(_::Val{ncells}, # ::Int64,
                  rhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
                  rho_i, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
                  vs, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
-                 speed, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 rhoq,
+                 cv,
+                speed, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
                  con43, # ::Float64, 
                  c3c4, # ::Float64, 
                  c1c5, # ::Float64, 
+                 c2dtty1,
                  dy3, # ::Float64, 
                  dy5, # ::Float64, 
                  dy1, # ::Float64, 
                  dymax, # ::Float64, 
+                 dtty1,
                  dtty2, # ::Float64, 
                  comz5, # ::Float64, 
                  comz4, # ::Float64, 
@@ -36,6 +40,7 @@ function y_solve(_::Val{ncells}, # ::Int64,
                  comm_solve, # ::MPI.Comm
                  requests,
                  s,
+                 timeron
                  ) where ncells
 
 #       requests = Array{MPI.Request}(undef,2)
@@ -88,9 +93,11 @@ function y_solve(_::Val{ncells}, # ::Int64,
                   lhs,
                   rho_i,
                   vs,
+                  rhoq,
+                  cv,
                   speed,
-                  con43, c3c4, c1c5, 
-                  dy3, dy5, dy1, dymax, dtty2, 
+                  con43, c3c4, c1c5, c2dtty1,
+                  dy3, dy5, dy1, dymax, dtty1, dtty2, 
                   comz5, comz4, comz1, comz6)
 
 #---------------------------------------------------------------------
@@ -181,9 +188,11 @@ function y_solve(_::Val{ncells}, # ::Int64,
                   lhs,
                   rho_i,
                   vs,
+                  rhoq,
+                  cv,
                   speed,
-                  con43, c3c4, c1c5, 
-                  dy3, dy5, dy1, dymax, dtty2, 
+                  con43, c3c4, c1c5, c2dtty1,
+                  dy3, dy5, dy1, dymax, dtty1, dtty2, 
                   comz5, comz4, comz1, comz6)
                end
 
