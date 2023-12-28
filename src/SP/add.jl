@@ -22,7 +22,7 @@ function add(_::Val{ncells},
           end
        end 
 
- # VECTORIZATION ATTEMP (does not work)
+ # VECTORIZATION ATTEMPT (does not work)
  #=    for c = 1:ncells
          uu = view(u, cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1, 
                       cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1,

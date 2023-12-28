@@ -76,7 +76,7 @@ function adi(no_nodes,
        comm_rhs
        ) 
 
-        @trace copy_faces(no_nodes,
+         copy_faces(no_nodes,
                      ncells,
                      successor, # ::Vector{Int64},
                      predecessor, # ::Vector{Int64},
@@ -204,7 +204,7 @@ function adi(no_nodes,
               timeron
               )
 
-        z_solve(ncells,
+            z_solve(ncells,
               successor,
               predecessor,
               slice,
