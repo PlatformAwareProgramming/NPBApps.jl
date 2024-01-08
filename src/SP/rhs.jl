@@ -60,7 +60,7 @@ function compute_rhs(ncells,
 # loop over all cells owned by this node                           
 #---------------------------------------------------------------------
        for c = 1:ncells
-
+         
 #---------------------------------------------------------------------
 #         compute the reciprocal of density, and the kinetic energy, 
 #         and the speed of sound. 

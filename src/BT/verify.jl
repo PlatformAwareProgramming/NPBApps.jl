@@ -74,7 +74,7 @@ end
 #  verification routine                         
 #---------------------------------------------------------------------
 
-function verify(class)
+function verify(class, sr, ss, b_size)
 
 #        use bt_data
 #        use mpinpb
@@ -106,7 +106,62 @@ function verify(class)
 
         error_norm(xce)
 
-        copy_faces()
+        copy_faces(ss, 
+                  sr, 
+                  b_size,
+                  cell_coord,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  forcing,        
+                  u,
+                  rhs,
+                  in_buffer,
+                  out_buffer,
+                  us,
+                  vs,
+                  ws,
+                  qs,
+                  rho_i,
+                  square,
+                  timeron,
+                  dt,
+                  Val(ncells),
+                  tx2,
+                  ty2,
+                  tz2,
+                  dx1tx1,
+                  dx2tx1,
+                  dx3tx1,
+                  dx4tx1,
+                  dx5tx1,
+                  dy1ty1,
+                  dy2ty1,
+                  dy3ty1,
+                  dy4ty1,
+                  dy5ty1,
+                  dz1tz1,
+                  dz2tz1,
+                  dz3tz1,
+                  dz4tz1,
+                  dz5tz1,
+                  xxcon2,
+                  xxcon3,
+                  xxcon4,
+                  xxcon5,
+                  yycon2,
+                  yycon3,
+                  yycon4,
+                  yycon5,
+                  zzcon2,
+                  zzcon3,
+                  zzcon4,
+                  zzcon5,
+                  Val(no_nodes), 
+                  comm_rhs,
+                  predecessor,
+                  successor,
+               )
 
         rhs_norm(xcr)
 

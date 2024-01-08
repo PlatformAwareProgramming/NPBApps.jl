@@ -8,10 +8,36 @@
 #     of the sweep.
 #---------------------------------------------------------------------
 
-function z_solve()
-
-      send_id = Ref{MPI.Request}()
-      recv_id = Ref{MPI.Request}()
+function z_solve(
+               MAX_CELL_DIM,
+               IMAX,
+               JMAX,
+               cell_coord,
+               cell_size,
+               cell_start,
+               cell_end,
+               slice,     
+               u,
+               rhs,
+               lhsc,
+               backsub_info,
+               in_buffer,
+               out_buffer,
+               fjac,
+               njac,
+               lhsa,
+               lhsb,
+               qs,
+               dt,
+               timeron,
+               ncells_v::Val{ncells},
+               tz1,
+               tz2,
+               comm_solve,
+               predecessor,
+               successor,
+               utmp,
+          )  where ncells
 
       kstart = 0
 
@@ -40,7 +66,23 @@ function z_solve()
 #---------------------------------------------------------------------
             FIRST = 1
 #            call lhsz(c)
-            z_solve_cell(FIRST, LAST, c)
+            z_solve_cell(FIRST, LAST, c,
+                         cell_size,
+                         cell_start,
+                         cell_end,
+                         u,
+                         rhs,
+                         lhsc,
+                         fjac,
+                         njac,
+                         lhsa,
+                         lhsb,
+                         qs,
+                         dt,
+                         tz1,
+                         tz2,
+                         utmp,
+                         )
          else
 #---------------------------------------------------------------------
 #     Not the first cell of this line, so receive info from
@@ -48,7 +90,13 @@ function z_solve()
 #---------------------------------------------------------------------
             FIRST = 0
             if (timeron) timer_start(t_zcomm) end
-            recv_id[] = z_receive_solve_info(c)
+            recv_id[] = z_receive_solve_info(c,
+                                             MAX_CELL_DIM,
+                                             out_buffer,
+                                             ncells_v,
+                                             comm_solve,
+                                             predecessor,
+                                   )
 #---------------------------------------------------------------------
 #     overlap computations and communications
 #---------------------------------------------------------------------
@@ -62,12 +110,46 @@ function z_solve()
 #---------------------------------------------------------------------
 #     install C'(kstart+1) and rhs'(kstart+1) to be used in this cell
 #---------------------------------------------------------------------
-            z_unpack_solve_info(c)
-            z_solve_cell(FIRST, LAST, c)
+            z_unpack_solve_info(c,                                         
+                              IMAX,
+                              JMAX,
+                              rhs,
+                              lhsc,
+                              out_buffer,
+                    )
+            z_solve_cell(FIRST, LAST, c,
+                         cell_size,
+                         cell_start,
+                         cell_end,
+                         u,
+                         rhs,
+                         lhsc,
+                         fjac,
+                         njac,
+                         lhsa,
+                         lhsb,
+                         qs,
+                         dt,
+                         tz1,
+                         tz2,
+                         utmp,
+                         )
          end
 
          if (LAST == 0) 
-             send_id[] = z_send_solve_info(c) 
+             send_id[] = z_send_solve_info(c,
+                                             MAX_CELL_DIM,
+                                             IMAX,
+                                             JMAX,
+                                             cell_coord,
+                                             cell_size,
+                                             rhs,
+                                             lhsc,
+                                             in_buffer,
+                                             timeron,
+                                             comm_solve,     
+                                             successor,
+                         ) 
          end
       end
 
@@ -84,18 +166,54 @@ function z_solve()
 #---------------------------------------------------------------------
 #     last cell, so perform back substitute without waiting
 #---------------------------------------------------------------------
-            z_backsubstitute(FIRST, LAST, c)
+         z_backsubstitute(FIRST, LAST, c,
+                              cell_size,
+                              cell_start,
+                              cell_end,
+                              rhs,
+                              lhsc,
+                              backsub_info,
+                    )
          else
             if (timeron) timer_start(t_zcomm) end
-            recv_id[] = z_receive_backsub_info(c)
+            recv_id[] = z_receive_backsub_info(c, 
+                                             MAX_CELL_DIM,
+                                             cell_coord,
+                                             out_buffer,
+                                             ncells_v,
+                                             comm_solve,
+                                             successor
+                                   )
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
             if (timeron) timer_stop(t_zcomm) end
-            z_unpack_backsub_info(c)
-            z_backsubstitute(FIRST, LAST, c)
+            z_unpack_backsub_info(c,
+                                   IMAX,
+                                   JMAX,
+                                   backsub_info,
+                                   out_buffer,)
+            z_backsubstitute(FIRST, LAST, c,
+                              cell_size,
+                              cell_start,
+                              cell_end,
+                              rhs,
+                              lhsc,
+                              backsub_info,
+                    )
          end
          if (FIRST == 0) 
-            send_id[] = z_send_backsub_info(c) 
+            send_id[] = z_send_backsub_info(c, 
+                                             MAX_CELL_DIM,
+                                             IMAX,
+                                             JMAX,
+                                             cell_coord,
+                                             rhs,
+                                             in_buffer,
+                                             timeron,
+                                             ncells_v, 
+                                             comm_solve,
+                                             predecessor,     
+                                   ) 
          end
       end
 
@@ -110,7 +228,13 @@ end
 #     all i and j
 #---------------------------------------------------------------------
 
-function z_unpack_solve_info(c)
+ function z_unpack_solve_info(c,
+                                        IMAX,
+                                        JMAX,
+                                        rhs,
+                                        lhsc,
+                                        out_buffer,
+                                    )
 
       kstart = 0
       ptr = 0
@@ -138,13 +262,24 @@ end
 #     all i and j
 #---------------------------------------------------------------------
 
-function z_send_solve_info(c)
+ function z_send_solve_info(c,
+                                   MAX_CELL_DIM,
+                                   IMAX,
+                                   JMAX,
+                                   cell_coord,
+                                   cell_size,
+                                   rhs,
+                                   lhsc,
+                                   in_buffer,
+                                   timeron,
+                                   comm_solve,     
+                                   successor,
+                        )
 
       ksize = cell_size[3, c]-1
       ip = cell_coord[1, c] - 1
       jp = cell_coord[2, c] - 1
-      buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(
-           BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
+      buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
 
 #---------------------------------------------------------------------
 #     pack up buffer
@@ -180,7 +315,18 @@ end
 #     pack up and send u[jstart] for all i and j
 #---------------------------------------------------------------------
 
-function z_send_backsub_info(c)
+ function z_send_backsub_info(c,
+                                   MAX_CELL_DIM,
+                                   IMAX,
+                                   JMAX,
+                                   cell_coord,
+                                   rhs,
+                                   in_buffer,
+                                   timeron,
+                                   ::Val{ncells}, 
+                                   comm_solve,     
+                                   predecessor,
+                        ) where ncells
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -211,7 +357,12 @@ end
 #     unpack u[ksize] for all i and j
 #---------------------------------------------------------------------
 
-function z_unpack_backsub_info(c)
+ function z_unpack_backsub_info(c,
+                                        IMAX,
+                                        JMAX,
+                                        backsub_info,
+                                        out_buffer,     
+          )
 
       ptr = 0
       for j = 0:JMAX-1
@@ -231,7 +382,14 @@ end
 #     post mpi receives
 #---------------------------------------------------------------------
 
-function z_receive_backsub_info(c)
+ function z_receive_backsub_info(c, 
+                                        MAX_CELL_DIM,
+                                        cell_coord,
+                                        out_buffer,
+                                        ::Val{ncells},
+                                        comm_solve,
+                                        successor
+          )  where ncells
 
       ip = cell_coord[1, c] - 1
       jp = cell_coord[2, c] - 1
@@ -246,7 +404,13 @@ end
 #     post mpi receives 
 #---------------------------------------------------------------------
 
-function z_receive_solve_info(c)
+ function z_receive_solve_info(c,
+                                        MAX_CELL_DIM,
+                                        out_buffer,
+                                        ::Val{ncells},
+                                        comm_solve,
+                                        predecessor,
+                             )  where ncells
 
       ip = cell_coord[1, c] - 1
       jp = cell_coord[2, c] - 1
@@ -264,7 +428,14 @@ end
 #     after call u[kstart] will be sent to next cell
 #---------------------------------------------------------------------
 
-function z_backsubstitute(FIRST, LAST, c)
+ function z_backsubstitute(FIRST, LAST, c,
+                                   cell_size,
+                                   cell_start,
+                                   cell_end,
+                                   rhs,
+                                   lhsc,
+                                   backsub_info,
+          )
 
       kstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -278,9 +449,7 @@ function z_backsubstitute(FIRST, LAST, c)
 #---------------------------------------------------------------------
                for m = 1:BLOCK_SIZE
                   for n = 1:BLOCK_SIZE
-                     rhs[m, i, j, ksize, c] = rhs[m, i, j, ksize, c]-
-                            lhsc[m, n, i, j, ksize, c]*
-                          backsub_info[n, i, j, c]
+                     rhs[m, i, j, ksize, c] -= lhsc[m, n, i, j, ksize, c]*backsub_info[n, i, j, c]
                   end
                end
             end
@@ -291,8 +460,7 @@ function z_backsubstitute(FIRST, LAST, c)
             for i = cell_start[1, c]:isize
                for m = 1:BLOCK_SIZE
                   for n = 1:BLOCK_SIZE
-                     rhs[m, i, j, k, c] = rhs[m, i, j, k, c]-
-                            lhsc[m, n, i, j, k, c]*rhs[n, i, j, k+1, c]
+                     rhs[m, i, j, k, c] -= lhsc[m, n, i, j, k, c]*rhs[n, i, j, k+1, c]
                   end
                end
             end
@@ -313,9 +481,23 @@ end
 #     c'(KMAX) and rhs'(KMAX) will be sent to next cell.
 #---------------------------------------------------------------------
 
-function z_solve_cell(FIRST, LAST, c)
-
-      utmp = OffsetArray(zeros(Float64, 6, JMAX+4), 1:6, -2:JMAX+1)
+ function z_solve_cell(FIRST, LAST, c,
+                         cell_size,
+                         cell_start,
+                         cell_end,
+                         u,
+                         rhs,
+                         lhsc,
+                         fjac,
+                         njac,
+                         lhsa,
+                         lhsb,
+                         qs,
+                         dt,
+                         tz1,
+                         tz2,
+                         utmp,
+                         )
 
       kstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -610,7 +792,7 @@ function z_solve_cell(FIRST, LAST, c)
 #     multiply c[i,j,kstart] by b_inverse and copy back to c
 #     multiply rhs[kstart] by b_inverse(kstart) and copy to rhs
 #---------------------------------------------------------------------
-               binvcrhs(view(lhsb, 1:5, 1:5, kstart), view(lhsc, 1:5, 1:5, i, j, kstart, c), view(rhs, 1:5, i, j, kstart, c))
+               binvcrhs(lhsb, kstart, lhsc, i, j, kstart, c, rhs, i, j, kstart, c)
 
             end
 
@@ -625,19 +807,20 @@ function z_solve_cell(FIRST, LAST, c)
 #     
 #     rhs[k] = rhs[k] - A*rhs[k-1]
 #---------------------------------------------------------------------
-               matvec_sub(view(lhsa, 1:5, 1:5, k), view(rhs, 1:5, i, j, k-1, c), view(rhs, 1:5, i, j, k, c))
+               matvec_sub(lhsa, k, rhs, i, j, k-1, c, rhs, i, j, k, c)
 
 #---------------------------------------------------------------------
 #      b[k] =  b[k] - C(k-1)*A(k)
 #     call matmul_sub(aa,i,j,k,c,cc,i,j,k-1,c,bb,i,j,k,c)
 #---------------------------------------------------------------------
-               matmul_sub(view(lhsa, 1:5, 1:5, k), view(lhsc, 1:5, 1:5, i, j, k-1, c), view(lhsb, 1:5, 1:5, k))
+               matmul_sub2(view(lhsa, 1:5, 1:5, k), view(lhsc, 1:5, 1:5, i, j, k-1, c), view(lhsb, 1:5, 1:5, k))
+#               matmul_sub(lhsa, k, lhsc, i, j, k-1, c, lhsb, k)
 
 #---------------------------------------------------------------------
 #     multiply c[i,j,k] by b_inverse and copy back to c
 #     multiply rhs[i,j,1] by b_inverse(i,j,1) and copy to rhs
 #---------------------------------------------------------------------
-               binvcrhs(view(lhsb, 1:5, 1:5, k), view(lhsc, 1:5, 1:5, i, j, k, c), view(rhs, 1:5, i, j, k, c))
+               binvcrhs(lhsb, k, lhsc, i, j, k, c, rhs, i, j, k, c)
 
             end
 
@@ -649,19 +832,20 @@ function z_solve_cell(FIRST, LAST, c)
 #---------------------------------------------------------------------
 #     rhs[ksize] = rhs[ksize] - A*rhs[ksize-1]
 #---------------------------------------------------------------------
-               matvec_sub(view(lhsa, 1:5, 1:5, ksize), view(rhs, 1:5, i, j, ksize-1, c), view(rhs, 1:5, i, j, ksize, c))
+               matvec_sub(lhsa, ksize, rhs, i, j, ksize-1, c, rhs, i, j, ksize, c)
 
 #---------------------------------------------------------------------
 #      b[ksize] =  b[ksize] - C(ksize-1)*A(ksize)
 #     call matmul_sub(aa,i,j,ksize,c,
 #     $              cc,i,j,ksize-1,c,bb,i,j,ksize,c)
 #---------------------------------------------------------------------
-               matmul_sub(view(lhsa, 1:5, 1:5, ksize), view(lhsc, 1:5, 1:5, i, j, ksize-1, c), view(lhsb, 1:5, 1:5, ksize))
+               matmul_sub2(view(lhsa, 1:5, 1:5, ksize), view(lhsc, 1:5, 1:5, i, j, ksize-1, c), view(lhsb, 1:5, 1:5, ksize))
+#               matmul_sub(lhsa, ksize, lhsc, i, j, ksize-1, c, lhsb, ksize)
 
 #---------------------------------------------------------------------
 #     multiply rhs[ksize] by b_inverse(ksize) and copy to rhs
 #---------------------------------------------------------------------
-               binvrhs(view(lhsb, 1:5, 1:5, ksize), view(rhs, 1:5, i, j, ksize, c))
+               binvrhs(lhsb, ksize, rhs, i, j, ksize, c)
 
             end
          end

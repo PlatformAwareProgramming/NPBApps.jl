@@ -11,9 +11,6 @@
 
 function y_solve()
 
-      send_id = Ref{MPI.Request}()
-      recv_id = Ref{MPI.Request}()
-
       jstart = 0
 
       if (timeron) timer_start(t_ysolve) end
@@ -112,7 +109,7 @@ end
 #     all i and k
 #---------------------------------------------------------------------
 
- function y_unpack_solve_info(c)
+  function y_unpack_solve_info(c)
 
       jstart = 0
       ptr = 0
@@ -140,7 +137,7 @@ end
 #     all i and k
 #---------------------------------------------------------------------
 
-function y_send_solve_info(c)
+ function y_send_solve_info(c)
 
       jsize = cell_size[2, c]-1
       ip = cell_coord[1, c] - 1
@@ -182,7 +179,7 @@ end
 #     pack up and send u[jstart] for all i and k
 #---------------------------------------------------------------------
 
-function y_send_backsub_info(c)
+ function y_send_backsub_info(c)
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -212,7 +209,7 @@ end
 #     unpack u[jsize] for all i and k
 #---------------------------------------------------------------------
 
-function y_unpack_backsub_info(c)
+ function y_unpack_backsub_info(c)
 
       ptr = 0
       for k = 0:KMAX-1
@@ -232,7 +229,7 @@ end
 #     post mpi receives
 #---------------------------------------------------------------------
 
-function y_receive_backsub_info(c)
+ function y_receive_backsub_info(c)
 
       ip = cell_coord[1, c] - 1
       kp = cell_coord[3, c] - 1
@@ -246,7 +243,7 @@ end
 #     post mpi receives 
 #---------------------------------------------------------------------
 
-function y_receive_solve_info(c)
+ function y_receive_solve_info(c)
 
       ip = cell_coord[1, c] - 1
       kp = cell_coord[3, c] - 1
@@ -263,7 +260,7 @@ end
 #     after call u[jstart] will be sent to next cell
 #---------------------------------------------------------------------
 
-function y_backsubstitute(FIRST, LAST, c)
+ function y_backsubstitute(FIRST, LAST, c)
 
       jstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -312,7 +309,7 @@ end
 #     c'(JMAX) and rhs'(JMAX) will be sent to next cell
 #---------------------------------------------------------------------
 
-function y_solve_cell(FIRST, LAST, c)
+ function y_solve_cell(FIRST, LAST, c)
 
       jstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1

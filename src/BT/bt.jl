@@ -144,10 +144,91 @@ function go()
 
        compute_buffer_size(5)
 
+       if (no_nodes > 1)
+         ss = SA[start_send_east::Int start_send_west::Int start_send_north::Int start_send_south::Int start_send_top::Int start_send_bottom::Int]
+         sr = SA[start_recv_east::Int start_recv_west::Int start_recv_north::Int start_recv_south::Int start_recv_top::Int start_recv_bottom::Int]
+         b_size = SA[east_size::Int west_size::Int north_size::Int south_size::Int top_size::Int bottom_size::Int]
+       else
+         ss = nothing
+         sr = nothing
+         b_size = nothing
+       end
+
+       utmp = OffsetArray(zeros(Float64, 6, JMAX+4), 1:6, -2:JMAX+1)
+
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
-       adi()
+       adi(ss, sr, b_size,
+            MAX_CELL_DIM,
+            IMAX,
+            JMAX,
+            KMAX,
+            cell_coord,
+            cell_size,
+            cell_start,
+            cell_end,
+            slice,
+            forcing,           
+            u,
+            rhs,
+            lhsc,
+            backsub_info,
+            in_buffer,
+            out_buffer,
+            fjac,
+            njac,
+            lhsa,
+            lhsb,
+            us,
+            vs,
+            ws,
+            qs,
+            rho_i,
+            square,
+            dt,
+            timeron,
+            Val(ncells),
+            tx1,
+            tx2,
+            ty1,
+            ty2,
+            tz1,
+            tz2,
+            dx1tx1,
+            dx2tx1,
+            dx3tx1,
+            dx4tx1,
+            dx5tx1,
+            dy1ty1,
+            dy2ty1,
+            dy3ty1,
+            dy4ty1,
+            dy5ty1,
+            dz1tz1,
+            dz2tz1,
+            dz3tz1,
+            dz4tz1,
+            dz5tz1,
+            xxcon2,
+            xxcon3,
+            xxcon4,
+            xxcon5,
+            yycon2,
+            yycon3,
+            yycon4,
+            yycon5,
+            zzcon2,
+            zzcon3,
+            zzcon4,
+            zzcon5,
+            Val(no_nodes), 
+            comm_solve,
+            comm_rhs,
+            predecessor,
+            successor,
+            utmp,
+       )
        initialize()
 
 #---------------------------------------------------------------------
@@ -161,6 +242,8 @@ function go()
 
        timer_start(1)
 
+       timer_clear(99)
+
        for STEP = 1:niter
 
           if node == root
@@ -169,7 +252,76 @@ function go()
              end
           end
 
-          adi()
+          adi(ss, sr, b_size,
+               MAX_CELL_DIM,
+               IMAX,
+               JMAX,
+               KMAX,
+               cell_coord,
+               cell_size,
+               cell_start,
+               cell_end,
+               slice,
+               forcing,           
+               u,
+               rhs,
+               lhsc,
+               backsub_info,
+               in_buffer,
+               out_buffer,
+               fjac,
+               njac,
+               lhsa,
+               lhsb,
+               us,
+               vs,
+               ws,
+               qs,
+               rho_i,
+               square,
+               dt,
+               timeron,
+               Val(ncells),
+               tx1,
+               tx2,
+               ty1,
+               ty2,
+               tz1,
+               tz2,
+               dx1tx1,
+               dx2tx1,
+               dx3tx1,
+               dx4tx1,
+               dx5tx1,
+               dy1ty1,
+               dy2ty1,
+               dy3ty1,
+               dy4ty1,
+               dy5ty1,
+               dz1tz1,
+               dz2tz1,
+               dz3tz1,
+               dz4tz1,
+               dz5tz1,
+               xxcon2,
+               xxcon3,
+               xxcon4,
+               xxcon5,
+               yycon2,
+               yycon3,
+               yycon4,
+               yycon5,
+               zzcon2,
+               zzcon3,
+               zzcon4,
+               zzcon5,
+               Val(no_nodes), 
+               comm_solve,
+               comm_rhs,
+               predecessor,
+               successor,
+               utmp,
+  )
 
        end
 
@@ -182,7 +334,7 @@ function go()
        t1[1] = timer_read(t_enorm)
 
        timer_clear(t_enorm)
-       verified = verify(class)
+       verified = verify(class, ss, sr, b_size)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
 
@@ -200,6 +352,9 @@ function go()
                               total_nodes, tmax, mflops, "          floating point",
                               verified, npbversion)
        end
+
+       ttt = timer_read(99)
+       @printf(stdout, " Time x_solve_cell =             %12.2F\n", ttt)
 
        if (!timeron) @goto L999 end
 

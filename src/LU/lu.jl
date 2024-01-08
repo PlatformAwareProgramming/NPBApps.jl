@@ -115,8 +115,55 @@
 #---------------------------------------------------------------------
 #   perform one SSOR iteration to touch all data and program pages 
 #---------------------------------------------------------------------
-      ssor(1)
-
+      ssor(1,
+            comm_solve, 
+            id,
+            rsdnm,
+            u,
+            rsd,
+            frct,
+            flux,
+            a,
+            b,
+            c,
+            d,
+            buf,
+            buf1,
+            south,
+            east,
+            north,
+            west,
+            isiz1,
+            isiz2,
+            isiz3,
+            inorm,
+            itmax,
+            dt,
+            omega,
+            tolrsd,
+            nx0,
+            ny0,
+            nz0,
+            timeron,
+            tx1,
+            tx2,
+            tx3,
+            ty1,
+            ty2,
+            ty3,
+            tz1,
+            tz2,
+            tz3,
+            nx,
+            ipt,
+            ny,
+            jpt,
+            nz,
+            ist,
+            iend,
+            jst,
+            jend,
+      )
 #---------------------------------------------------------------------
 #   reset the boundary and initial values
 #---------------------------------------------------------------------
@@ -126,7 +173,55 @@
 #---------------------------------------------------------------------
 #   perform the SSOR iterations
 #---------------------------------------------------------------------
-      ssor(itmax)
+      ssor(itmax,
+            comm_solve, 
+            id,
+            rsdnm,
+            u,
+            rsd,
+            frct,
+            flux,
+            a,
+            b,
+            c,
+            d,
+            buf,
+            buf1,
+            south,
+            east,
+            north,
+            west,
+            isiz1,
+            isiz2,
+            isiz3,
+            inorm,
+            itmax,
+            dt,
+            omega,
+            tolrsd,
+            nx0,
+            ny0,
+            nz0,
+            timeron,
+            tx1,
+            tx2,
+            tx3,
+            ty1,
+            ty2,
+            ty3,
+            tz1,
+            tz2,
+            tz3,
+            nx,
+            ipt,
+            ny,
+            jpt,
+            nz,
+            ist,
+            iend,
+            jst,
+            jend,
+           )
 
 #---------------------------------------------------------------------
 #   compute the solution error
@@ -159,6 +254,8 @@
       end
 
       if (!timeron) @goto L999 end
+
+      t1 = Array{Float64}(undef, t_last+2)
 
       for i = 1:t_last
          t1[i] = timer_read(i)

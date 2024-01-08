@@ -32,9 +32,9 @@ const SOUTH = 5000
 const BOTTOM = 6000 
 const TOP = 7000
 
-predecessor = zeros(Int64, 3)
-successor = zeros(Int64,3)
-grid_size = zeros(Int64, 3)
+const predecessor = zeros(Int64, 3)
+const successor = zeros(Int64,3)
+const grid_size = zeros(Int64, 3)
 
 #---------------------------------------------------------------------
 #     Timer constants

@@ -74,7 +74,11 @@ end
 #  verification routine                         
 #---------------------------------------------------------------------
 
-function verify(class)
+function verify(class,
+                ss,
+                sr,
+                b_size,
+)
 
         xcrref = Array{Float64}(undef, 5)
         xceref = Array{Float64}(undef, 5)
@@ -153,7 +157,10 @@ function verify(class)
                   Array{MPI.Request}(undef,12),
                   timeron,
                   comm_rhs,
-                  )
+                  ss,
+                  sr,
+                  b_size,
+               )
 
         rhs_norm(xcr)
 

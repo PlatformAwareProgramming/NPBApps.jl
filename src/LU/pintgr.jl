@@ -68,7 +68,7 @@
 
       for j = jbeg:jfin1
          for i = ibeg:ifin1
-            frc1 = frc1 + (  phi1[i, j]+
+            frc1 += (  phi1[i, j]+
                             phi1[i+1, j]+
                             phi1[i, j+1]+
                             phi1[i+1, j+1]+
@@ -143,7 +143,7 @@
       frc2 = 0.0e+00
       for k = ki1:ki2-1
          for i = ibeg:ifin1
-            frc2 = frc2 + (  phi1[i, k]+
+            frc2 += (  phi1[i, k]+
                             phi1[i+1, k]+
                             phi1[i, k+1]+
                             phi1[i+1, k+1]+
@@ -219,7 +219,7 @@
 
       for k = ki1:ki2-1
          for j = jbeg:jfin1
-            frc3 = frc3 + (  phi1[j, k]+
+            frc3 += (  phi1[j, k]+
                             phi1[j+1, k]+
                             phi1[j, k+1]+
                             phi1[j+1, k+1]+

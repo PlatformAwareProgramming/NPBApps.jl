@@ -88,8 +88,8 @@ function proc_grid()
       end
       @label L2100
 
-      global row    = mod(id, xdim) + 1
-      global col    = div(id,xdim) + 1
+      global row = mod(id,xdim) + 1
+      global col = div(id,xdim) + 1
 
       return nothing
 end

@@ -213,12 +213,7 @@ end
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-function lhsinit()
-
-#      use bt_data
-#      implicit none
-
-#      integer i, j, k, d, c, m, n
+@inline function lhsinit()
 
 #---------------------------------------------------------------------
 #     loop over all cells                                       
@@ -263,19 +258,11 @@ end
 
 
 #---------------------------------------------------------------------
+#     next, set all diagonal values to 1. This is overkill, but convenient
 #---------------------------------------------------------------------
 
 function lhsabinit(lhsa, lhsb, SIZE)
-#      implicit none
 
-#      integer SIZE
-#      DOUBLEPRECISION lhsa[5, 5, -1:SIZE], lhsb[5, 5, -1:SIZE]
-
-#      integer i, m, n
-
-#---------------------------------------------------------------------
-#     next, set all diagonal values to 1. This is overkill, but convenient
-#---------------------------------------------------------------------
       for i = 0:SIZE
          for m = 1:5
             for n = 1:5

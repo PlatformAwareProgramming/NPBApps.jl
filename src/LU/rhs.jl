@@ -2,7 +2,36 @@
 #   compute the right hand sides
 #---------------------------------------------------------------------
 
- function rhs()
+ function rhs(
+               comm_solve, 
+               u,
+               rsd,
+               frct,
+               flux,
+               buf,
+               buf1,
+               south,
+               east,
+               north,
+               west,
+               timeron,
+               tx1,
+               tx2,
+               tx3,
+               ty1,
+               ty2,
+               ty3,
+               tz1,
+               tz2,
+               tz3,
+               nx,
+               ny,
+               nz,
+               ist,
+               iend,
+               jst,
+               jend,
+      )
 
       if (timeron) timer_start(t_rhs) end
 
@@ -30,7 +59,18 @@
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
       if (timeron) timer_start(t_exch) end
-      exchange_3(u, iex)
+      exchange_3(u, iex,
+                  comm_solve, 
+                  buf,
+                  buf1,
+                  south,
+                  east,
+                  north,
+                  west,
+                  nx,
+                  ny,
+                  nz,
+                 )
       if (timeron) timer_stop(t_exch) end
 
       L1 = 0
@@ -63,8 +103,7 @@
 
             for i = ist:iend
                for m = 1:5
-                  rsd[m, i, j, k] =  rsd[m, i, j, k]-
-                        tx2 * ( flux[m, i+1, j, k] - flux[m, i-1, j, k] )
+                  rsd[m, i, j, k] -= tx2 * ( flux[m, i+1, j, k] - flux[m, i-1, j, k] )
                end
             end
 
@@ -95,26 +134,26 @@
             end
 
             for i = ist:iend
-               rsd[1, i, j, k] = rsd[1, i, j, k]+
+               rsd[1, i, j, k] +=
                      dx1 * tx1 * (            u[1, i-1, j, k]-
                                     2.0e+00 * u[1, i, j, k]+
                                               u[1, i+1, j, k] )
-               rsd[2, i, j, k] = rsd[2, i, j, k]+
+               rsd[2, i, j, k] +=
                  tx3 * c3 * c4 * ( flux[2, i+1, j, k] - flux[2, i, j, k] )+
                      dx2 * tx1 * (            u[2, i-1, j, k]-
                                     2.0e+00 * u[2, i, j, k]+
                                               u[2, i+1, j, k] )
-               rsd[3, i, j, k] = rsd[3, i, j, k]+
+               rsd[3, i, j, k] +=
                  tx3 * c3 * c4 * ( flux[3, i+1, j, k] - flux[3, i, j, k] )+
                      dx3 * tx1 * (            u[3, i-1, j, k]-
                                     2.0e+00 * u[3, i, j, k]+
                                               u[3, i+1, j, k] )
-               rsd[4, i, j, k] = rsd[4, i, j, k]+
+               rsd[4, i, j, k] +=
                  tx3 * c3 * c4 * ( flux[4, i+1, j, k] - flux[4, i, j, k] )+
                      dx4 * tx1 * (            u[4, i-1, j, k]-
                                     2.0e+00 * u[4, i, j, k]+
                                               u[4, i+1, j, k] )
-               rsd[5, i, j, k] = rsd[5, i, j, k]+
+               rsd[5, i, j, k] +=
                  tx3 * c3 * c4 * ( flux[5, i+1, j, k] - flux[5, i, j, k] )+
                      dx5 * tx1 * (            u[5, i-1, j, k]-
                                     2.0e+00 * u[5, i, j, k]+
@@ -126,11 +165,11 @@
 #---------------------------------------------------------------------
             if north == -1
              for m = 1:5
-               rsd[m, 2, j, k] = rsd[m, 2, j, k]-
+               rsd[m, 2, j, k] -=
                   dssp * ( + 5.0e+00 * u[m, 2, j, k]-
                              4.0e+00 * u[m, 3, j, k]+
                                        u[m, 4, j, k] )
-               rsd[m, 3, j, k] = rsd[m, 3, j, k]-
+               rsd[m, 3, j, k] -=
                   dssp * ( - 4.0e+00 * u[m, 2, j, k]+
                              6.0e+00 * u[m, 3, j, k]-
                              4.0e+00 * u[m, 4, j, k]+
@@ -140,7 +179,7 @@
 
             for i = ist1:iend1
                for m = 1:5
-                  rsd[m, i, j, k] = rsd[m, i, j, k]-
+                  rsd[m, i, j, k] -=
                      dssp * (            u[m, i-2, j, k]-
                                4.0e+00 * u[m, i-1, j, k]+
                                6.0e+00 * u[m, i, j, k]-
@@ -151,12 +190,12 @@
 
             if south == -1
              for m = 1:5
-               rsd[m, nx-2, j, k] = rsd[m, nx-2, j, k]-
+               rsd[m, nx-2, j, k] -=
                   dssp * (             u[m, nx-4, j, k]-
                              4.0e+00 * u[m, nx-3, j, k]+
                              6.0e+00 * u[m, nx-2, j, k]-
                              4.0e+00 * u[m, nx-1, j, k]  )
-               rsd[m, nx-1, j, k] = rsd[m, nx-1, j, k]-
+               rsd[m, nx-1, j, k] -=
                   dssp * (             u[m, nx-3, j, k]-
                              4.0e+00 * u[m, nx-2, j, k]+
                              5.0e+00 * u[m, nx-1, j, k] )
@@ -179,7 +218,18 @@
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
       if (timeron) timer_start(t_exch) end
-      exchange_3(u, iex)
+      exchange_3(u, iex,
+                  comm_solve, 
+                  buf,
+                  buf1,
+                  south,
+                  east,
+                  north,
+                  west,
+                  nx,
+                  ny,
+                  nz,
+                )
       if (timeron) timer_stop(t_exch) end
 
       L1 = 0
@@ -213,7 +263,7 @@
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
-                  rsd[m, i, j, k] =  rsd[m, i, j, k]-
+                  rsd[m, i, j, k] -=
                           ty2 * ( flux[m, i, j+1, k] - flux[m, i, j-1, k] )
                end
             end
@@ -249,30 +299,30 @@
          for j = jst:jend
             for i = ist:iend
 
-               rsd[1, i, j, k] = rsd[1, i, j, k]+
+               rsd[1, i, j, k] +=
                      dy1 * ty1 * (            u[1, i, j-1, k]-
                                     2.0e+00 * u[1, i, j, k]+
                                               u[1, i, j+1, k] )
 
-               rsd[2, i, j, k] = rsd[2, i, j, k]+
+               rsd[2, i, j, k] +=
                  ty3 * c3 * c4 * ( flux[2, i, j+1, k] - flux[2, i, j, k] )+
                      dy2 * ty1 * (            u[2, i, j-1, k]-
                                     2.0e+00 * u[2, i, j, k]+
                                               u[2, i, j+1, k] )
 
-               rsd[3, i, j, k] = rsd[3, i, j, k]+
+               rsd[3, i, j, k] +=
                  ty3 * c3 * c4 * ( flux[3, i, j+1, k] - flux[3, i, j, k] )+
                      dy3 * ty1 * (            u[3, i, j-1, k]-
                                     2.0e+00 * u[3, i, j, k]+
                                               u[3, i, j+1, k] )
 
-               rsd[4, i, j, k] = rsd[4, i, j, k]+
+               rsd[4, i, j, k] += 
                  ty3 * c3 * c4 * ( flux[4, i, j+1, k] - flux[4, i, j, k] )+
                      dy4 * ty1 * (            u[4, i, j-1, k]-
                                     2.0e+00 * u[4, i, j, k]+
                                               u[4, i, j+1, k] )
 
-               rsd[5, i, j, k] = rsd[5, i, j, k]+
+               rsd[5, i, j, k] +=
                  ty3 * c3 * c4 * ( flux[5, i, j+1, k] - flux[5, i, j, k] )+
                      dy5 * ty1 * (            u[5, i, j-1, k]-
                                     2.0e+00 * u[5, i, j, k]+
@@ -287,11 +337,11 @@
          if west == -1
             for i = ist:iend
              for m = 1:5
-               rsd[m, i, 2, k] = rsd[m, i, 2, k]-
+               rsd[m, i, 2, k] -=
                   dssp * ( + 5.0e+00 * u[m, i, 2, k]-
                              4.0e+00 * u[m, i, 3, k]+
                                        u[m, i, 4, k] )
-               rsd[m, i, 3, k] = rsd[m, i, 3, k]-
+               rsd[m, i, 3, k] -=
                   dssp * ( - 4.0e+00 * u[m, i, 2, k]+
                              6.0e+00 * u[m, i, 3, k]-
                              4.0e+00 * u[m, i, 4, k]+
@@ -303,7 +353,7 @@
          for j = jst1:jend1
             for i = ist:iend
                for m = 1:5
-                  rsd[m, i, j, k] = rsd[m, i, j, k]-
+                  rsd[m, i, j, k] -=
                      dssp * (            u[m, i, j-2, k]-
                                4.0e+00 * u[m, i, j-1, k]+
                                6.0e+00 * u[m, i, j, k]-
@@ -316,12 +366,12 @@
          if east == -1
             for i = ist:iend
              for m = 1:5
-               rsd[m, i, ny-2, k] = rsd[m, i, ny-2, k]-
+               rsd[m, i, ny-2, k] -=
                   dssp * (             u[m, i, ny-4, k]-
                              4.0e+00 * u[m, i, ny-3, k]+
                              6.0e+00 * u[m, i, ny-2, k]-
                              4.0e+00 * u[m, i, ny-1, k]  )
-               rsd[m, i, ny-1, k] = rsd[m, i, ny-1, k]-
+               rsd[m, i, ny-1, k] -=
                   dssp * (             u[m, i, ny-3, k]-
                              4.0e+00 * u[m, i, ny-2, k]+
                              5.0e+00 * u[m, i, ny-1, k] )
@@ -357,8 +407,7 @@
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
-                  rsd[m, i, j, k] =  rsd[m, i, j, k]-
-                       tz2 * ( flux[m, i, j, k+1] - flux[m, i, j, k-1] )
+                  rsd[m, i, j, k] -= tz2 * ( flux[m, i, j, k+1] - flux[m, i, j, k-1] )
                end
             end
          end
@@ -397,26 +446,26 @@
       for k = 2:nz - 1
          for j = jst:jend
             for i = ist:iend
-               rsd[1, i, j, k] = rsd[1, i, j, k]+
+               rsd[1, i, j, k] +=
                      dz1 * tz1 * (            u[1, i, j, k-1]-
                                     2.0e+00 * u[1, i, j, k]+
                                               u[1, i, j, k+1] )
-               rsd[2, i, j, k] = rsd[2, i, j, k]+
+               rsd[2, i, j, k] +=
                  tz3 * c3 * c4 * ( flux[2, i, j, k+1] - flux[2, i, j, k] )+
                      dz2 * tz1 * (            u[2, i, j, k-1]-
                                     2.0e+00 * u[2, i, j, k]+
                                               u[2, i, j, k+1] )
-               rsd[3, i, j, k] = rsd[3, i, j, k]+
+               rsd[3, i, j, k] +=
                  tz3 * c3 * c4 * ( flux[3, i, j, k+1] - flux[3, i, j, k] )+
                      dz3 * tz1 * (            u[3, i, j, k-1]-
                                     2.0e+00 * u[3, i, j, k]+
                                               u[3, i, j, k+1] )
-               rsd[4, i, j, k] = rsd[4, i, j, k]+
+               rsd[4, i, j, k] +=
                  tz3 * c3 * c4 * ( flux[4, i, j, k+1] - flux[4, i, j, k] )+
                      dz4 * tz1 * (            u[4, i, j, k-1]-
                                     2.0e+00 * u[4, i, j, k]+
                                               u[4, i, j, k+1] )
-               rsd[5, i, j, k] = rsd[5, i, j, k]+
+               rsd[5, i, j, k] +=
                  tz3 * c3 * c4 * ( flux[5, i, j, k+1] - flux[5, i, j, k] )+
                      dz5 * tz1 * (            u[5, i, j, k-1]-
                                     2.0e+00 * u[5, i, j, k]+
@@ -431,11 +480,11 @@
       for j = jst:jend
          for i = ist:iend
             for m = 1:5
-               rsd[m, i, j, 2] = rsd[m, i, j, 2]-
+               rsd[m, i, j, 2] -=
                   dssp * ( + 5.0e+00 * u[m, i, j, 2]-
                              4.0e+00 * u[m, i, j, 3]+
                                        u[m, i, j, 4] )
-               rsd[m, i, j, 3] = rsd[m, i, j, 3]-
+               rsd[m, i, j, 3] -=
                   dssp * ( - 4.0e+00 * u[m, i, j, 2]+
                              6.0e+00 * u[m, i, j, 3]-
                              4.0e+00 * u[m, i, j, 4]+
@@ -448,7 +497,7 @@
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
-                  rsd[m, i, j, k] = rsd[m, i, j, k]-
+                  rsd[m, i, j, k] -=
                      dssp * (            u[m, i, j, k-2]-
                                4.0e+00 * u[m, i, j, k-1]+
                                6.0e+00 * u[m, i, j, k]-
@@ -462,12 +511,12 @@
       for j = jst:jend
          for i = ist:iend
             for m = 1:5
-               rsd[m, i, j, nz-2] = rsd[m, i, j, nz-2]-
+               rsd[m, i, j, nz-2] -=
                   dssp * (             u[m, i, j, nz-4]-
                              4.0e+00 * u[m, i, j, nz-3]+
                              6.0e+00 * u[m, i, j, nz-2]-
                              4.0e+00 * u[m, i, j, nz-1]  )
-               rsd[m, i, j, nz-1] = rsd[m, i, j, nz-1]-
+               rsd[m, i, j, nz-1] -=
                   dssp * (             u[m, i, j, nz-3]-
                              4.0e+00 * u[m, i, j, nz-2]+
                              5.0e+00 * u[m, i, j, nz-1] )

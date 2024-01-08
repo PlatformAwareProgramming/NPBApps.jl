@@ -12,9 +12,6 @@
 
 function x_solve()
 
-      send_id = Ref{MPI.Request}()
-      recv_id = Ref{MPI.Request}()
-
       istart = 0
 
       if (timeron) timer_start(t_xsolve) end
@@ -113,7 +110,7 @@ end
 #     all j and k
 #---------------------------------------------------------------------
 
-function x_unpack_solve_info(c)
+ function x_unpack_solve_info(c)
 
       istart = 0
       ptr = 0
@@ -140,7 +137,7 @@ end
 #     all j and k
 #---------------------------------------------------------------------
 
-function x_send_solve_info(c)
+ function x_send_solve_info(c)
 
 
       isize = cell_size[1, c]-1
@@ -183,7 +180,7 @@ end
 #     pack up and send u[istart] for all j and k
 #---------------------------------------------------------------------
 
-function x_send_backsub_info(c)
+ function x_send_backsub_info(c)
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -213,7 +210,7 @@ end
 #     unpack u[isize] for all j and k
 #---------------------------------------------------------------------
 
-function x_unpack_backsub_info(c)
+ function x_unpack_backsub_info(c)
 
       ptr = 0
       for k = 0:KMAX-1
@@ -233,7 +230,7 @@ end
 #     post mpi receives
 #---------------------------------------------------------------------
 
-function x_receive_backsub_info(c)
+ function x_receive_backsub_info(c)
 
       jp = cell_coord[2, c] - 1
       kp = cell_coord[3, c] - 1
@@ -247,7 +244,7 @@ end
 #     post mpi receives 
 #---------------------------------------------------------------------
 
-function x_receive_solve_info(c)
+ function x_receive_solve_info(c)
 
       jp = cell_coord[2, c] - 1
       kp = cell_coord[3, c] - 1
@@ -265,7 +262,7 @@ end
 #     after call u[istart] will be sent to next cell
 #---------------------------------------------------------------------
 
-function x_backsubstitute(FIRST, LAST, c)
+ function x_backsubstitute(FIRST, LAST, c)
 
       istart = 0
       isize = cell_size[1, c]-1
@@ -318,7 +315,7 @@ end
 #     c'(IMAX) and rhs'(IMAX) will be sent to next cell
 #---------------------------------------------------------------------
 
-function x_solve_cell(FIRST, LAST, c)
+ function x_solve_cell(FIRST, LAST, c)
 
       istart = 0
       isize = cell_size[1, c]-1

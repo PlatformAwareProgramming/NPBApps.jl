@@ -2,12 +2,49 @@
 #   set up coefficients
 #---------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------
+#   diffusion coefficients
+#---------------------------------------------------------------------
+const dx1 = 0.75e+00
+const dx2 = dx1
+const dx3 = dx1
+const dx4 = dx1
+const dx5 = dx1
+
+const dy1 = 0.75e+00
+const dy2 = dy1
+const dy3 = dy1
+const dy4 = dy1
+const dy5 = dy1
+
+const dz1 = 1.00e+00
+const dz2 = dz1
+const dz3 = dz1
+const dz4 = dz1
+const dz5 = dz1
+
+const ii1 = 2
+const ji1 = 2
+const ki1 = 3
+
+#---------------------------------------------------------------------
+#   fourth difference dissipation
+#---------------------------------------------------------------------
+const dssp = ( max(dx1, dy1, dz1 ) ) / 4.0e+00
+
+const ce = SA_F64[2.0e0 0.0e0 0.0e0 4.0e0 5.0e0 3.0e0 0.5e0 0.02e0 0.01e0 0.03e0 0.5e0 0.4e0 0.3e0;  # coefficients of the exact solution to the first pde
+                  1.0e0 0.0e0 0.0e0 0.0e0 1.0e0 2.0e0 3.0e0 0.01e0 0.03e0 0.02e0 0.4e0 0.3e0 0.5e0;  # coefficients of the exact solution to the second pde
+                  2.0e0 2.0e0 0.0e0 0.0e0 0.0e0 2.0e0 3.0e0 0.04e0 0.03e0 0.05e0 0.3e0 0.5e0 0.4e0;  # coefficients of the exact solution to the third pde
+                  2.0e0 2.0e0 0.0e0 0.0e0 0.0e0 2.0e0 3.0e0 0.03e0 0.05e0 0.04e0 0.2e0 0.1e0 0.3e0;  # coefficients of the exact solution to the fourth pde
+                  5.0e0 4.0e0 3.0e0 2.0e0 0.1e0 0.4e0 0.3e0 0.05e0 0.04e0 0.03e0 0.1e0 0.3e0 0.2e0]  # coefficients of the exact solution to the fifth pde
+
+
  function setcoeff()
 
 #---------------------------------------------------------------------
 #  local variables
 #---------------------------------------------------------------------
-
 
       global dxi = 1.0e+00 / ( nx0 - 1 )
       global deta = 1.0e+00 / ( ny0 - 1 )
@@ -25,126 +62,9 @@
       global tz2 = 1.0e+00 / ( 2.0e+00 * dzeta )
       global tz3 = 1.0e+00 / dzeta
 
-      global ii1 = 2
       global ii2 = nx0 - 1
-      global ji1 = 2
       global ji2 = ny0 - 2
-      global ki1 = 3
       global ki2 = nz0 - 1
-
-#---------------------------------------------------------------------
-#   diffusion coefficients
-#---------------------------------------------------------------------
-      global dx1 = 0.75e+00
-      global dx2 = dx1
-      global dx3 = dx1
-      global dx4 = dx1
-      global dx5 = dx1
-
-      global dy1 = 0.75e+00
-      global dy2 = dy1
-      global dy3 = dy1
-      global dy4 = dy1
-      global dy5 = dy1
-
-      global dz1 = 1.00e+00
-      global dz2 = dz1
-      global dz3 = dz1
-      global dz4 = dz1
-      global dz5 = dz1
-
-#---------------------------------------------------------------------
-#   fourth difference dissipation
-#---------------------------------------------------------------------
-      global dssp = ( max(dx1, dy1, dz1 ) ) / 4.0e+00
-
-#---------------------------------------------------------------------
-#   coefficients of the exact solution to the first pde
-#---------------------------------------------------------------------
-
-      global ce = zeros(Float64, 5, 13)
-
-      ce[1, 1] = 2.0e+00
-      ce[1, 2] = 0.0e+00
-      ce[1, 3] = 0.0e+00
-      ce[1, 4] = 4.0e+00
-      ce[1, 5] = 5.0e+00
-      ce[1, 6] = 3.0e+00
-      ce[1, 7] = 5.0e-01
-      ce[1, 8] = 2.0e-02
-      ce[1, 9] = 1.0e-02
-      ce[1, 10] = 3.0e-02
-      ce[1, 11] = 5.0e-01
-      ce[1, 12] = 4.0e-01
-      ce[1, 13] = 3.0e-01
-
-#---------------------------------------------------------------------
-#   coefficients of the exact solution to the second pde
-#---------------------------------------------------------------------
-      ce[2, 1] = 1.0e+00
-      ce[2, 2] = 0.0e+00
-      ce[2, 3] = 0.0e+00
-      ce[2, 4] = 0.0e+00
-      ce[2, 5] = 1.0e+00
-      ce[2, 6] = 2.0e+00
-      ce[2, 7] = 3.0e+00
-      ce[2, 8] = 1.0e-02
-      ce[2, 9] = 3.0e-02
-      ce[2, 10] = 2.0e-02
-      ce[2, 11] = 4.0e-01
-      ce[2, 12] = 3.0e-01
-      ce[2, 13] = 5.0e-01
-
-#---------------------------------------------------------------------
-#   coefficients of the exact solution to the third pde
-#---------------------------------------------------------------------
-      ce[3, 1] = 2.0e+00
-      ce[3, 2] = 2.0e+00
-      ce[3, 3] = 0.0e+00
-      ce[3, 4] = 0.0e+00
-      ce[3, 5] = 0.0e+00
-      ce[3, 6] = 2.0e+00
-      ce[3, 7] = 3.0e+00
-      ce[3, 8] = 4.0e-02
-      ce[3, 9] = 3.0e-02
-      ce[3, 10] = 5.0e-02
-      ce[3, 11] = 3.0e-01
-      ce[3, 12] = 5.0e-01
-      ce[3, 13] = 4.0e-01
-
-#---------------------------------------------------------------------
-#   coefficients of the exact solution to the fourth pde
-#---------------------------------------------------------------------
-      ce[4, 1] = 2.0e+00
-      ce[4, 2] = 2.0e+00
-      ce[4, 3] = 0.0e+00
-      ce[4, 4] = 0.0e+00
-      ce[4, 5] = 0.0e+00
-      ce[4, 6] = 2.0e+00
-      ce[4, 7] = 3.0e+00
-      ce[4, 8] = 3.0e-02
-      ce[4, 9] = 5.0e-02
-      ce[4, 10] = 4.0e-02
-      ce[4, 11] = 2.0e-01
-      ce[4, 12] = 1.0e-01
-      ce[4, 13] = 3.0e-01
-
-#---------------------------------------------------------------------
-#   coefficients of the exact solution to the fifth pde
-#---------------------------------------------------------------------
-      ce[5, 1] = 5.0e+00
-      ce[5, 2] = 4.0e+00
-      ce[5, 3] = 3.0e+00
-      ce[5, 4] = 2.0e+00
-      ce[5, 5] = 1.0e-01
-      ce[5, 6] = 4.0e-01
-      ce[5, 7] = 3.0e-01
-      ce[5, 8] = 5.0e-02
-      ce[5, 9] = 4.0e-02
-      ce[5, 10] = 3.0e-02
-      ce[5, 11] = 1.0e-01
-      ce[5, 12] = 3.0e-01
-      ce[5, 13] = 2.0e-01
 
       return nothing
 end

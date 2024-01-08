@@ -141,6 +141,16 @@ function go()
 
        compute_buffer_size(5)
 
+       if (no_nodes > 1)
+         ss = SA[start_send_east::Int start_send_west::Int start_send_north::Int start_send_south::Int start_send_top::Int start_send_bottom::Int]
+         sr = SA[start_recv_east::Int start_recv_west::Int start_recv_north::Int start_recv_south::Int start_recv_top::Int start_recv_bottom::Int]
+         b_size = SA[east_size::Int west_size::Int north_size::Int south_size::Int top_size::Int bottom_size::Int]
+       else
+         ss = nothing
+         sr = nothing
+         b_size = nothing
+       end
+
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
@@ -213,7 +223,11 @@ function go()
             in_buffer,
             out_buffer,
             comm_solve,
-            comm_rhs)
+            comm_rhs,
+            ss,
+            sr,
+            b_size,
+   )
 
        initialize()
 
@@ -306,14 +320,18 @@ function go()
                in_buffer,
                out_buffer,
                comm_solve,
-               comm_rhs)
+               comm_rhs,
+               ss,
+               sr,
+               b_size,
+         )
 
        end
 
        timer_stop(1)
        t = timer_read(1)
 
-       verified = verify(class)
+       verified = verify(class, ss, sr, b_size)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
 

@@ -3,9 +3,59 @@
 #   for five nonlinear pde's.
 #---------------------------------------------------------------------
 
- function ssor(niter)
+const delunm = Array{Float64}(undef, 5) 
+const tmat = Array{Float64}(undef, 5, 5)
 
-      delunm = Array{Float64}(undef, 5) 
+ function ssor(niter,
+               comm_solve, 
+               id,
+               rsdnm,
+               u,
+               rsd,
+               frct,
+               flux,
+               a,
+               b,
+               c,
+               d,
+               buf,
+               buf1,
+               south,
+               east,
+               north,
+               west,
+               isiz1,
+               isiz2,
+               isiz3,
+               inorm,
+               itmax,
+               dt,
+               omega,
+               tolrsd,
+               nx0,
+               ny0,
+               nz0,
+               timeron,
+               tx1,
+               tx2,
+               tx3,
+               ty1,
+               ty2,
+               ty3,
+               tz1,
+               tz2,
+               tz3,
+               nx,
+               ipt,
+               ny,
+               jpt,
+               nz,
+               ist,
+               iend,
+               jst,
+               jend,
+               )
+
       tv = Array{Float64}(undef, 5, isiz1) 
 
 #---------------------------------------------------------------------
@@ -31,14 +81,46 @@
 #---------------------------------------------------------------------
 #   compute the steady-state residuals
 #---------------------------------------------------------------------
-      rhs()
+      rhs(               
+            comm_solve, 
+            u,
+            rsd,
+            frct,
+            flux,
+            buf,
+            buf1,
+            south,
+            east,
+            north,
+            west,
+            timeron,
+            tx1,
+            tx2,
+            tx3,
+            ty1,
+            ty2,
+            ty3,
+            tz1,
+            tz2,
+            tz3,
+            nx,
+            ny,
+            nz,
+            ist,
+            iend,
+            jst,
+            jend,
+         )
 
 #---------------------------------------------------------------------
 #   compute the L2 norms of newton iteration residuals
 #---------------------------------------------------------------------
       l2norm( isiz1, isiz2, isiz3, nx0, ny0, nz0,
                    ist, iend, jst, jend,
-                   rsd, rsdnm )
+                   rsd, rsdnm, 
+                   comm_solve, 
+                   timeron,
+            )
 
       for i = 1:t_last
          timer_clear(i)
@@ -81,7 +163,21 @@
 #---------------------------------------------------------------------
             if (timeron) timer_start(t_lcomm) end
             iex = 0
-            exchange_1( rsd, k, iex )
+            exchange_1( rsd, k, iex,
+                        comm_solve, 
+                        buf,
+                        buf1,
+                        south,
+                        east,
+                        north,
+                        west,
+                        nx,
+                        ny,
+                        ist,
+                        iend,
+                        jst,
+                        jend, 
+                     )
             if (timeron) timer_stop(t_lcomm) end
 
 
@@ -91,18 +187,33 @@
 #---------------------------------------------------------------------
 #   form the lower triangular part of the jacobian matrix
 #---------------------------------------------------------------------
-               jacld(j, k)
+             jacld(j, k,
+                     u,
+                     a,
+                     b,
+                     c,
+                     d,
+                     dt,
+                     tx1,
+                     tx2,
+                     ty1,
+                     ty2,
+                     tz1,
+                     tz2,
+                     ist,
+                     iend,
+                    )
 
 #---------------------------------------------------------------------
 #   perform the lower triangular solution
 #---------------------------------------------------------------------
-               blts( isiz1, isiz2, isiz3,
+             blts( isiz1, isiz2, isiz3,
                           nx, ny, nz, j, k,
                           omega,
                           rsd,
                           a, b, c, d,
                           ist, iend, jst, jend,
-                          nx0, ny0, ipt, jpt)
+                          nx0, ny0, ipt, jpt, tmat)
             end
             if (timeron) timer_stop(t_blts) end
 
@@ -111,7 +222,21 @@
 #---------------------------------------------------------------------
             if (timeron) timer_start(t_lcomm) end
             iex = 2
-            exchange_1( rsd, k, iex )
+            exchange_1( rsd, k, iex,
+                        comm_solve, 
+                        buf,
+                        buf1,
+                        south,
+                        east,
+                        north,
+                        west,
+                        nx,
+                        ny,
+                        ist,
+                        iend,
+                        jst,
+                        jend,
+                     )
             if (timeron) timer_stop(t_lcomm) end
          end
 
@@ -121,7 +246,21 @@
 #---------------------------------------------------------------------
             if (timeron) timer_start(t_ucomm) end
             iex = 1
-            exchange_1( rsd, k, iex )
+            exchange_1( rsd, k, iex,
+                        comm_solve, 
+                        buf,
+                        buf1,
+                        south,
+                        east,
+                        north,
+                        west,
+                        nx,
+                        ny,
+                        ist,
+                        iend,
+                        jst,
+                        jend,
+                       )
             if (timeron) timer_stop(t_ucomm) end
 
             if (timeron) timer_start(t_buts) end
@@ -130,7 +269,22 @@
 #---------------------------------------------------------------------
 #   form the strictly upper triangular part of the jacobian matrix
 #---------------------------------------------------------------------
-               jacu(j, k)
+              jacu(j, k, 
+                     u,
+                     a,
+                     b,
+                     c,
+                     d,
+                     dt,
+                     tx1,
+                     tx2,
+                     ty1,
+                     ty2,
+                     tz1,
+                     tz2,
+                     ist,
+                     iend,
+                   )
 
 #---------------------------------------------------------------------
 #   perform the upper triangular solution
@@ -141,7 +295,7 @@
                           rsd, tv,
                           d, a, b, c,
                           ist, iend, jst, jend,
-                          nx0, ny0, ipt, jpt)
+                          nx0, ny0, ipt, jpt, tmat)
             end
             if (timeron) timer_stop(t_buts) end
 
@@ -150,7 +304,21 @@
 #---------------------------------------------------------------------
             if (timeron) timer_start(t_ucomm) end
             iex = 3
-            exchange_1( rsd, k, iex )
+            exchange_1( rsd, k, iex,
+                        comm_solve, 
+                        buf,
+                        buf1,
+                        south,
+                        east,
+                        north,
+                        west,
+                        nx,
+                        ny,
+                        ist,
+                        iend,
+                        jst,
+                        jend, 
+                     )
             if (timeron) timer_stop(t_ucomm) end
          end
 
@@ -172,7 +340,10 @@
 #   compute the max-norms of newton iteration corrections
 #---------------------------------------------------------------------
          if mod(istep, inorm) == 0
-            l2norm(isiz1, isiz2, isiz3, nx0, ny0, nz0, ist, iend, jst, jend, rsd, delunm)
+            l2norm(isiz1, isiz2, isiz3, nx0, ny0, nz0, ist, iend, jst, jend, rsd, delunm, 
+                   comm_solve, 
+                   timeron,
+                  )
 #            if ( ipr .eq. 1 .and. id .eq. 0 ) then
 #                write (*,1006) ( delunm(m), m = 1, 5 )
 #            else if ( ipr .eq. 2 .and. id .eq. 0 ) then
@@ -183,13 +354,45 @@
 #---------------------------------------------------------------------
 #   compute the steady-state residuals
 #---------------------------------------------------------------------
-         rhs()
+         rhs(               
+               comm_solve, 
+               u,
+               rsd,
+               frct,
+               flux,
+               buf,
+               buf1,
+               south,
+               east,
+               north,
+               west,
+               timeron,
+               tx1,
+               tx2,
+               tx3,
+               ty1,
+               ty2,
+               ty3,
+               tz1,
+               tz2,
+               tz3,
+               nx,
+               ny,
+               nz,
+               ist,
+               iend,
+               jst,
+               jend,
+            )
 
 #---------------------------------------------------------------------
 #   compute the max-norms of newton iteration residuals
 #---------------------------------------------------------------------
          if (mod(istep, inorm) == 0) || (istep == itmax)
-            l2norm( isiz1, isiz2, isiz3, nx0, ny0, nz0, ist, iend, jst, jend, rsd, rsdnm)
+            l2norm( isiz1, isiz2, isiz3, nx0, ny0, nz0, ist, iend, jst, jend, rsd, rsdnm, 
+                    comm_solve, 
+                    timeron,
+                  )
 #            if ( ipr .eq. 1.and.id.eq.0 ) then
 #                write (*,1007) ( rsdnm[m], m = 1, 5 )
 #            end if

@@ -73,8 +73,11 @@ function adi(no_nodes,
        in_buffer,
        out_buffer,
        comm_solve,
-       comm_rhs
-       ) 
+       comm_rhs,
+       ss,
+       sr,
+       b_size,
+) 
 
          copy_faces(no_nodes,
                      ncells,
@@ -136,9 +139,12 @@ function adi(no_nodes,
                      requests,
                      timeron,
                      comm_rhs,
+                     ss,
+                     sr,
+                     b_size,
                      )
          
-         txinvr(ncells,
+       txinvr(ncells,
               cell_size,
               cell_start,
               cell_end,
@@ -153,7 +159,7 @@ function adi(no_nodes,
               c2,
               bt)
 
-          x_solve(ncells,
+       x_solve(ncells,
               successor,
               predecessor,
               slice,
@@ -204,7 +210,7 @@ function adi(no_nodes,
               timeron
               )
 
-            z_solve(ncells,
+          z_solve(ncells,
               successor,
               predecessor,
               slice,
