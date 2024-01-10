@@ -2,9 +2,21 @@
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
- function exchange_3(g, iex)
+const mid = Ref{MPI.Request}()
 
-      mid = Ref{MPI.Request}()
+function exchange_3(g, iex,
+                      comm_solve, 
+                      buf,
+                      buf1,
+                      south,
+                      east,
+                      north,
+                      west,
+                      nx,
+                      ny,
+                      nz,
+                    )
+
 
       if iex == 0
         

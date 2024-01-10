@@ -58,7 +58,18 @@
 #---------------------------------------------------------------------
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
-      exchange_3(rsd, iex)
+      exchange_3(rsd, iex,
+                  comm_solve, 
+                  buf,
+                  buf1,
+                  south,
+                  east,
+                  north,
+                  west,
+                  nx,
+                  ny,
+                  nz,
+               )
 
       L1 = 0
       if (north == -1) L1 = 1 end
@@ -208,7 +219,18 @@
 #---------------------------------------------------------------------
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
-      exchange_3(rsd, iex)
+      exchange_3(rsd, iex,
+                  comm_solve, 
+                  buf,
+                  buf1,
+                  south,
+                  east,
+                  north,
+                  west,
+                  nx,
+                  ny,
+                  nz,
+               )
 
       L1 = 0
       if (west == -1) L1 = 1 end

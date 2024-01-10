@@ -21,7 +21,7 @@ const bb = 2
 const cc = 3
 const BLOCK_SIZE = 5
 
-grid_points = zeros(Integer, 3)
+const grid_points = zeros(Integer, 3)
 
 const EAST = 2000 
 const WEST = 3000      
@@ -30,9 +30,9 @@ const SOUTH = 5000
 const BOTTOM = 6000 
 const TOP = 7000
 
-predecessor = zeros(Int64, 3)
-successor = zeros(Int64,3)
-grid_size = zeros(Int64, 3)
+const predecessor = zeros(Int64, 3)
+const successor = zeros(Int64,3)
+const grid_size = zeros(Int64, 3)
 
 #---------------------------------------------------------------------
 #     These are used by btio
@@ -64,18 +64,11 @@ const t_enorm = 12
 const t_iov = 13
 const t_last = 13
 
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
- function alloc_space()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
 #---------------------------------------------------------------------
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
+
+ function alloc_space()
 
       global MAX_CELL_DIM = div(problem_size,maxcells)+1
 
@@ -92,7 +85,6 @@ const t_last = 13
       global cell_start = zeros(Int64, 3, maxcells)
       global cell_end = zeros(Int64, 3, maxcells)
       global slice = zeros(Int64, 3, maxcells)
-
 
       forcing0 = zeros(Float64, 5, IMAX, JMAX, KMAX, maxcells)
       global forcing = OffsetArray(forcing0, 1:5, 0:IMAX-1, 0:JMAX-1, 0:KMAX-1, 1:maxcells)            

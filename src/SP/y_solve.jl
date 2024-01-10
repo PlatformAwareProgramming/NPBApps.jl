@@ -6,10 +6,45 @@
 # systems for the y-lines. Boundary conditions are non-periodic
 #---------------------------------------------------------------------
 
-function y_solve()
+function y_solve(_::Val{ncells}, # ::Int64,
+                 successor, # ::Vector{Int64},
+                 predecessor, # ::Vector{Int64},
+                 slice, # ::Array{Int64,2},
+                 cell_size, # ::Array{Int64,2},
+                 cell_start, # ::Array{Int64,2},
+                 cell_end, # ::Array{Int64,2},
+                 cell_coord, # ::Array{Int64,2},
+                 lhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
+                 rhs, # ::OffsetArray{Float64, 5, Array{Float64, 5}},
+                 rho_i, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 vs, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 rhoq,
+                 cv,
+                speed, # ::OffsetArray{Float64, 4, Array{Float64, 4}},
+                 con43, # ::Float64, 
+                 c3c4, # ::Float64, 
+                 c1c5, # ::Float64, 
+                 c2dtty1,
+                 dy3, # ::Float64, 
+                 dy5, # ::Float64, 
+                 dy1, # ::Float64, 
+                 dymax, # ::Float64, 
+                 dtty1,
+                 dtty2, # ::Float64, 
+                 comz5, # ::Float64, 
+                 comz4, # ::Float64, 
+                 comz1, # ::Float64, 
+                 comz6, # ::Float64,
+                 in_buffer, # ::Vector{Float64},
+                 out_buffer, # ::Vector{Float64},
+                 comm_solve, # ::MPI.Comm
+                 requests,
+                 s,
+                 timeron
+                 ) where ncells
 
-       requests = Array{MPI.Request}(undef,2)
-       s = Array{Float64}(undef,5)
+#       requests = Array{MPI.Request}(undef,2)
+#       s = Array{Float64}(undef,5)
 
 #---------------------------------------------------------------------
 # now do a sweep on a layer-by-layer basis, i.e. sweeping through cells
@@ -51,7 +86,19 @@ function y_solve()
 #            communication has already been started. 
 #            compute the left hand side while waiting for the msg
 #---------------------------------------------------------------------
-             lhsy(c)
+             lhsy(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  lhs,
+                  rho_i,
+                  vs,
+                  rhoq,
+                  cv,
+                  speed,
+                  con43, c3c4, c1c5, c2dtty1,
+                  dy3, dy5, dy1, dymax, dtty1, dtty2, 
+                  comz5, comz4, comz1, comz6)
 
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
@@ -74,13 +121,10 @@ function y_solve()
              p = 0
              for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                 for i = cell_start[1, c]:isize-cell_end[1, c]-1
-                   lhs[i, j, k, n+2, c] = lhs[i, j, k, n+2, c] -
-                             in_buffer[p+1] * lhs[i, j, k, n+1, c]
-                   lhs[i, j, k, n+3, c] = lhs[i, j, k, n+3, c] -
-                             in_buffer[p+2] * lhs[i, j, k, n+1, c]
+                   lhs[i, j, k, n+2, c] -= in_buffer[p+1] * lhs[i, j, k, n+1, c]
+                   lhs[i, j, k, n+3, c] -= in_buffer[p+2] * lhs[i, j, k, n+1, c]
                    for m = 1:3
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                             in_buffer[p+2+m] * lhs[i, j, k, n+1, c]
+                      rhs[i, j, k, m, c] -= in_buffer[p+2+m] * lhs[i, j, k, n+1, c]
                    end
                    d            = in_buffer[p+6]
                    e            = in_buffer[p+7]
@@ -88,16 +132,16 @@ function y_solve()
                       s[m] = in_buffer[p+7+m]
                    end
                    r1 = lhs[i, j, k, n+2, c]
-                   lhs[i, j, k, n+3, c] = lhs[i, j, k, n+3, c] - d * r1
-                   lhs[i, j, k, n+4, c] = lhs[i, j, k, n+4, c] - e * r1
+                   lhs[i, j, k, n+3, c] -= d * r1
+                   lhs[i, j, k, n+4, c] -= e * r1
                    for m = 1:3
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - s[m] * r1
+                      rhs[i, j, k, m, c] -= s[m] * r1
                    end
                    r2 = lhs[i, j1, k, n+1, c]
-                   lhs[i, j1, k, n+2, c] = lhs[i, j1, k, n+2, c] - d * r2
-                   lhs[i, j1, k, n+3, c] = lhs[i, j1, k, n+3, c] - e * r2
+                   lhs[i, j1, k, n+2, c] -= d * r2
+                   lhs[i, j1, k, n+3, c] -= e * r2
                    for m = 1:3
-                      rhs[i, j1, k, m, c] = rhs[i, j1, k, m, c] - s[m] * r2
+                      rhs[i, j1, k, m, c] -= s[m] * r2
                    end
                    p = p + 10
                 end
@@ -107,23 +151,20 @@ function y_solve()
                 n = (m-3)*5
                 for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                    for i = cell_start[1, c]:isize-cell_end[1, c]-1
-                      lhs[i, j, k, n+2, c] = lhs[i, j, k, n+2, c] -
-                                in_buffer[p+1] * lhs[i, j, k, n+1, c]
-                      lhs[i, j, k, n+3, c] = lhs[i, j, k, n+3, c] -
-                                in_buffer[p+2] * lhs[i, j, k, n+1, c]
-                      rhs[i, j, k, m, c]   = rhs[i, j, k, m, c] -
-                                in_buffer[p+3] * lhs[i, j, k, n+1, c]
+                      lhs[i, j, k, n+2, c] -= in_buffer[p+1] * lhs[i, j, k, n+1, c]
+                      lhs[i, j, k, n+3, c] -= in_buffer[p+2] * lhs[i, j, k, n+1, c]
+                      rhs[i, j, k, m, c]   -= in_buffer[p+3] * lhs[i, j, k, n+1, c]
                       d                = in_buffer[p+4]
                       e                = in_buffer[p+5]
                       s[m]             = in_buffer[p+6]
                       r1 = lhs[i, j, k, n+2, c]
-                      lhs[i, j, k, n+3, c] = lhs[i, j, k, n+3, c] - d * r1
-                      lhs[i, j, k, n+4, c] = lhs[i, j, k, n+4, c] - e * r1
-                      rhs[i, j, k, m, c]   = rhs[i, j, k, m, c] - s[m] * r1
+                      lhs[i, j, k, n+3, c] -= d * r1
+                      lhs[i, j, k, n+4, c] -= e * r1
+                      rhs[i, j, k, m, c]   -= s[m] * r1
                       r2 = lhs[i, j1, k, n+1, c]
-                      lhs[i, j1, k, n+2, c] = lhs[i, j1, k, n+2, c] - d * r2
-                      lhs[i, j1, k, n+3, c] = lhs[i, j1, k, n+3, c] - e * r2
-                      rhs[i, j1, k, m, c]   = rhs[i, j1, k, m, c] - s[m] * r2
+                      lhs[i, j1, k, n+2, c] -= d * r2
+                      lhs[i, j1, k, n+3, c] -= e * r2
+                      rhs[i, j1, k, m, c]   -= s[m] * r2
                       p = p + 6
                    end
                 end
@@ -134,8 +175,20 @@ function y_solve()
 #---------------------------------------------------------------------
 #            if this IS the first cell, we still compute the lhs
 #---------------------------------------------------------------------
-             lhsy(c)
-          end
+             lhsy(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  lhs,
+                  rho_i,
+                  vs,
+                  rhoq,
+                  cv,
+                  speed,
+                  con43, c3c4, c1c5, c2dtty1,
+                  dy3, dy5, dy1, dymax, dtty1, dtty2, 
+                  comz5, comz4, comz1, comz6)
+               end
 
 #---------------------------------------------------------------------
 #         perform the Thomas algorithm; first, FORWARD ELIMINATION     
@@ -147,27 +200,21 @@ function y_solve()
                 for i = cell_start[1, c]:isize-cell_end[1, c]-1
                    j1 = j  + 1
                    j2 = j  + 2
-                   fac1               = 1.0e0/lhs[i, j, k, n+3, c]
-                   lhs[i, j, k, n+4, c]   = fac1*lhs[i, j, k, n+4, c]
-                   lhs[i, j, k, n+5, c]   = fac1*lhs[i, j, k, n+5, c]
+                   fac1 = 1.0e0/lhs[i, j, k, n+3, c]
+                   lhs[i, j, k, n+4, c] *= fac1
+                   lhs[i, j, k, n+5, c] *= fac1
                    for m = 1:3
-                      rhs[i, j, k, m, c] = fac1*rhs[i, j, k, m, c]
+                      rhs[i, j, k, m, c] *= fac1
                    end
-                   lhs[i, j1, k, n+3, c] = lhs[i, j1, k, n+3, c] -
-                               lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+4, c]
-                   lhs[i, j1, k, n+4, c] = lhs[i, j1, k, n+4, c] -
-                               lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+5, c]
+                   lhs[i, j1, k, n+3, c] -= lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+4, c]
+                   lhs[i, j1, k, n+4, c] -= lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+5, c]
                    for m = 1:3
-                      rhs[i, j1, k, m, c] = rhs[i, j1, k, m, c] -
-                               lhs[i, j1, k, n+2, c]*rhs[i, j, k, m, c]
+                      rhs[i, j1, k, m, c] -= lhs[i, j1, k, n+2, c]*rhs[i, j, k, m, c]
                    end
-                   lhs[i, j2, k, n+2, c] = lhs[i, j2, k, n+2, c] -
-                               lhs[i, j2, k, n+1, c]*lhs[i, j, k, n+4, c]
-                   lhs[i, j2, k, n+3, c] = lhs[i, j2, k, n+3, c] -
-                               lhs[i, j2, k, n+1, c]*lhs[i, j, k, n+5, c]
+                   lhs[i, j2, k, n+2, c] -= lhs[i, j2, k, n+1, c]*lhs[i, j, k, n+4, c]
+                   lhs[i, j2, k, n+3, c] -= lhs[i, j2, k, n+1, c]*lhs[i, j, k, n+5, c]
                    for m = 1:3
-                      rhs[i, j2, k, m, c] = rhs[i, j2, k, m, c] -
-                               lhs[i, j2, k, n+1, c]*rhs[i, j, k, m, c]
+                      rhs[i, j2, k, m, c] -= lhs[i, j2, k, n+1, c]*rhs[i, j, k, m, c]
                    end
                 end
              end
@@ -183,29 +230,26 @@ function y_solve()
           j1 = jend
           for k = cell_start[3, c]:ksize-cell_end[3, c]-1
              for i = cell_start[1, c]:isize-cell_end[1, c]-1
-                fac1               = 1.0e0/lhs[i, j, k, n+3, c]
-                lhs[i, j, k, n+4, c]   = fac1*lhs[i, j, k, n+4, c]
-                lhs[i, j, k, n+5, c]   = fac1*lhs[i, j, k, n+5, c]
+                fac1 = 1.0e0/lhs[i, j, k, n+3, c]
+                lhs[i, j, k, n+4, c] *= fac1
+                lhs[i, j, k, n+5, c] *= fac1
                 for m = 1:3
-                   rhs[i, j, k, m, c] = fac1*rhs[i, j, k, m, c]
+                   rhs[i, j, k, m, c] *= fac1
                 end
-                lhs[i, j1, k, n+3, c] = lhs[i, j1, k, n+3, c] -
-                            lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+4, c]
-                lhs[i, j1, k, n+4, c] = lhs[i, j1, k, n+4, c] -
-                            lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+5, c]
+                lhs[i, j1, k, n+3, c] -= lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+4, c]
+                lhs[i, j1, k, n+4, c] -= lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+5, c]
                 for m = 1:3
-                   rhs[i, j1, k, m, c] = rhs[i, j1, k, m, c] -
-                            lhs[i, j1, k, n+2, c]*rhs[i, j, k, m, c]
+                   rhs[i, j1, k, m, c] -= lhs[i, j1, k, n+2, c]*rhs[i, j, k, m, c]
                 end
 #---------------------------------------------------------------------
 #               scale the last row immediately (some of this is
 #               overkill in case this is the last cell)
 #---------------------------------------------------------------------
-                fac2               = 1.0e0/lhs[i, j1, k, n+3, c]
-                lhs[i, j1, k, n+4, c] = fac2*lhs[i, j1, k, n+4, c]
-                lhs[i, j1, k, n+5, c] = fac2*lhs[i, j1, k, n+5, c]
+                fac2 = 1.0e0/lhs[i, j1, k, n+3, c]
+                lhs[i, j1, k, n+4, c] *= fac2
+                lhs[i, j1, k, n+5, c] *= fac2
                 for m = 1:3
-                   rhs[i, j1, k, m, c] = fac2*rhs[i, j1, k, m, c]
+                   rhs[i, j1, k, m, c] *= fac2
                 end
              end
           end
@@ -220,22 +264,16 @@ function y_solve()
                    for i = cell_start[1, c]:isize-cell_end[1, c]-1
                    j1 = j  + 1
                    j2 = j  + 2
-                   fac1               = 1.0e0/lhs[i, j, k, n+3, c]
-                   lhs[i, j, k, n+4, c]   = fac1*lhs[i, j, k, n+4, c]
-                   lhs[i, j, k, n+5, c]   = fac1*lhs[i, j, k, n+5, c]
-                   rhs[i, j, k, m, c] = fac1*rhs[i, j, k, m, c]
-                   lhs[i, j1, k, n+3, c] = lhs[i, j1, k, n+3, c] -
-                               lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+4, c]
-                   lhs[i, j1, k, n+4, c] = lhs[i, j1, k, n+4, c] -
-                               lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+5, c]
-                   rhs[i, j1, k, m, c] = rhs[i, j1, k, m, c] -
-                               lhs[i, j1, k, n+2, c]*rhs[i, j, k, m, c]
-                   lhs[i, j2, k, n+2, c] = lhs[i, j2, k, n+2, c] -
-                               lhs[i, j2, k, n+1, c]*lhs[i, j, k, n+4, c]
-                   lhs[i, j2, k, n+3, c] = lhs[i, j2, k, n+3, c] -
-                               lhs[i, j2, k, n+1, c]*lhs[i, j, k, n+5, c]
-                   rhs[i, j2, k, m, c] = rhs[i, j2, k, m, c] -
-                               lhs[i, j2, k, n+1, c]*rhs[i, j, k, m, c]
+                   fac1 = 1.0e0/lhs[i, j, k, n+3, c]
+                   lhs[i, j, k, n+4, c] *= fac1
+                   lhs[i, j, k, n+5, c] *= fac1
+                   rhs[i, j, k, m, c] *= fac1
+                   lhs[i, j1, k, n+3, c] -= lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+4, c]
+                   lhs[i, j1, k, n+4, c] -= lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+5, c]
+                   rhs[i, j1, k, m, c] -= lhs[i, j1, k, n+2, c]*rhs[i, j, k, m, c]
+                   lhs[i, j2, k, n+2, c]-=lhs[i, j2, k, n+1, c]*lhs[i, j, k, n+4, c]
+                   lhs[i, j2, k, n+3, c] -= lhs[i, j2, k, n+1, c]*lhs[i, j, k, n+5, c]
+                   rhs[i, j2, k, m, c] -= lhs[i, j2, k, n+1, c]*rhs[i, j, k, m, c]
                 end
              end
           end
@@ -247,24 +285,21 @@ function y_solve()
              j1 = jend
              for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                 for i = cell_start[1, c]:isize-cell_end[1, c]-1
-                fac1               = 1.0e0/lhs[i, j, k, n+3, c]
-                lhs[i, j, k, n+4, c]   = fac1*lhs[i, j, k, n+4, c]
-                lhs[i, j, k, n+5, c]   = fac1*lhs[i, j, k, n+5, c]
-                rhs[i, j, k, m, c]     = fac1*rhs[i, j, k, m, c]
-                lhs[i, j1, k, n+3, c] = lhs[i, j1, k, n+3, c] -
-                            lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+4, c]
-                lhs[i, j1, k, n+4, c] = lhs[i, j1, k, n+4, c] -
-                            lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+5, c]
-                rhs[i, j1, k, m, c]   = rhs[i, j1, k, m, c] -
-                            lhs[i, j1, k, n+2, c]*rhs[i, j, k, m, c]
+                fac1 = 1.0e0/lhs[i, j, k, n+3, c]
+                lhs[i, j, k, n+4, c] *= fac1
+                lhs[i, j, k, n+5, c] *= fac1
+                rhs[i, j, k, m, c] *= fac1
+                lhs[i, j1, k, n+3, c] -= lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+4, c]
+                lhs[i, j1, k, n+4, c] -= lhs[i, j1, k, n+2, c]*lhs[i, j, k, n+5, c]
+                rhs[i, j1, k, m, c]   -= lhs[i, j1, k, n+2, c]*rhs[i, j, k, m, c]
 #---------------------------------------------------------------------
 #               Scale the last row immediately (some of this is overkill
 #               if this is the last cell)
 #---------------------------------------------------------------------
-                fac2               = 1.0e0/lhs[i, j1, k, n+3, c]
-                lhs[i, j1, k, n+4, c] = fac2*lhs[i, j1, k, n+4, c]
-                lhs[i, j1, k, n+5, c] = fac2*lhs[i, j1, k, n+5, c]
-                rhs[i, j1, k, m, c]   = fac2*rhs[i, j1, k, m, c]
+                fac2 = 1.0e0/lhs[i, j1, k, n+3, c]
+                lhs[i, j1, k, n+4, c] *= fac2
+                lhs[i, j1, k, n+5, c] *= fac2
+                rhs[i, j1, k, m, c]   *= fac2
 
              end
           end
@@ -359,7 +394,12 @@ function y_solve()
 #            cell that was just finished                
 #---------------------------------------------------------------------
 
-             pinvr(slice[2, stage+1])
+             pinvr(slice[2, stage+1],
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  rhs,
+                  bt)
 
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
@@ -381,12 +421,8 @@ function y_solve()
                    for i = cell_start[1, c]:isize-cell_end[1, c]-1
                       sm1 = in_buffer[p+1]
                       sm2 = in_buffer[p+2]
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                              lhs[i, j, k, n+4, c]*sm1 -
-                              lhs[i, j, k, n+5, c]*sm2
-                      rhs[i, j1, k, m, c] = rhs[i, j1, k, m, c] -
-                              lhs[i, j1, k, n+4, c] * rhs[i, j, k, m, c] -
-                              lhs[i, j1, k, n+5, c] * sm1
+                      rhs[i, j, k, m, c] -= lhs[i, j, k, n+4, c]*sm1 + lhs[i, j, k, n+5, c]*sm2
+                      rhs[i, j1, k, m, c] -= lhs[i, j1, k, n+4, c] * rhs[i, j, k, m, c] + lhs[i, j1, k, n+5, c] * sm1
                       p = p + 2
                    end
                 end
@@ -401,12 +437,8 @@ function y_solve()
                    for i = cell_start[1, c]:isize-cell_end[1, c]-1
                       sm1 = in_buffer[p+1]
                       sm2 = in_buffer[p+2]
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                              lhs[i, j, k, n+4, c]*sm1 -
-                              lhs[i, j, k, n+5, c]*sm2
-                      rhs[i, j1, k, m, c] = rhs[i, j1, k, m, c] -
-                              lhs[i, j1, k, n+4, c] * rhs[i, j, k, m, c] -
-                              lhs[i, j1, k, n+5, c] * sm1
+                      rhs[i, j, k, m, c] -= lhs[i, j, k, n+4, c]*sm1 + lhs[i, j, k, n+5, c]*sm2
+                      rhs[i, j1, k, m, c] -= lhs[i, j1, k, n+4, c] * rhs[i, j, k, m, c] + lhs[i, j1, k, n+5, c] * sm1
                       p = p + 2
                    end
                 end
@@ -424,8 +456,7 @@ function y_solve()
              for m = 1:3
                 for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                    for i = cell_start[1, c]:isize-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                                   lhs[i, j, k, n+4, c]*rhs[i, j1, k, m, c]
+                      rhs[i, j, k, m, c] -= lhs[i, j, k, n+4, c]*rhs[i, j1, k, m, c]
                    end
                 end
              end
@@ -434,8 +465,7 @@ function y_solve()
                 n = (m-3)*5
                 for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                    for i = cell_start[1, c]:isize-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                                   lhs[i, j, k, n+4, c]*rhs[i, j1, k, m, c]
+                      rhs[i, j, k, m, c] -= lhs[i, j, k, n+4, c]*rhs[i, j1, k, m, c]
                    end
                 end
              end
@@ -454,11 +484,9 @@ function y_solve()
              for k = cell_start[3, c]:ksize-cell_end[3, c]-1
                 for j = jend-2:-1:jstart
                    for i = cell_start[1, c]:isize-cell_end[1, c]-1
-                      j1 = j  + 1
-                      j2 = j  + 2
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                                lhs[i, j, k, n+4, c]*rhs[i, j1, k, m, c] -
-                                lhs[i, j, k, n+5, c]*rhs[i, j2, k, m, c]
+                      j1 = j + 1
+                      j2 = j + 2
+                      rhs[i, j, k, m, c] -= lhs[i, j, k, n+4, c]*rhs[i, j1, k, m, c] + lhs[i, j, k, n+5, c]*rhs[i, j2, k, m, c]
                    end
                 end
              end
@@ -474,9 +502,7 @@ function y_solve()
                    for i = cell_start[1, c]:isize-cell_end[1, c]-1
                       j1 = j  + 1
                       j2 = j1 + 1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] -
-                                lhs[i, j, k, n+4, c]*rhs[i, j1, k, m, c] -
-                                lhs[i, j, k, n+5, c]*rhs[i, j2, k, m, c]
+                      rhs[i, j, k, m, c] -= lhs[i, j, k, n+4, c]*rhs[i, j1, k, m, c] + lhs[i, j, k, n+5, c]*rhs[i, j2, k, m, c]
                    end
                 end
              end
@@ -512,7 +538,14 @@ function y_solve()
 #---------------------------------------------------------------------
 #         If this was the last stage, do the block-diagonal inversion          
 #---------------------------------------------------------------------
-          if (stage == 1) pinvr(c) end
+          if (stage == 1) 
+            pinvr(c,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  rhs,
+                  bt) 
+         end
 
        end
 

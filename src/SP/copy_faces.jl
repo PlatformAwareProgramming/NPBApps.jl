@@ -8,41 +8,193 @@
 # adds so much overhead that it's not clearly useful. 
 #---------------------------------------------------------------------
 
-function copy_faces()         
-
-       requests = Array{MPI.Request}(undef,12)
-       ss = Array{Int}(undef,6)
-       sr = Array{Int}(undef,6)
-       b_size = Array{Int}(undef,6)
+function copy_faces(_::Val{1},
+                     _::Val{ncells},
+                     successor, # ::Vector{Int64},
+                     predecessor, # ::Vector{Int64},
+                     cell_size,
+                     cell_start,
+                     cell_end,
+                     cell_coord,
+                     u,
+                     rhs,
+                     rho_i,
+                     us,
+                     vs,
+                     ws,
+                     square,
+                     qs,
+                     ainv,
+                     speed,
+                     forcing,
+                     dt,
+                     tx2,
+                     ty2,
+                     tz2,
+                     c1,
+                     c2,
+                     c1c2,
+                     dx1tx1,
+                     dx2tx1,
+                     dx3tx1, 
+                     dx4tx1,
+                     dx5tx1,
+                     dy1ty1,
+                     dy2ty1,
+                     dy3ty1,
+                     dy4ty1,
+                     dy5ty1,
+                     dz1tz1,
+                     dz2tz1,
+                     dz3tz1,
+                     dz4tz1,
+                     dz5tz1,
+                     xxcon2,
+                     xxcon3,
+                     xxcon4,
+                     xxcon5,
+                     yycon2,
+                     yycon3,
+                     yycon4,
+                     yycon5,
+                     zzcon2,
+                     zzcon3,
+                     zzcon4,
+                     zzcon5,
+                     dssp,
+                     con43,
+                     in_buffer,
+                     out_buffer,
+                     requests,
+                     timeron,
+                     comm_rhs,
+                     ss,
+                     sr,
+                     b_size,
+                     ) where ncells
 
 #---------------------------------------------------------------------
 #      exit immediately if there are no faces to be copied           
 #---------------------------------------------------------------------
-       if no_nodes == 1
-          compute_rhs()
-          return nothing
-       end
+   compute_rhs(ncells,
+               cell_size,
+               cell_start,
+               cell_end,
+               u,
+               rhs,
+               rho_i,
+               us,
+               vs,
+               ws,
+               square,
+               qs,
+               ainv,
+               speed,
+               forcing,
+               dt,
+               tx2,
+               ty2,
+               tz2,
+               c1,
+               c2,
+               c1c2,
+               dx1tx1,
+               dx2tx1,
+               dx3tx1, 
+               dx4tx1,
+               dx5tx1,
+               dy1ty1,
+               dy2ty1,
+               dy3ty1,
+               dy4ty1,
+               dy5ty1,
+               dz1tz1,
+               dz2tz1,
+               dz3tz1,
+               dz4tz1,
+               dz5tz1,
+               xxcon2,
+               xxcon3,
+               xxcon4,
+               xxcon5,
+               yycon2,
+               yycon3,
+               yycon4,
+               yycon5,
+               zzcon2,
+               zzcon3,
+               zzcon4,
+               zzcon5,
+               dssp,
+               con43)    
+end 
 
-       ss[1] = start_send_east
-       ss[2] = start_send_west
-       ss[3] = start_send_north
-       ss[4] = start_send_south
-       ss[5] = start_send_top
-       ss[6] = start_send_bottom
+function copy_faces(_::Val{no_nodes},
+                     _::Val{ncells},
+                     successor, # ::Vector{Int64},
+                     predecessor, # ::Vector{Int64},
+                     cell_size,
+                     cell_start,
+                     cell_end,
+                     cell_coord,
+                     u,
+                     rhs,
+                     rho_i,
+                     us,
+                     vs,
+                     ws,
+                     square,
+                     qs,
+                     ainv,
+                     speed,
+                     forcing,
+                     dt,
+                     tx2,
+                     ty2,
+                     tz2,
+                     c1,
+                     c2,
+                     c1c2,
+                     dx1tx1,
+                     dx2tx1,
+                     dx3tx1, 
+                     dx4tx1,
+                     dx5tx1,
+                     dy1ty1,
+                     dy2ty1,
+                     dy3ty1,
+                     dy4ty1,
+                     dy5ty1,
+                     dz1tz1,
+                     dz2tz1,
+                     dz3tz1,
+                     dz4tz1,
+                     dz5tz1,
+                     xxcon2,
+                     xxcon3,
+                     xxcon4,
+                     xxcon5,
+                     yycon2,
+                     yycon3,
+                     yycon4,
+                     yycon5,
+                     zzcon2,
+                     zzcon3,
+                     zzcon4,
+                     zzcon5,
+                     dssp,
+                     con43,
+                     in_buffer,
+                     out_buffer,
+                     requests,
+                     timeron,
+                     comm_rhs,
+                     ss,
+                     sr,
+                     b_size,
+                     ) where {ncells, no_nodes}  
 
-       sr[1] = start_recv_east
-       sr[2] = start_recv_west
-       sr[3] = start_recv_north
-       sr[4] = start_recv_south
-       sr[5] = start_recv_top
-       sr[6] = start_recv_bottom
 
-       b_size[1] = east_size   
-       b_size[2] = west_size   
-       b_size[3] = north_size  
-       b_size[4] = south_size  
-       b_size[5] = top_size    
-       b_size[6] = bottom_size 
 
 #---------------------------------------------------------------------
 # because the difference stencil for the diagonalized scheme is 
@@ -160,19 +312,19 @@ function copy_faces()
 
        if (timeron) timer_start(t_exch) end
 
-       requests[1] = MPI.Irecv!(view(in_buffer,sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = successor[1], tag = WEST)
-       requests[2] = MPI.Irecv!(view(in_buffer,sr[2]:sr[2]+b_size[2]-1), comm_rhs; source = predecessor[1], tag = EAST)
-       requests[3] = MPI.Irecv!(view(in_buffer,sr[3]:sr[3]+b_size[3]-1), comm_rhs; source = successor[2], tag = SOUTH)
-       requests[4] = MPI.Irecv!(view(in_buffer,sr[4]:sr[4]+b_size[4]-1), comm_rhs; source = predecessor[2], tag = NORTH)
-       requests[5] = MPI.Irecv!(view(in_buffer,sr[5]:sr[5]+b_size[5]-1), comm_rhs; source = successor[3], tag = BOTTOM)
-       requests[6] = MPI.Irecv!(view(in_buffer,sr[6]:sr[6]+b_size[6]-1), comm_rhs; source = predecessor[3], tag = TOP)
+       requests[1] = MPI.Irecv!(view(in_buffer, sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = successor[1], tag = WEST)
+       requests[2] = MPI.Irecv!(view(in_buffer, sr[2]:sr[2]+b_size[2]-1), comm_rhs; source = predecessor[1], tag = EAST)
+       requests[3] = MPI.Irecv!(view(in_buffer, sr[3]:sr[3]+b_size[3]-1), comm_rhs; source = successor[2], tag = SOUTH)
+       requests[4] = MPI.Irecv!(view(in_buffer, sr[4]:sr[4]+b_size[4]-1), comm_rhs; source = predecessor[2], tag = NORTH)
+       requests[5] = MPI.Irecv!(view(in_buffer, sr[5]:sr[5]+b_size[5]-1), comm_rhs; source = successor[3], tag = BOTTOM)
+       requests[6] = MPI.Irecv!(view(in_buffer, sr[6]:sr[6]+b_size[6]-1), comm_rhs; source = predecessor[3], tag = TOP)
 
-       requests[7] = MPI.Isend(view(out_buffer,ss[1]:ss[1]+b_size[1]-1), comm_rhs; dest = successor[1], tag = EAST)
-       requests[8] = MPI.Isend(view(out_buffer,ss[2]:ss[2]+b_size[2]-1), comm_rhs; dest = predecessor[1], tag = WEST)
-       requests[9] = MPI.Isend(view(out_buffer,ss[3]:ss[3]+b_size[3]-1), comm_rhs; dest = successor[2], tag = NORTH)
+       requests[7] = MPI.Isend(view(out_buffer, ss[1]:ss[1]+b_size[1]-1), comm_rhs; dest = successor[1], tag = EAST)
+       requests[8] = MPI.Isend(view(out_buffer, ss[2]:ss[2]+b_size[2]-1), comm_rhs; dest = predecessor[1], tag = WEST)
+       requests[9] = MPI.Isend(view(out_buffer, ss[3]:ss[3]+b_size[3]-1), comm_rhs; dest = successor[2], tag = NORTH)
        requests[10] = MPI.Isend(view(out_buffer,ss[4]:ss[4]+b_size[4]-1), comm_rhs; dest = predecessor[2], tag = SOUTH)
-       requests[11] = MPI.Isend(view(out_buffer,ss[5]:ss[5]+b_size[5]-1), comm_rhs; dest = successor[3], tag = TOP)
-       requests[12] = MPI.Isend(view(out_buffer,ss[6]:ss[6]+b_size[6]-1), comm_rhs; dest = predecessor[3], tag = BOTTOM)
+       requests[11] = MPI.Isend(view(out_buffer, ss[5]:ss[5]+b_size[5]-1), comm_rhs; dest = successor[3], tag = TOP)
+       requests[12] = MPI.Isend(view(out_buffer, ss[6]:ss[6]+b_size[6]-1), comm_rhs; dest = predecessor[3], tag = BOTTOM)
 
        MPI.Waitall(requests)
 
@@ -273,7 +425,57 @@ function copy_faces()
 #---------------------------------------------------------------------
 # now that we have all the data, compute the rhs
 #---------------------------------------------------------------------
-       compute_rhs()
+       compute_rhs(ncells,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  u,
+                  rhs,
+                  rho_i,
+                  us,
+                  vs,
+                  ws,
+                  square,
+                  qs,
+                  ainv,
+                  speed,
+                  forcing,
+                  dt,
+                  tx2,
+                  ty2,
+                  tz2,
+                  c1,
+                  c2,
+                  c1c2,
+                  dx1tx1,
+                  dx2tx1,
+                  dx3tx1, 
+                  dx4tx1,
+                  dx5tx1,
+                  dy1ty1,
+                  dy2ty1,
+                  dy3ty1,
+                  dy4ty1,
+                  dy5ty1,
+                  dz1tz1,
+                  dz2tz1,
+                  dz3tz1,
+                  dz4tz1,
+                  dz5tz1,
+                  xxcon2,
+                  xxcon3,
+                  xxcon4,
+                  xxcon5,
+                  yycon2,
+                  yycon3,
+                  yycon4,
+                  yycon5,
+                  zzcon2,
+                  zzcon3,
+                  zzcon4,
+                  zzcon5,
+                  dssp,
+                  con43)
 
 return nothing
 end

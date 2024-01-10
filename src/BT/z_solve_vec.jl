@@ -10,9 +10,6 @@
 
 function z_solve()
 
-      send_id = Ref{MPI.Request}()
-      recv_id = Ref{MPI.Request}()
-
       kstart = 0
 
       if (timeron) timer_start(t_zsolve) end
@@ -110,7 +107,7 @@ end
 #     all i and j
 #---------------------------------------------------------------------
 
-function z_unpack_solve_info(c)
+ function z_unpack_solve_info(c)
 
       kstart = 0
       ptr = 0
@@ -138,7 +135,7 @@ end
 #     all i and j
 #---------------------------------------------------------------------
 
-function z_send_solve_info(c)
+ function z_send_solve_info(c)
 
       ksize = cell_size[3, c]-1
       ip = cell_coord[1, c] - 1
@@ -180,7 +177,7 @@ end
 #     pack up and send u[jstart] for all i and j
 #---------------------------------------------------------------------
 
-function z_send_backsub_info(c)
+ function z_send_backsub_info(c)
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -211,7 +208,7 @@ end
 #     unpack u[ksize] for all i and j
 #---------------------------------------------------------------------
 
-function z_unpack_backsub_info(c)
+ function z_unpack_backsub_info(c)
 
       ptr = 0
       for j = 0:JMAX-1
@@ -231,7 +228,7 @@ end
 #     post mpi receives
 #---------------------------------------------------------------------
 
-function z_receive_backsub_info(c)
+ function z_receive_backsub_info(c)
 
       ip = cell_coord[1, c] - 1
       jp = cell_coord[2, c] - 1
@@ -246,7 +243,7 @@ end
 #     post mpi receives 
 #---------------------------------------------------------------------
 
-function z_receive_solve_info(c)
+ function z_receive_solve_info(c)
 
       ip = cell_coord[1, c] - 1
       jp = cell_coord[2, c] - 1
@@ -264,7 +261,7 @@ end
 #     after call u[kstart] will be sent to next cell
 #---------------------------------------------------------------------
 
-function z_backsubstitute(FIRST, LAST, c)
+ function z_backsubstitute(FIRST, LAST, c)
 
       kstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -313,7 +310,7 @@ end
 #     c'(KMAX) and rhs'(KMAX) will be sent to next cell.
 #---------------------------------------------------------------------
 
-function z_solve_cell(FIRST, LAST, c)
+ function z_solve_cell(FIRST, LAST, c)
 
       kstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1

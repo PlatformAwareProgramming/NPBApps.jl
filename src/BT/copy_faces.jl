@@ -9,43 +9,178 @@
 # adds so much overhead that it's not clearly useful. 
 #---------------------------------------------------------------------
 
-function copy_faces()
-
-      requests = Array{MPI.Request}(undef,12)
-      ss = Array{Int}(undef,6)
-      sr = Array{Int}(undef,6)
-      b_size = Array{Int}(undef,6)
+const requests = Array{MPI.Request}(undef,12)
 
 #---------------------------------------------------------------------
 #     exit immediately if there are no faces to be copied           
 #---------------------------------------------------------------------
-      if no_nodes == 1
-         compute_rhs()
-         return nothing
+
+function copy_faces(ss, 
+                     sr, 
+                     b_size,
+                     cell_coord,
+                     cell_size,
+                     cell_start,
+                     cell_end,
+                     forcing,        
+                     u,
+                     rhs,
+                     in_buffer,
+                     out_buffer,
+                     us,
+                     vs,
+                     ws,
+                     qs,
+                     rho_i,
+                     square,
+                     timeron,
+                     dt,
+                     ::Val{ncells},
+                     tx2,
+                     ty2,
+                     tz2,
+                     dx1tx1,
+                     dx2tx1,
+                     dx3tx1,
+                     dx4tx1,
+                     dx5tx1,
+                     dy1ty1,
+                     dy2ty1,
+                     dy3ty1,
+                     dy4ty1,
+                     dy5ty1,
+                     dz1tz1,
+                     dz2tz1,
+                     dz3tz1,
+                     dz4tz1,
+                     dz5tz1,
+                     xxcon2,
+                     xxcon3,
+                     xxcon4,
+                     xxcon5,
+                     yycon2,
+                     yycon3,
+                     yycon4,
+                     yycon5,
+                     zzcon2,
+                     zzcon3,
+                     zzcon4,
+                     zzcon5,
+                     _::Val{1}, 
+                     comm_rhs,
+                     predecessor,
+                     successor,
+                     ) where ncells
+
+         compute_rhs(cell_size,
+                     cell_start,
+                     cell_end,
+                     forcing,           
+                     u,
+                     rhs,
+                     us,
+                     vs,
+                     ws,
+                     qs,
+                     rho_i,
+                     square,
+                     timeron,
+                     dt,
+                     ncells,
+                     tx2,
+                     ty2,
+                     tz2,
+                     dx1tx1,
+                     dx2tx1,
+                     dx3tx1,
+                     dx4tx1,
+                     dx5tx1,
+                     dy1ty1,
+                     dy2ty1,
+                     dy3ty1,
+                     dy4ty1,
+                     dy5ty1,
+                     dz1tz1,
+                     dz2tz1,
+                     dz3tz1,
+                     dz4tz1,
+                     dz5tz1,
+                     xxcon2,
+                     xxcon3,
+                     xxcon4,
+                     xxcon5,
+                     yycon2,
+                     yycon3,
+                     yycon4,
+                     yycon5,
+                     zzcon2,
+                     zzcon3,
+                     zzcon4,
+                     zzcon5,
+      )
+
 end
 
-      ss[1] = start_send_east
-      ss[2] = start_send_west
-      ss[3] = start_send_north
-      ss[4] = start_send_south
-      ss[5] = start_send_top
-      ss[6] = start_send_bottom
 
-      sr[1] = start_recv_east
-      sr[2] = start_recv_west
-      sr[3] = start_recv_north
-      sr[4] = start_recv_south
-      sr[5] = start_recv_top
-      sr[6] = start_recv_bottom
 
-      b_size[1] = east_size
-      b_size[2] = west_size
-      b_size[3] = north_size
-      b_size[4] = south_size
-      b_size[5] = top_size
-      b_size[6] = bottom_size
+function copy_faces(ss, 
+                     sr, 
+                     b_size,
+                     cell_coord,
+                     cell_size,
+                     cell_start,
+                     cell_end,
+                     forcing,        
+                     u,
+                     rhs,
+                     in_buffer,
+                     out_buffer,
+                     us,
+                     vs,
+                     ws,
+                     qs,
+                     rho_i,
+                     square,
+                     timeron,
+                     dt,
+                     ::Val{ncells},
+                     tx2,
+                     ty2,
+                     tz2,
+                     dx1tx1,
+                     dx2tx1,
+                     dx3tx1,
+                     dx4tx1,
+                     dx5tx1,
+                     dy1ty1,
+                     dy2ty1,
+                     dy3ty1,
+                     dy4ty1,
+                     dy5ty1,
+                     dz1tz1,
+                     dz2tz1,
+                     dz3tz1,
+                     dz4tz1,
+                     dz5tz1,
+                     xxcon2,
+                     xxcon3,
+                     xxcon4,
+                     xxcon5,
+                     yycon2,
+                     yycon3,
+                     yycon4,
+                     yycon5,
+                     zzcon2,
+                     zzcon3,
+                     zzcon4,
+                     zzcon5,
+                     _::Val{no_nodes}, 
+                     comm_rhs,
+                     predecessor,
+                     successor,
+                     ) where {no_nodes, ncells}
 
-#---------------------------------------------------------------------
+ #---------------------------------------------------------------------
 #     because the difference stencil for the diagonalized scheme is 
 #     orthogonal, we do not have to perform the staged copying of faces, 
 #     but can send all face information simultaneously to the neighboring 
@@ -285,7 +420,52 @@ end
 #---------------------------------------------------------------------
 #     do the rest of the rhs that uses the copied face values          
 #---------------------------------------------------------------------
-      compute_rhs()
+      compute_rhs(cell_size,
+                  cell_start,
+                  cell_end,
+                  forcing,           
+                  u,
+                  rhs,
+                  us,
+                  vs,
+                  ws,
+                  qs,
+                  rho_i,
+                  square,
+                  timeron,
+                  dt,
+                  ncells,
+                  tx2,
+                  ty2,
+                  tz2,
+                  dx1tx1,
+                  dx2tx1,
+                  dx3tx1,
+                  dx4tx1,
+                  dx5tx1,
+                  dy1ty1,
+                  dy2ty1,
+                  dy3ty1,
+                  dy4ty1,
+                  dy5ty1,
+                  dz1tz1,
+                  dz2tz1,
+                  dz3tz1,
+                  dz4tz1,
+                  dz5tz1,
+                  xxcon2,
+                  xxcon3,
+                  xxcon4,
+                  xxcon5,
+                  yycon2,
+                  yycon3,
+                  yycon4,
+                  yycon5,
+                  zzcon2,
+                  zzcon3,
+                  zzcon4,
+                  zzcon5,
+               )
 
       return nothing
 end

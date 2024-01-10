@@ -2,7 +2,13 @@
 #   block-diagonal matrix-vector multiplication                       
 #---------------------------------------------------------------------
 
-function pinvr(c)
+function pinvr(c,
+               cell_size,
+               cell_start,
+               cell_end,
+               rhs,
+               bt,
+               )
 
 #---------------------------------------------------------------------
 #      treat only one cell                                   

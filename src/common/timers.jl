@@ -1,27 +1,13 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-#      module timers
-
-#      DOUBLEPRECISION start[64], elapsed[64]
-
-#      end
-
-start = Array{Float64}(undef, 64)
-elapsed = Array{Float64}(undef, 64)
+const start = Array{Float64}(undef, 64)
+const elapsed = Array{Float64}(undef, 64)
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
 function timer_clear(n)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use timers
-#      implicit none
-
-#      integer n
 
       elapsed[n] = 0.0
       return nothing
@@ -33,16 +19,6 @@ end
 
 function timer_start(n)
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use timers
-#      implicit none
-
-#      integer n
-
-#      include("mpif.h")
-
       start[n] = MPI.Wtime()
 
       return nothing
@@ -53,18 +29,6 @@ end
 #---------------------------------------------------------------------
 
 function timer_stop(n)
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use timers
-#      implicit none
-
-#      integer n
-
-#      include("mpif.h")
-
-#      DOUBLEPRECISION t, now
 
       now = MPI.Wtime()
       t = now - start[n]
@@ -79,14 +43,6 @@ end
 
 function timer_read(n)
 
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      use timers
-#      implicit none
-
-#      integer n
-
       timer_read = elapsed[n]
 
       return timer_read
@@ -96,15 +52,6 @@ end
 #---------------------------------------------------------------------
 
 function check_timer_flag()
-
-#---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#      implicit none
-#      logical timeron
-
-#      integer nc, ios
-#      character(len = 20) val
 
 # ... Check environment variable "NPB_TIMER_FLAG"
       #get_environment_variable("NPB_TIMER_FLAG", val, nc, ios)

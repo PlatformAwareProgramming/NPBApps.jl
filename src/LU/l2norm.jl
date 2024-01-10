@@ -2,15 +2,20 @@
 #   to compute the l2-norm of vector v.
 #---------------------------------------------------------------------
 
-function l2norm( ldx, ldy, ldz, nx0, ny0, nz0, ist, iend, jst, jend, v, SUM )
+dummy = zeros(Float64, 5)
 
-      dummy = zeros(Float64, 5)
+function l2norm( ldx, ldy, ldz, nx0, ny0, nz0, ist, iend, jst, jend, v, SUM, 
+   comm_solve, 
+   timeron,
+   )
+
+      dummy .= 0
 
       for k = 2:nz0-1
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
-                  dummy[m] = dummy[m] + v[m,i,j,k] * v[m,i,j,k]
+                  dummy[m] += v[m,i,j,k] * v[m,i,j,k]
                end
             end
          end

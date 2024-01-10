@@ -2,14 +2,65 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-function compute_rhs()
+function compute_rhs(ncells,
+                     cell_size,
+                     cell_start,
+                     cell_end,
+                     u,
+                     rhs,
+                     rho_i,
+                     us,
+                     vs,
+                     ws,
+                     square,
+                     qs,
+                     ainv,
+                     speed,
+                     forcing,
+                     dt,
+                     tx2,
+                     ty2,
+                     tz2,
+                     c1,
+                     c2,
+                     c1c2,
+                     dx1tx1,
+                     dx2tx1,
+                     dx3tx1, 
+                     dx4tx1,
+                     dx5tx1,
+                     dy1ty1,
+                     dy2ty1,
+                     dy3ty1,
+                     dy4ty1,
+                     dy5ty1,
+                     dz1tz1,
+                     dz2tz1,
+                     dz3tz1,
+                     dz4tz1,
+                     dz5tz1,
+                     xxcon2,
+                     xxcon3,
+                     xxcon4,
+                     xxcon5,
+                     yycon2,
+                     yycon3,
+                     yycon4,
+                     yycon5,
+                     zzcon2,
+                     zzcon3,
+                     zzcon4,
+                     zzcon5,
+                     dssp,
+                     con43,
+                     )
 
        if (timeron) timer_start(t_rhs) end
 #---------------------------------------------------------------------
 # loop over all cells owned by this node                           
 #---------------------------------------------------------------------
        for c = 1:ncells
-
+         
 #---------------------------------------------------------------------
 #         compute the reciprocal of density, and the kinetic energy, 
 #         and the speed of sound. 
@@ -65,12 +116,12 @@ function compute_rhs()
                    up1  = us[i+1, j, k, c]
                    um1  = us[i-1, j, k, c]
 
-                   rhs[i, j, k, 1, c] = rhs[i, j, k, 1, c] + dx1tx1 *(
+                   rhs[i, j, k, 1, c] += dx1tx1 *(
                           u[i+1, j, k, 1, c] - 2.0e0*u[i, j, k, 1, c] +
                            u[i-1, j, k, 1, c]) -
                           tx2 * (u[i+1, j, k, 2, c] - u[i-1, j, k, 2, c])
 
-                   rhs[i, j, k, 2, c] = rhs[i, j, k, 2, c] + dx2tx1 *(
+                   rhs[i, j, k, 2, c] += dx2tx1 *(
                           u[i+1, j, k, 2, c] - 2.0e0*u[i, j, k, 2, c] +
                            u[i-1, j, k, 2, c]) +
                           xxcon2*con43 * (up1 - 2.0e0*uijk + um1) -
@@ -80,7 +131,7 @@ function compute_rhs()
                                   u[i-1, j, k, 5, c]+ square[i-1, j, k, c])*
                                   c2)
 
-                   rhs[i, j, k, 3, c] = rhs[i, j, k, 3, c] + dx3tx1 *(
+                   rhs[i, j, k, 3, c] += dx3tx1 *(
                           u[i+1, j, k, 3, c] - 2.0e0*u[i, j, k, 3, c] +
                            u[i-1, j, k, 3, c]) +
                           xxcon2 * (vs[i+1, j, k, c] - 2.0e0*vs[i, j, k, c] +
@@ -88,7 +139,7 @@ function compute_rhs()
                           tx2 * (u[i+1, j, k, 3, c]*up1 -
                                  u[i-1, j, k, 3, c]*um1)
 
-                   rhs[i, j, k, 4, c] = rhs[i, j, k, 4, c] + dx4tx1 *(
+                   rhs[i, j, k, 4, c] += dx4tx1 *(
                           u[i+1, j, k, 4, c] - 2.0e0*u[i, j, k, 4, c] +
                            u[i-1, j, k, 4, c]) +
                           xxcon2 * (ws[i+1, j, k, c] - 2.0e0*ws[i, j, k, c] +
@@ -96,7 +147,7 @@ function compute_rhs()
                           tx2 * (u[i+1, j, k, 4, c]*up1 -
                                  u[i-1, j, k, 4, c]*um1)
 
-                   rhs[i, j, k, 5, c] = rhs[i, j, k, 5, c] + dx5tx1 *(
+                   rhs[i, j, k, 5, c] += dx5tx1 *(
                           u[i+1, j, k, 5, c] - 2.0e0*u[i, j, k, 5, c] +
                            u[i-1, j, k, 5, c]) +
                           xxcon3 * (qs[i+1, j, k, c] - 2.0e0*qs[i, j, k, c] +
@@ -122,8 +173,7 @@ function compute_rhs()
              for m = 1:5
                 for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                    for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c]- dssp *(
-                           5.0e0*u[i, j, k, m, c] - 4.0e0*u[i+1, j, k, m, c] + u[i+2, j, k, m, c])
+                      rhs[i, j, k, m, c] -= dssp *(5.0e0*u[i, j, k, m, c] - 4.0e0*u[i+1, j, k, m, c] + u[i+2, j, k, m, c])
                    end
                 end
              end
@@ -132,8 +182,7 @@ function compute_rhs()
              for m = 1:5
                 for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                    for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                          -4.0e0*u[i-1, j, k, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i+1, j, k, m, c] + u[i+2, j, k, m, c])
+                      rhs[i, j, k, m, c] -= dssp *(-4.0e0*u[i-1, j, k, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i+1, j, k, m, c] + u[i+2, j, k, m, c])
                    end
                 end
              end
@@ -143,8 +192,7 @@ function compute_rhs()
              for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = 3*cell_start[1, c]:cell_size[1, c]-3*cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                            u[i-2, j, k, m, c] - 4.0e0*u[i-1, j, k, m, c] + 6.0*u[i, j, k, m, c] - 4.0e0*u[i+1, j, k, m, c] + u[i+2, j, k, m, c] )
+                      rhs[i, j, k, m, c] -= dssp *(u[i-2, j, k, m, c] - 4.0e0*u[i-1, j, k, m, c] + 6.0*u[i, j, k, m, c] - 4.0e0*u[i+1, j, k, m, c] + u[i+2, j, k, m, c] )
                    end
                 end
              end
@@ -156,8 +204,7 @@ function compute_rhs()
              for m = 1:5
                 for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                    for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                           u[i-2, j, k, m, c] - 4.0e0*u[i-1, j, k, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i+1, j, k, m, c] )
+                      rhs[i, j, k, m, c] -= dssp *(u[i-2, j, k, m, c] - 4.0e0*u[i-1, j, k, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i+1, j, k, m, c] )
                    end
                 end
              end
@@ -166,8 +213,7 @@ function compute_rhs()
              for m = 1:5
                 for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                    for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                           u[i-2, j, k, m, c] - 4.0e0*u[i-1, j, k, m, c] + 5.0e0*u[i, j, k, m, c] )
+                      rhs[i, j, k, m, c] -= dssp *(u[i-2, j, k, m, c] - 4.0e0*u[i-1, j, k, m, c] + 5.0e0*u[i, j, k, m, c] )
                    end
                 end
              end
@@ -182,18 +228,18 @@ function compute_rhs()
                    vijk = vs[i, j, k, c]
                    vp1  = vs[i, j+1, k, c]
                    vm1  = vs[i, j-1, k, c]
-                   rhs[i, j, k, 1, c] = rhs[i, j, k, 1, c] + dy1ty1 *(
+                   rhs[i, j, k, 1, c] += dy1ty1 *(
                          u[i, j+1, k, 1, c] - 2.0e0*u[i, j, k, 1, c] +
                           u[i, j-1, k, 1, c]) -
                          ty2 * (u[i, j+1, k, 3, c] - u[i, j-1, k, 3, c])
-                   rhs[i, j, k, 2, c] = rhs[i, j, k, 2, c] + dy2ty1 *(
+                   rhs[i, j, k, 2, c] += dy2ty1 *(
                          u[i, j+1, k, 2, c] - 2.0e0*u[i, j, k, 2, c] +
                           u[i, j-1, k, 2, c]) +
                          yycon2 * (us[i, j+1, k, c] - 2.0e0*us[i, j, k, c] +
                                    us[i, j-1, k, c]) -
                          ty2 * (u[i, j+1, k, 2, c]*vp1 -
                                 u[i, j-1, k, 2, c]*vm1)
-                   rhs[i, j, k, 3, c] = rhs[i, j, k, 3, c] + dy3ty1 *(
+                   rhs[i, j, k, 3, c] += dy3ty1 *(
                          u[i, j+1, k, 3, c] - 2.0e0*u[i, j, k, 3, c] +
                           u[i, j-1, k, 3, c]) +
                          yycon2*con43 * (vp1 - 2.0e0*vijk + vm1) -
@@ -202,14 +248,14 @@ function compute_rhs()
                                 u[i, j+1, k, 5, c] - square[i, j+1, k, c] -
                                  u[i, j-1, k, 5, c] + square[i, j-1, k, c])*
                                 c2)
-                   rhs[i, j, k, 4, c] = rhs[i, j, k, 4, c] + dy4ty1 *(
+                   rhs[i, j, k, 4, c] += dy4ty1 *(
                          u[i, j+1, k, 4, c] - 2.0e0*u[i, j, k, 4, c] +
                           u[i, j-1, k, 4, c]) +
                          yycon2 * (ws[i, j+1, k, c] - 2.0e0*ws[i, j, k, c] +
                                    ws[i, j-1, k, c]) -
                          ty2 * (u[i, j+1, k, 4, c]*vp1 -
                                 u[i, j-1, k, 4, c]*vm1)
-                   rhs[i, j, k, 5, c] = rhs[i, j, k, 5, c] + dy5ty1 *(
+                   rhs[i, j, k, 5, c] += dy5ty1 *(
                          u[i, j+1, k, 5, c] - 2.0e0*u[i, j, k, 5, c] +
                           u[i, j-1, k, 5, c]) +
                          yycon3 * (qs[i, j+1, k, c] - 2.0e0*qs[i, j, k, c] +
@@ -235,8 +281,7 @@ function compute_rhs()
              for m = 1:5
                 for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c]- dssp *(
-                           5.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j+1, k, m, c] + u[i, j+2, k, m, c])
+                      rhs[i, j, k, m, c] -= dssp *(5.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j+1, k, m, c] + u[i, j+2, k, m, c])
                    end
                 end
              end
@@ -245,8 +290,7 @@ function compute_rhs()
              for m = 1:5
                 for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                          -4.0e0*u[i, j-1, k, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j+1, k, m, c] + u[i, j+2, k, m, c])
+                      rhs[i, j, k, m, c] -= dssp *(-4.0e0*u[i, j-1, k, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j+1, k, m, c] + u[i, j+2, k, m, c])
                    end
                 end
              end
@@ -256,8 +300,7 @@ function compute_rhs()
              for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                 for j = 3*cell_start[2, c]:cell_size[2, c]-3*cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                            u[i, j-2, k, m, c] - 4.0e0*u[i, j-1, k, m, c] + 6.0*u[i, j, k, m, c] - 4.0e0*u[i, j+1, k, m, c] + u[i, j+2, k, m, c] )
+                      rhs[i, j, k, m, c] -= dssp *(u[i, j-2, k, m, c] - 4.0e0*u[i, j-1, k, m, c] + 6.0*u[i, j, k, m, c] - 4.0e0*u[i, j+1, k, m, c] + u[i, j+2, k, m, c] )
                    end
                 end
              end
@@ -268,8 +311,7 @@ function compute_rhs()
              for m = 1:5
                 for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                           u[i, j-2, k, m, c] - 4.0e0*u[i, j-1, k, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j+1, k, m, c] )
+                      rhs[i, j, k, m, c] -= dssp *(u[i, j-2, k, m, c] - 4.0e0*u[i, j-1, k, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j+1, k, m, c] )
                    end
                 end
              end
@@ -278,8 +320,7 @@ function compute_rhs()
              for m = 1:5
                 for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                           u[i, j-2, k, m, c] - 4.0e0*u[i, j-1, k, m, c] + 5.0e0*u[i, j, k, m, c] )
+                      rhs[i, j, k, m, c] -= dssp *(u[i, j-2, k, m, c] - 4.0e0*u[i, j-1, k, m, c] + 5.0e0*u[i, j, k, m, c] )
                    end
                 end
              end
@@ -296,25 +337,25 @@ function compute_rhs()
                    wp1  = ws[i, j, k+1, c]
                    wm1  = ws[i, j, k-1, c]
 
-                   rhs[i, j, k, 1, c] = rhs[i, j, k, 1, c] + dz1tz1 *(
+                   rhs[i, j, k, 1, c] += dz1tz1 *(
                          u[i, j, k+1, 1, c] - 2.0e0*u[i, j, k, 1, c] +
                           u[i, j, k-1, 1, c]) -
                          tz2 * (u[i, j, k+1, 4, c] - u[i, j, k-1, 4, c])
-                   rhs[i, j, k, 2, c] = rhs[i, j, k, 2, c] + dz2tz1 *(
+                   rhs[i, j, k, 2, c] += dz2tz1 *(
                          u[i, j, k+1, 2, c] - 2.0e0*u[i, j, k, 2, c] +
                           u[i, j, k-1, 2, c]) +
                          zzcon2 * (us[i, j, k+1, c] - 2.0e0*us[i, j, k, c] +
                                    us[i, j, k-1, c]) -
                          tz2 * (u[i, j, k+1, 2, c]*wp1 -
                                 u[i, j, k-1, 2, c]*wm1)
-                   rhs[i, j, k, 3, c] = rhs[i, j, k, 3, c] + dz3tz1 *(
+                   rhs[i, j, k, 3, c] += dz3tz1 *(
                          u[i, j, k+1, 3, c] - 2.0e0*u[i, j, k, 3, c] +
                           u[i, j, k-1, 3, c]) +
                          zzcon2 * (vs[i, j, k+1, c] - 2.0e0*vs[i, j, k, c] +
                                    vs[i, j, k-1, c]) -
                          tz2 * (u[i, j, k+1, 3, c]*wp1 -
                                 u[i, j, k-1, 3, c]*wm1)
-                   rhs[i, j, k, 4, c] = rhs[i, j, k, 4, c] + dz4tz1 *(
+                   rhs[i, j, k, 4, c] += dz4tz1 *(
                          u[i, j, k+1, 4, c] - 2.0e0*u[i, j, k, 4, c] +
                           u[i, j, k-1, 4, c]) +
                          zzcon2*con43 * (wp1 - 2.0e0*wijk + wm1) -
@@ -323,13 +364,11 @@ function compute_rhs()
                                 u[i, j, k+1, 5, c] - square[i, j, k+1, c] -
                                  u[i, j, k-1, 5, c] + square[i, j, k-1, c])*
                                 c2)
-                   rhs[i, j, k, 5, c] = rhs[i, j, k, 5, c] + dz5tz1 *(
+                   rhs[i, j, k, 5, c] += dz5tz1 *(
                          u[i, j, k+1, 5, c] - 2.0e0*u[i, j, k, 5, c] +
                           u[i, j, k-1, 5, c]) +
-                         zzcon3 * (qs[i, j, k+1, c] - 2.0e0*qs[i, j, k, c] +
-                                   qs[i, j, k-1, c]) +
-                         zzcon4 * (wp1*wp1 - 2.0e0*wijk*wijk +
-                                   wm1*wm1) +
+                         zzcon3 * (qs[i, j, k+1, c] - 2.0e0*qs[i, j, k, c] + qs[i, j, k-1, c]) +
+                         zzcon4 * (wp1*wp1 - 2.0e0*wijk*wijk + wm1*wm1) +
                          zzcon5 * (u[i, j, k+1, 5, c]*rho_i[i, j, k+1, c] -
                                    2.0e0*u[i, j, k, 5, c]*rho_i[i, j, k, c] +
                                    u[i, j, k-1, 5, c]*rho_i[i, j, k-1, c]) -
@@ -349,8 +388,7 @@ function compute_rhs()
              for m = 1:5
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c]- dssp *(
-                           5.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j, k+1, m, c] + u[i, j, k+2, m, c])
+                      rhs[i, j, k, m, c] -= dssp *(5.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j, k+1, m, c] + u[i, j, k+2, m, c])
                    end
                 end
              end
@@ -359,8 +397,7 @@ function compute_rhs()
              for m = 1:5
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                          -4.0e0*u[i, j, k-1, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j, k+1, m, c] + u[i, j, k+2, m, c])
+                      rhs[i, j, k, m, c] -= dssp *(-4.0e0*u[i, j, k-1, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j, k+1, m, c] + u[i, j, k+2, m, c])
                    end
                 end
              end
@@ -370,8 +407,7 @@ function compute_rhs()
              for k = 3*cell_start[3, c]:cell_size[3, c]-3*cell_end[3, c]-1
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                            u[i, j, k-2, m, c] - 4.0e0*u[i, j, k-1, m, c] + 6.0*u[i, j, k, m, c] - 4.0e0*u[i, j, k+1, m, c] + u[i, j, k+2, m, c])
+                      rhs[i, j, k, m, c]-= dssp *(u[i, j, k-2, m, c] - 4.0e0*u[i, j, k-1, m, c] + 6.0*u[i, j, k, m, c] - 4.0e0*u[i, j, k+1, m, c] + u[i, j, k+2, m, c])
                    end
                 end
              end
@@ -382,8 +418,7 @@ function compute_rhs()
              for m = 1:5
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                           u[i, j, k-2, m, c] - 4.0e0*u[i, j, k-1, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j, k+1, m, c] )
+                      rhs[i, j, k, m, c] -= dssp *( u[i, j, k-2, m, c] - 4.0e0*u[i, j, k-1, m, c] + 6.0e0*u[i, j, k, m, c] - 4.0e0*u[i, j, k+1, m, c] )
                    end
                 end
              end
@@ -392,9 +427,7 @@ function compute_rhs()
              for m = 1:5
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] - dssp *(
-                           u[i, j, k-2, m, c] - 4.0e0*u[i, j, k-1, m, c] +
-                            5.0e0*u[i, j, k, m, c] )
+                      rhs[i, j, k, m, c] -= dssp *(u[i, j, k-2, m, c] - 4.0e0*u[i, j, k-1, m, c] + 5.0e0*u[i, j, k, m, c] )
                    end
                 end
              end
@@ -404,7 +437,7 @@ function compute_rhs()
              for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-                      rhs[i, j, k, m, c] = rhs[i, j, k, m, c] * dt
+                      rhs[i, j, k, m, c] *= dt
                    end
                 end
              end

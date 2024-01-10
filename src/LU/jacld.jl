@@ -2,7 +2,22 @@
 #   compute the lower triangular part of the jacobian matrix
 #---------------------------------------------------------------------
 
- function jacld(j, k)
+ function jacld(j, k,
+               u,
+               a,
+               b,
+               c,
+               d,
+               dt,
+               tx1,
+               tx2,
+               ty1,
+               ty2,
+               tz1,
+               tz2,
+               ist,
+               iend,
+               )
 
       r43 = ( 4.0e+00 / 3.0e+00 )
       c1345 = c1 * c3 * c4 * c5

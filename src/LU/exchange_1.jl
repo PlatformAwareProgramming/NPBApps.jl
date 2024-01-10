@@ -1,7 +1,21 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
- function exchange_1( g, k, iex )
+ function exchange_1( g, k, iex,
+                        comm_solve, 
+                        buf,
+                        buf1,
+                        south,
+                        east,
+                        north,
+                        west,
+                        nx,
+                        ny,
+                        ist,
+                        iend,
+                        jst,
+                        jend,
+                    )
 
       if iex == 0
 

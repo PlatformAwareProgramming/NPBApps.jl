@@ -9,10 +9,37 @@
 #     of the sweep.
 #---------------------------------------------------------------------
 
-function y_solve()
-
-      send_id = Ref{MPI.Request}()
-      recv_id = Ref{MPI.Request}()
+function y_solve(
+     MAX_CELL_DIM,
+     IMAX,
+     JMAX,
+     KMAX,
+     cell_coord,
+     cell_size,
+     cell_start,
+     cell_end,
+     slice,
+     u,
+     rhs,
+     lhsc,
+     backsub_info,
+     in_buffer,
+     out_buffer,
+     fjac,
+     njac,
+     lhsa,
+     lhsb,
+     qs,
+     dt,
+     timeron,
+     ncells_v::Val{ncells},
+     ty1,
+     ty2,
+     comm_solve,     
+     predecessor,
+     successor,
+     utmp,
+) where ncells
 
       jstart = 0
 
@@ -42,7 +69,23 @@ function y_solve()
 #---------------------------------------------------------------------
             FIRST = 1
 #            call lhsy(c)
-            y_solve_cell(FIRST, LAST, c)
+            y_solve_cell(FIRST, LAST, c,
+                         cell_size,
+                         cell_start,
+                         cell_end,    
+                         u,
+                         rhs,
+                         lhsc,
+                         fjac,
+                         njac,
+                         lhsa,
+                         lhsb,
+                         qs,
+                         dt,
+                         ty1,
+                         ty2,
+                         utmp,
+                         )
          else
 #---------------------------------------------------------------------
 #     Not the first cell of this line, so receive info from
@@ -50,7 +93,14 @@ function y_solve()
 #---------------------------------------------------------------------
             FIRST = 0
             if (timeron) timer_start(t_ycomm) end
-            recv_id[] = y_receive_solve_info(c)
+            recv_id[] = y_receive_solve_info(c,
+                                             MAX_CELL_DIM,
+                                             cell_coord,
+                                             out_buffer,
+                                             ncells_v,
+                                             comm_solve,
+                                             predecessor
+                                        )
 #---------------------------------------------------------------------
 #     overlap computations and communications
 #---------------------------------------------------------------------
@@ -64,12 +114,47 @@ function y_solve()
 #---------------------------------------------------------------------
 #     install C'(jstart+1) and rhs'(jstart+1) to be used in this cell
 #---------------------------------------------------------------------
-            y_unpack_solve_info(c)
-            y_solve_cell(FIRST, LAST, c)
+            y_unpack_solve_info(c,
+                              IMAX,
+                              KMAX,
+                              rhs,
+                              lhsc,
+                              out_buffer,
+                    )
+            y_solve_cell(FIRST, LAST, c,
+                         cell_size,
+                         cell_start,
+                         cell_end,    
+                         u,
+                         rhs,
+                         lhsc,
+                         fjac,
+                         njac,
+                         lhsa,
+                         lhsb,
+                         qs,
+                         dt,
+                         ty1,
+                         ty2,
+                         utmp,
+                         )
          end
 
          if (LAST == 0) 
-            send_id[] = y_send_solve_info(c) 
+            send_id[] = y_send_solve_info(c,
+                                        MAX_CELL_DIM,
+                                        IMAX,
+                                        KMAX,
+                                        cell_coord,
+                                        cell_size,
+                                        rhs,
+                                        lhsc,
+                                        in_buffer,
+                                        timeron,
+                                        ncells_v,     
+                                        comm_solve,    
+                                        successor 
+                                        ) 
          end
       end
 
@@ -86,18 +171,54 @@ function y_solve()
 #---------------------------------------------------------------------
 #     last cell, so perform back substitute without waiting
 #---------------------------------------------------------------------
-            y_backsubstitute(FIRST, LAST, c)
+         y_backsubstitute(FIRST, LAST, c,
+                              cell_size,
+                              cell_start,
+                              cell_end,
+                              rhs,
+                              lhsc,
+                              backsub_info,
+                              )
          else
             if (timeron) timer_start(t_ycomm) end
-            recv_id[] = y_receive_backsub_info(c)
+            recv_id[] = y_receive_backsub_info(c,
+                                             MAX_CELL_DIM, 
+                                             cell_coord,
+                                             out_buffer,
+                                             ncells_v,
+                                             comm_solve,     
+                                             successor
+                                   )
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
             if (timeron) timer_stop(t_ycomm) end
-            y_unpack_backsub_info(c)
-            y_backsubstitute(FIRST, LAST, c)
+            y_unpack_backsub_info(c,
+                                   IMAX,
+                                   KMAX,
+                                   backsub_info,
+                                   out_buffer,
+                         )
+            y_backsubstitute(FIRST, LAST, c,
+                              cell_size,
+                              cell_start,
+                              cell_end,
+                              rhs,
+                              lhsc,
+                              backsub_info,
+                              )
          end
          if (FIRST == 0) 
-            send_id[] = y_send_backsub_info(c) 
+            send_id[] = y_send_backsub_info(c,
+                                             MAX_CELL_DIM,
+                                             IMAX,
+                                             KMAX,
+                                             cell_coord,
+                                             rhs,
+                                             in_buffer,
+                                             timeron,
+                                             ncells_v,
+                                             predecessor
+                                             ) 
          end
       end
 
@@ -112,7 +233,13 @@ end
 #     all i and k
 #---------------------------------------------------------------------
 
-function y_unpack_solve_info(c)
+function y_unpack_solve_info(c,
+                                   IMAX,
+                                   KMAX,
+                                   rhs,
+                                   lhsc,
+                                   out_buffer,
+                                   )
 
       jstart = 0
       ptr = 0
@@ -140,13 +267,25 @@ end
 #     all i and k
 #---------------------------------------------------------------------
 
-function y_send_solve_info(c)
+function y_send_solve_info(c,
+                                   MAX_CELL_DIM,
+                                   IMAX,
+                                   KMAX,
+                                   cell_coord,
+                                   cell_size,
+                                   rhs,
+                                   lhsc,
+                                   in_buffer,
+                                   timeron,
+                                   ::Val{ncells},     
+                                   comm_solve,     
+                                   successor
+                                   ) where ncells
 
       jsize = cell_size[2, c]-1
       ip = cell_coord[1, c] - 1
       kp = cell_coord[3, c] - 1
-      buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(
-           BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
+      buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
 
 #---------------------------------------------------------------------
 #     pack up buffer
@@ -182,7 +321,17 @@ end
 #     pack up and send u[jstart] for all i and k
 #---------------------------------------------------------------------
 
-function y_send_backsub_info(c)
+function y_send_backsub_info(c,
+                                   MAX_CELL_DIM,
+                                   IMAX,
+                                   KMAX,
+                                   cell_coord,
+                                   rhs,
+                                   in_buffer,
+                                   timeron,
+                                   ::Val{ncells},
+                                   predecessor
+                                   )  where ncells
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -212,7 +361,12 @@ end
 #     unpack u[jsize] for all i and k
 #---------------------------------------------------------------------
 
-function y_unpack_backsub_info(c)
+function y_unpack_backsub_info(c,
+                                        IMAX,
+                                        KMAX,
+                                        backsub_info,
+                                        out_buffer,
+     )
 
       ptr = 0
       for k = 0:KMAX-1
@@ -232,7 +386,14 @@ end
 #     post mpi receives
 #---------------------------------------------------------------------
 
-function y_receive_backsub_info(c)
+function y_receive_backsub_info(c,
+                                        MAX_CELL_DIM, 
+                                        cell_coord,
+                                        out_buffer,
+                                        ::Val{ncells},
+                                        comm_solve,     
+                                        successor
+          )  where ncells
 
       ip = cell_coord[1, c] - 1
       kp = cell_coord[3, c] - 1
@@ -246,7 +407,14 @@ end
 #     post mpi receives 
 #---------------------------------------------------------------------
 
-function y_receive_solve_info(c)
+function y_receive_solve_info(c,
+                                        MAX_CELL_DIM,
+                                        cell_coord,
+                                        out_buffer,
+                                        ::Val{ncells},
+                                        comm_solve,
+                                        predecessor
+                                    )  where ncells
 
       ip = cell_coord[1, c] - 1
       kp = cell_coord[3, c] - 1
@@ -264,7 +432,14 @@ end
 #     after call u[jstart] will be sent to next cell
 #---------------------------------------------------------------------
 
-function y_backsubstitute(FIRST, LAST, c)
+function y_backsubstitute(FIRST, LAST, c,
+                                   cell_size,
+                                   cell_start,
+                                   cell_end,
+                                   rhs,
+                                   lhsc,
+                                   backsub_info,
+                                   )
 
       jstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -278,9 +453,7 @@ function y_backsubstitute(FIRST, LAST, c)
 #---------------------------------------------------------------------
                for m = 1:BLOCK_SIZE
                   for n = 1:BLOCK_SIZE
-                     rhs[m, i, jsize, k, c] = rhs[m, i, jsize, k, c]-
-                            lhsc[m, n, i, jsize, k, c]*
-                          backsub_info[n, i, k, c]
+                     rhs[m, i, jsize, k, c] -= lhsc[m, n, i, jsize, k, c]*backsub_info[n, i, k, c]
                   end
                end
             end
@@ -291,8 +464,7 @@ function y_backsubstitute(FIRST, LAST, c)
             for i = cell_start[1, c]:isize
                for m = 1:BLOCK_SIZE
                   for n = 1:BLOCK_SIZE
-                     rhs[m, i, j, k, c] = rhs[m, i, j, k, c]-
-                            lhsc[m, n, i, j, k, c]*rhs[n, i, j+1, k, c]
+                     rhs[m, i, j, k, c] -= lhsc[m, n, i, j, k, c]*rhs[n, i, j+1, k, c]
                   end
                end
             end
@@ -313,10 +485,26 @@ end
 #     c'(JMAX) and rhs'(JMAX) will be sent to next cell
 #---------------------------------------------------------------------
 
-function y_solve_cell(FIRST, LAST, c)
+function y_solve_cell(FIRST, LAST, c,
+                    cell_size,
+                    cell_start,
+                    cell_end,    
+                    u,
+                    rhs,
+                    lhsc,
+                    fjac,
+                    njac,
+                    lhsa,
+                    lhsb,
+                    qs,
+                    dt,
+                    ty1,
+                    ty2,
+                    utmp,
+          )
 
-      utmp = OffsetArray(zeros(Float64, 6, JMAX+4), 1:6, -2:JMAX+1)
-
+      
+      
       jstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
       jsize = cell_size[2, c]-1
@@ -356,38 +544,28 @@ function y_solve_cell(FIRST, LAST, c)
                fjac[1, 4, j] = 0.0e+00
                fjac[1, 5, j] = 0.0e+00
 
-               fjac[2, 1, j] = - ( utmp[2,j]*utmp[3,j] )*
-                     tmp2
+               fjac[2, 1, j] = - ( utmp[2,j]*utmp[3,j] ) * tmp2
                fjac[2, 2, j] = utmp[3,j] * tmp1
                fjac[2, 3, j] = utmp[2,j] * tmp1
                fjac[2, 4, j] = 0.0e+00
                fjac[2, 5, j] = 0.0e+00
 
-               fjac[3, 1, j] = - ( utmp[3,j]*utmp[3,j]*tmp2)+
-                     c2 * utmp[6,j]
+               fjac[3, 1, j] = - ( utmp[3,j]*utmp[3,j]*tmp2) + c2 * utmp[6,j]
                fjac[3, 2, j] = - c2 *  utmp[2,j] * tmp1
-               fjac[3, 3, j] = ( 2.0e+00 - c2 )*
-                      utmp[3,j] * tmp1
+               fjac[3, 3, j] = ( 2.0e+00 - c2 ) * utmp[3,j] * tmp1
                fjac[3, 4, j] = - c2 * utmp[4,j] * tmp1
                fjac[3, 5, j] = c2
 
-               fjac[4, 1, j] = - ( utmp[3,j]*utmp[4,j] )*
-                     tmp2
+               fjac[4, 1, j] = - ( utmp[3,j]*utmp[4,j] ) * tmp2
                fjac[4, 2, j] = 0.0e+00
                fjac[4, 3, j] = utmp[4,j] * tmp1
                fjac[4, 4, j] = utmp[3,j] * tmp1
                fjac[4, 5, j] = 0.0e+00
 
-               fjac[5, 1, j] = ( c2 * 2.0e0 * utmp[6,j]-
-                     c1 * utmp[5,j] * tmp1 )*
-                     utmp[3,j] * tmp1
-               fjac[5, 2, j] = - c2 * utmp[2,j]*utmp[3,j]*
-                     tmp2
-               fjac[5, 3, j] = c1 * utmp[5,j] * tmp1-
-                     c2 * ( utmp[6,j]+
-                     utmp[3,j]*utmp[3,j] * tmp2 )
-               fjac[5, 4, j] = - c2 * ( utmp[3,j]*utmp[4,j] )*
-                     tmp2
+               fjac[5, 1, j] = ( c2 * 2.0e0 * utmp[6,j] - c1 * utmp[5,j] * tmp1 ) * utmp[3,j] * tmp1
+               fjac[5, 2, j] = - c2 * utmp[2,j]*utmp[3,j] * tmp2
+               fjac[5, 3, j] = c1 * utmp[5,j] * tmp1 - c2 * ( utmp[6,j] + utmp[3,j]*utmp[3,j] * tmp2 )
+               fjac[5, 4, j] = - c2 * ( utmp[3,j]*utmp[4,j] ) * tmp2
                fjac[5, 5, j] = c1 * utmp[3,j] * tmp1
 
                njac[1, 1, j] = 0.0e+00
@@ -422,8 +600,7 @@ function y_solve_cell(FIRST, LAST, c)
                      c1345 * tmp2 * utmp[5,j]
 
                njac[5, 2, j] = (  c3c4 - c1345 ) * tmp2 * utmp[2,j]
-               njac[5, 3, j] = ( con43 * c3c4-
-                     c1345 ) * tmp2 * utmp[3,j]
+               njac[5, 3, j] = ( con43 * c3c4 - c1345 ) * tmp2 * utmp[3,j]
                njac[5, 4, j] = ( c3c4 - c1345 ) * tmp2 * utmp[4,j]
                njac[5, 5, j] = ( c1345 ) * tmp1
 
@@ -437,152 +614,112 @@ function y_solve_cell(FIRST, LAST, c)
                tmp1 = dt * ty1
                tmp2 = dt * ty2
 
-                lhsa[1, 1, j] = - tmp2 * fjac[1, 1, j-1]-
-                     tmp1 * njac[1, 1, j-1]-
-                     tmp1 * dy1
-                lhsa[1, 2, j] = - tmp2 * fjac[1, 2, j-1]-
-                     tmp1 * njac[1, 2, j-1]
-                lhsa[1, 3, j] = - tmp2 * fjac[1, 3, j-1]-
-                     tmp1 * njac[1, 3, j-1]
-                lhsa[1, 4, j] = - tmp2 * fjac[1, 4, j-1]-
-                     tmp1 * njac[1, 4, j-1]
-                lhsa[1, 5, j] = - tmp2 * fjac[1, 5, j-1]-
-                     tmp1 * njac[1, 5, j-1]
+                lhsa[1, 1, j] = - tmp2 * fjac[1, 1, j-1] - tmp1 * njac[1, 1, j-1]- tmp1 * dy1
+                lhsa[1, 2, j] = - tmp2 * fjac[1, 2, j-1] - tmp1 * njac[1, 2, j-1]
+                lhsa[1, 3, j] = - tmp2 * fjac[1, 3, j-1] - tmp1 * njac[1, 3, j-1]
+                lhsa[1, 4, j] = - tmp2 * fjac[1, 4, j-1] - tmp1 * njac[1, 4, j-1]
+                lhsa[1, 5, j] = - tmp2 * fjac[1, 5, j-1] - tmp1 * njac[1, 5, j-1]
 
-                lhsa[2, 1, j] = - tmp2 * fjac[2, 1, j-1]-
-                     tmp1 * njac[2, 1, j-1]
-                lhsa[2, 2, j] = - tmp2 * fjac[2, 2, j-1]-
-                     tmp1 * njac[2, 2, j-1]-
-                     tmp1 * dy2
-                lhsa[2, 3, j] = - tmp2 * fjac[2, 3, j-1]-
-                     tmp1 * njac[2, 3, j-1]
-                lhsa[2, 4, j] = - tmp2 * fjac[2, 4, j-1]-
-                     tmp1 * njac[2, 4, j-1]
-                lhsa[2, 5, j] = - tmp2 * fjac[2, 5, j-1]-
-                     tmp1 * njac[2, 5, j-1]
+                lhsa[2, 1, j] = - tmp2 * fjac[2, 1, j-1] - tmp1 * njac[2, 1, j-1]
+                lhsa[2, 2, j] = - tmp2 * fjac[2, 2, j-1] - tmp1 * njac[2, 2, j-1] - tmp1 * dy2
+                lhsa[2, 3, j] = - tmp2 * fjac[2, 3, j-1] - tmp1 * njac[2, 3, j-1]
+                lhsa[2, 4, j] = - tmp2 * fjac[2, 4, j-1] - tmp1 * njac[2, 4, j-1]
+                lhsa[2, 5, j] = - tmp2 * fjac[2, 5, j-1] - tmp1 * njac[2, 5, j-1]
 
-                lhsa[3, 1, j] = - tmp2 * fjac[3, 1, j-1]-
-                     tmp1 * njac[3, 1, j-1]
-                lhsa[3, 2, j] = - tmp2 * fjac[3, 2, j-1]-
-                     tmp1 * njac[3, 2, j-1]
-                lhsa[3, 3, j] = - tmp2 * fjac[3, 3, j-1]-
-                     tmp1 * njac[3, 3, j-1]-
-                     tmp1 * dy3
-                lhsa[3, 4, j] = - tmp2 * fjac[3, 4, j-1]-
-                     tmp1 * njac[3, 4, j-1]
-                lhsa[3, 5, j] = - tmp2 * fjac[3, 5, j-1]-
-                     tmp1 * njac[3, 5, j-1]
+                lhsa[3, 1, j] = - tmp2 * fjac[3, 1, j-1] - tmp1 * njac[3, 1, j-1]
+                lhsa[3, 2, j] = - tmp2 * fjac[3, 2, j-1] - tmp1 * njac[3, 2, j-1]
+                lhsa[3, 3, j] = - tmp2 * fjac[3, 3, j-1] - tmp1 * njac[3, 3, j-1] - tmp1 * dy3
+                lhsa[3, 4, j] = - tmp2 * fjac[3, 4, j-1] - tmp1 * njac[3, 4, j-1]
+                lhsa[3, 5, j] = - tmp2 * fjac[3, 5, j-1] - tmp1 * njac[3, 5, j-1]
 
-                lhsa[4, 1, j] = - tmp2 * fjac[4, 1, j-1]-
-                     tmp1 * njac[4, 1, j-1]
-                lhsa[4, 2, j] = - tmp2 * fjac[4, 2, j-1]-
-                     tmp1 * njac[4, 2, j-1]
-                lhsa[4, 3, j] = - tmp2 * fjac[4, 3, j-1]-
-                     tmp1 * njac[4, 3, j-1]
-                lhsa[4, 4, j] = - tmp2 * fjac[4, 4, j-1]-
-                     tmp1 * njac[4, 4, j-1]-
-                     tmp1 * dy4
-                lhsa[4, 5, j] = - tmp2 * fjac[4, 5, j-1]-
-                     tmp1 * njac[4, 5, j-1]
+                lhsa[4, 1, j] = - tmp2 * fjac[4, 1, j-1] - tmp1 * njac[4, 1, j-1]
+                lhsa[4, 2, j] = - tmp2 * fjac[4, 2, j-1] - tmp1 * njac[4, 2, j-1]
+                lhsa[4, 3, j] = - tmp2 * fjac[4, 3, j-1] - tmp1 * njac[4, 3, j-1]
+                lhsa[4, 4, j] = - tmp2 * fjac[4, 4, j-1] - tmp1 * njac[4, 4, j-1] - tmp1 * dy4
+                lhsa[4, 5, j] = - tmp2 * fjac[4, 5, j-1] - tmp1 * njac[4, 5, j-1]
 
-                lhsa[5, 1, j] = - tmp2 * fjac[5, 1, j-1]-
-                     tmp1 * njac[5, 1, j-1]
-                lhsa[5, 2, j] = - tmp2 * fjac[5, 2, j-1]-
-                     tmp1 * njac[5, 2, j-1]
-                lhsa[5, 3, j] = - tmp2 * fjac[5, 3, j-1]-
-                     tmp1 * njac[5, 3, j-1]
-                lhsa[5, 4, j] = - tmp2 * fjac[5, 4, j-1]-
-                     tmp1 * njac[5, 4, j-1]
-                lhsa[5, 5, j] = - tmp2 * fjac[5, 5, j-1]-
-                     tmp1 * njac[5, 5, j-1]-
-                     tmp1 * dy5
+                lhsa[5, 1, j] = - tmp2 * fjac[5, 1, j-1] - tmp1 * njac[5, 1, j-1]
+                lhsa[5, 2, j] = - tmp2 * fjac[5, 2, j-1] - tmp1 * njac[5, 2, j-1]
+                lhsa[5, 3, j] = - tmp2 * fjac[5, 3, j-1] - tmp1 * njac[5, 3, j-1]
+                lhsa[5, 4, j] = - tmp2 * fjac[5, 4, j-1] - tmp1 * njac[5, 4, j-1]
+                lhsa[5, 5, j] = - tmp2 * fjac[5, 5, j-1] - tmp1 * njac[5, 5, j-1]- tmp1 * dy5
 
-                lhsb[1, 1, j] = 1.0e+00+
-                     tmp1 * 2.0e+00 * njac[1, 1, j]+
-                     tmp1 * 2.0e+00 * dy1
+                lhsb[1, 1, j] = 1.0e+00 + tmp1 * 2.0e+00 * njac[1, 1, j] + tmp1 * 2.0e+00 * dy1
                 lhsb[1, 2, j] = tmp1 * 2.0e+00 * njac[1, 2, j]
                 lhsb[1, 3, j] = tmp1 * 2.0e+00 * njac[1, 3, j]
                 lhsb[1, 4, j] = tmp1 * 2.0e+00 * njac[1, 4, j]
                 lhsb[1, 5, j] = tmp1 * 2.0e+00 * njac[1, 5, j]
 
                 lhsb[2, 1, j] = tmp1 * 2.0e+00 * njac[2, 1, j]
-                lhsb[2, 2, j] = 1.0e+00+
-                     tmp1 * 2.0e+00 * njac[2, 2, j]+
-                     tmp1 * 2.0e+00 * dy2
+                lhsb[2, 2, j] = 1.0e+00 + tmp1 * 2.0e+00 * njac[2, 2, j] +  tmp1 * 2.0e+00 * dy2
                 lhsb[2, 3, j] = tmp1 * 2.0e+00 * njac[2, 3, j]
                 lhsb[2, 4, j] = tmp1 * 2.0e+00 * njac[2, 4, j]
                 lhsb[2, 5, j] = tmp1 * 2.0e+00 * njac[2, 5, j]
 
                 lhsb[3, 1, j] = tmp1 * 2.0e+00 * njac[3, 1, j]
                 lhsb[3, 2, j] = tmp1 * 2.0e+00 * njac[3, 2, j]
-                lhsb[3, 3, j] = 1.0e+00+
-                     tmp1 * 2.0e+00 * njac[3, 3, j]+
-                     tmp1 * 2.0e+00 * dy3
+                lhsb[3, 3, j] = 1.0e+00 + tmp1 * 2.0e+00 * njac[3, 3, j] + tmp1 * 2.0e+00 * dy3
                 lhsb[3, 4, j] = tmp1 * 2.0e+00 * njac[3, 4, j]
                 lhsb[3, 5, j] = tmp1 * 2.0e+00 * njac[3, 5, j]
 
                 lhsb[4, 1, j] = tmp1 * 2.0e+00 * njac[4, 1, j]
                 lhsb[4, 2, j] = tmp1 * 2.0e+00 * njac[4, 2, j]
                 lhsb[4, 3, j] = tmp1 * 2.0e+00 * njac[4, 3, j]
-                lhsb[4, 4, j] = 1.0e+00+
-                     tmp1 * 2.0e+00 * njac[4, 4, j]+
-                     tmp1 * 2.0e+00 * dy4
+                lhsb[4, 4, j] = 1.0e+00 + tmp1 * 2.0e+00 * njac[4, 4, j] + tmp1 * 2.0e+00 * dy4
                 lhsb[4, 5, j] = tmp1 * 2.0e+00 * njac[4, 5, j]
 
                 lhsb[5, 1, j] = tmp1 * 2.0e+00 * njac[5, 1, j]
                 lhsb[5, 2, j] = tmp1 * 2.0e+00 * njac[5, 2, j]
                 lhsb[5, 3, j] = tmp1 * 2.0e+00 * njac[5, 3, j]
                 lhsb[5, 4, j] = tmp1 * 2.0e+00 * njac[5, 4, j]
-                lhsb[5, 5, j] = 1.0e+00+
-                     tmp1 * 2.0e+00 * njac[5, 5, j]+
-                     tmp1 * 2.0e+00 * dy5
+                lhsb[5, 5, j] = 1.0e+00 + tmp1 * 2.0e+00 * njac[5, 5, j] + tmp1 * 2.0e+00 * dy5
 
-                lhsc[1, 1, i, j, k, c] =  tmp2 * fjac[1, 1, j+1]-
+                lhsc[1, 1, i, j, k, c] =  tmp2 * fjac[1, 1, j+1] -
                      tmp1 * njac[1, 1, j+1]-
                      tmp1 * dy1
-                lhsc[1, 2, i, j, k, c] =  tmp2 * fjac[1, 2, j+1]-
+                lhsc[1, 2, i, j, k, c] =  tmp2 * fjac[1, 2, j+1] -
                      tmp1 * njac[1, 2, j+1]
-                lhsc[1, 3, i, j, k, c] =  tmp2 * fjac[1, 3, j+1]-
+                lhsc[1, 3, i, j, k, c] =  tmp2 * fjac[1, 3, j+1] -
                      tmp1 * njac[1, 3, j+1]
-                lhsc[1, 4, i, j, k, c] =  tmp2 * fjac[1, 4, j+1]-
+                lhsc[1, 4, i, j, k, c] =  tmp2 * fjac[1, 4, j+1] -
                      tmp1 * njac[1, 4, j+1]
-                lhsc[1, 5, i, j, k, c] =  tmp2 * fjac[1, 5, j+1]-
+                lhsc[1, 5, i, j, k, c] =  tmp2 * fjac[1, 5, j+1] -
                      tmp1 * njac[1, 5, j+1]
 
-                lhsc[2, 1, i, j, k, c] =  tmp2 * fjac[2, 1, j+1]-
+                lhsc[2, 1, i, j, k, c] =  tmp2 * fjac[2, 1, j+1] -
                      tmp1 * njac[2, 1, j+1]
-                lhsc[2, 2, i, j, k, c] =  tmp2 * fjac[2, 2, j+1]-
+                lhsc[2, 2, i, j, k, c] =  tmp2 * fjac[2, 2, j+1] -
                      tmp1 * njac[2, 2, j+1]-
                      tmp1 * dy2
-                lhsc[2, 3, i, j, k, c] =  tmp2 * fjac[2, 3, j+1]-
+                lhsc[2, 3, i, j, k, c] =  tmp2 * fjac[2, 3, j+1] -
                      tmp1 * njac[2, 3, j+1]
-                lhsc[2, 4, i, j, k, c] =  tmp2 * fjac[2, 4, j+1]-
+                lhsc[2, 4, i, j, k, c] =  tmp2 * fjac[2, 4, j+1] -
                      tmp1 * njac[2, 4, j+1]
-                lhsc[2, 5, i, j, k, c] =  tmp2 * fjac[2, 5, j+1]-
+                lhsc[2, 5, i, j, k, c] =  tmp2 * fjac[2, 5, j+1] -
                      tmp1 * njac[2, 5, j+1]
 
-                lhsc[3, 1, i, j, k, c] =  tmp2 * fjac[3, 1, j+1]-
+                lhsc[3, 1, i, j, k, c] =  tmp2 * fjac[3, 1, j+1] -
                      tmp1 * njac[3, 1, j+1]
-                lhsc[3, 2, i, j, k, c] =  tmp2 * fjac[3, 2, j+1]-
+                lhsc[3, 2, i, j, k, c] =  tmp2 * fjac[3, 2, j+1] -
                      tmp1 * njac[3, 2, j+1]
-                lhsc[3, 3, i, j, k, c] =  tmp2 * fjac[3, 3, j+1]-
+                lhsc[3, 3, i, j, k, c] =  tmp2 * fjac[3, 3, j+1] -
                      tmp1 * njac[3, 3, j+1]-
                      tmp1 * dy3
-                lhsc[3, 4, i, j, k, c] =  tmp2 * fjac[3, 4, j+1]-
+                lhsc[3, 4, i, j, k, c] =  tmp2 * fjac[3, 4, j+1] -
                      tmp1 * njac[3, 4, j+1]
-                lhsc[3, 5, i, j, k, c] =  tmp2 * fjac[3, 5, j+1]-
+                lhsc[3, 5, i, j, k, c] =  tmp2 * fjac[3, 5, j+1] -
                      tmp1 * njac[3, 5, j+1]
 
-                lhsc[4, 1, i, j, k, c] =  tmp2 * fjac[4, 1, j+1]-
+                lhsc[4, 1, i, j, k, c] =  tmp2 * fjac[4, 1, j+1] -
                      tmp1 * njac[4, 1, j+1]
-                lhsc[4, 2, i, j, k, c] =  tmp2 * fjac[4, 2, j+1]-
+                lhsc[4, 2, i, j, k, c] =  tmp2 * fjac[4, 2, j+1] -
                      tmp1 * njac[4, 2, j+1]
-                lhsc[4, 3, i, j, k, c] =  tmp2 * fjac[4, 3, j+1]-
+                lhsc[4, 3, i, j, k, c] =  tmp2 * fjac[4, 3, j+1] -
                      tmp1 * njac[4, 3, j+1]
-                lhsc[4, 4, i, j, k, c] =  tmp2 * fjac[4, 4, j+1]-
+                lhsc[4, 4, i, j, k, c] =  tmp2 * fjac[4, 4, j+1] -
                      tmp1 * njac[4, 4, j+1]-
                      tmp1 * dy4
-                lhsc[4, 5, i, j, k, c] =  tmp2 * fjac[4, 5, j+1]-
+                lhsc[4, 5, i, j, k, c] =  tmp2 * fjac[4, 5, j+1] -
                      tmp1 * njac[4, 5, j+1]
 
                 lhsc[5, 1, i, j, k, c] =  tmp2 * fjac[5, 1, j+1]-
@@ -609,7 +746,7 @@ function y_solve_cell(FIRST, LAST, c)
 #     multiply c[i,jstart,k] by b_inverse and copy back to c
 #     multiply rhs[jstart] by b_inverse(jstart) and copy to rhs
 #---------------------------------------------------------------------
-               binvcrhs(view(lhsb, 1:5, 1:5, jstart), view(lhsc, 1:5, 1:5, i, jstart, k, c), view(rhs, 1:5, i, jstart, k, c))
+               binvcrhs(lhsb, jstart, lhsc, i, jstart, k, c, rhs, i, jstart, k, c)
 
             end
 
@@ -624,18 +761,21 @@ function y_solve_cell(FIRST, LAST, c)
 #     
 #     rhs[j] = rhs[j] - A*rhs[j-1]
 #---------------------------------------------------------------------
-               matvec_sub(view(lhsa, 1:5, 1:5, j), view(rhs, 1:5, i, j-1, k, c), view(rhs, 1:5, i, j, k, c))
+#3               matvec_sub(view(lhsa, 1:5, 1:5, j), view(rhs, 1:5, i, j-1, k, c), view(rhs, 1:5, i, j, k, c))
+               matvec_sub(lhsa, j, rhs, i, j-1, k, c, rhs, i, j, k, c)
 
 #---------------------------------------------------------------------
 #      b[j] =  b[j] - C(j-1)*A(j)
 #---------------------------------------------------------------------
-               matmul_sub(view(lhsa, 1:5, 1:5, j), view(lhsc, 1:5, 1:5, i, j-1, k, c), view(lhsb, 1:5, 1:5, j))
+              matmul_sub2(view(lhsa, 1:5, 1:5, j), view(lhsc, 1:5, 1:5, i, j-1, k, c), view(lhsb, 1:5, 1:5, j))
+#               matmul_sub(lhsa, j, lhsc, i, j-1, k, c, lhsb, j)
 
 #---------------------------------------------------------------------
 #     multiply c[i,j,k] by b_inverse and copy back to c
 #     multiply rhs[i,1,k] by b_inverse(i,1,k) and copy to rhs
 #---------------------------------------------------------------------
-               binvcrhs(view(lhsb, 1:5, 1:5, j), view(lhsc, 1:5, 1:5, i, j, k, c), view(rhs, 1:5, i, j, k, c) )
+#               binvcrhs(view(lhsb, 1:5, 1:5, j), view(lhsc, 1:5, 1:5, i, j, k, c), view(rhs, 1:5, i, j, k, c) )
+               binvcrhs(lhsb, j, lhsc, i, j, k, c, rhs, i, j, k, c)
 
             end
 
@@ -647,19 +787,22 @@ function y_solve_cell(FIRST, LAST, c)
 #---------------------------------------------------------------------
 #     rhs[jsize] = rhs[jsize] - A*rhs[jsize-1]
 #---------------------------------------------------------------------
-               matvec_sub(view(lhsa, 1:5, 1:5, jsize), view(rhs,1:5, i, jsize-1, k, c), view(rhs, 1:5, i, jsize, k, c))
+#               matvec_sub(view(lhsa, 1:5, 1:5, jsize), view(rhs,1:5, i, jsize-1, k, c), view(rhs, 1:5, i, jsize, k, c))
+               matvec_sub(lhsa, jsize, rhs, i, jsize-1, k, c, rhs, i, jsize, k, c)
 
 #---------------------------------------------------------------------
 #      b[jsize] =  b[jsize] - C(jsize-1)*A(jsize)
 #     call matmul_sub(aa,i,jsize,k,c,
 #     $              cc,i,jsize-1,k,c,bb,i,jsize,k,c)
 #---------------------------------------------------------------------
-               matmul_sub(view(lhsa, 1:5, 1:5, jsize), view(lhsc, 1:5, 1:5, i, jsize-1, k, c), view(lhsb, 1:5, 1:5, jsize))
+               matmul_sub2(view(lhsa, 1:5, 1:5, jsize), view(lhsc, 1:5, 1:5, i, jsize-1, k, c), view(lhsb, 1:5, 1:5, jsize))
+#               matmul_sub(lhsa, jsize, lhsc, i, jsize-1, k, c, lhsb, jsize)
 
 #---------------------------------------------------------------------
 #     multiply rhs[jsize] by b_inverse(jsize) and copy to rhs
 #---------------------------------------------------------------------
-               binvrhs(view(lhsb,1:5, 1:5, jsize), view(rhs, 1:5, i, jsize, k, c))
+#               binvrhs(view(lhsb,1:5, 1:5, jsize), view(rhs, 1:5, i, jsize, k, c))
+               binvrhs(lhsb, jsize, rhs, i, jsize, k, c)
 
             end
          end

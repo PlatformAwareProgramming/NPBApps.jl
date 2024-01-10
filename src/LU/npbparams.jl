@@ -7,13 +7,13 @@
 #  
 
 # full problem size
-const isiz01 = 12 
-const isiz02 = 12
-const isiz03 = 12
+const isiz01 = 64 
+const isiz02 = 64
+const isiz03 = 64
 
 # number of iterations and how often to print the norm
-const itmax_default = 50 
-const inorm_default = 50
-const dt_default = 0.5e0
+const itmax_default = 250 
+const inorm_default = 250
+const dt_default = 2.0e0
 const convertdouble = false
 const npbversion = "3.4.2"

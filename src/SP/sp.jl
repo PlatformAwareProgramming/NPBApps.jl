@@ -141,10 +141,94 @@ function go()
 
        compute_buffer_size(5)
 
+       if (no_nodes > 1)
+         ss = SA[start_send_east::Int start_send_west::Int start_send_north::Int start_send_south::Int start_send_top::Int start_send_bottom::Int]
+         sr = SA[start_recv_east::Int start_recv_west::Int start_recv_north::Int start_recv_south::Int start_recv_top::Int start_recv_bottom::Int]
+         b_size = SA[east_size::Int west_size::Int north_size::Int south_size::Int top_size::Int bottom_size::Int]
+       else
+         ss = nothing
+         sr = nothing
+         b_size = nothing
+       end
+
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
-       adi()
+       adi(Val(no_nodes),
+            Val(ncells),
+            slice,
+            cell_size,
+            cell_start,
+            cell_end,
+            cell_coord,
+            u,
+            rhs,
+            lhs,
+            rho_i,
+            us,
+            cv,
+            rhoq,
+            rhon,
+            rhos,
+            vs,
+            ws,
+            square,
+            qs,
+            ainv,
+            speed,
+            forcing,
+            dt,
+            tx2,
+            ty2,
+            tz2,
+            c1,
+            c2,
+            c1c2,
+            dx1tx1,
+            dx2tx1,
+            dx3tx1, 
+            dx4tx1,
+            dx5tx1,
+            dy1ty1,
+            dy2ty1,
+            dy3ty1,
+            dy4ty1,
+            dy5ty1,
+            dz1tz1,
+            dz2tz1,
+            dz3tz1,
+            dz4tz1,
+            dz5tz1,
+            xxcon2,
+            xxcon3,
+            xxcon4,
+            xxcon5,
+            yycon2,
+            yycon3,
+            yycon4,
+            yycon5,
+            zzcon2,
+            zzcon3,
+            zzcon4,
+            zzcon5,
+            dssp,
+            con43,
+            dx2, dx5, c3c4, c1c5, c2dtty1, dxmax, dx1, dttx1, dttx2,
+            comz5, comz4, comz1, comz6,
+            dy3, dy5, dy1, dymax, dtty1, dtty2, 
+            dz4, dz5, dz1, dttz2, dttz1, dzmax,
+            bt,
+            successor,
+            predecessor,
+            in_buffer,
+            out_buffer,
+            comm_solve,
+            comm_rhs,
+            ss,
+            sr,
+            b_size,
+   )
+
        initialize()
 
 #---------------------------------------------------------------------
@@ -167,14 +251,87 @@ function go()
               end
           end
 
-          adi()
+          adi( Val(no_nodes),
+               Val(ncells),
+               slice,
+               cell_size,
+               cell_start,
+               cell_end,
+               cell_coord,
+               u,
+               rhs,
+               lhs,
+               rho_i,
+               us,
+               cv,
+               rhoq,
+               rhon,
+               rhos,
+               vs,
+               ws,
+               square,
+               qs,
+               ainv,
+               speed,
+               forcing,
+               dt,
+               tx2,
+               ty2,
+               tz2,
+               c1,
+               c2,
+               c1c2,
+               dx1tx1,
+               dx2tx1,
+               dx3tx1, 
+               dx4tx1,
+               dx5tx1,
+               dy1ty1,
+               dy2ty1,
+               dy3ty1,
+               dy4ty1,
+               dy5ty1,
+               dz1tz1,
+               dz2tz1,
+               dz3tz1,
+               dz4tz1,
+               dz5tz1,
+               xxcon2,
+               xxcon3,
+               xxcon4,
+               xxcon5,
+               yycon2,
+               yycon3,
+               yycon4,
+               yycon5,
+               zzcon2,
+               zzcon3,
+               zzcon4,
+               zzcon5,
+               dssp,
+               con43,
+               dx2, dx5, c3c4, c1c5, c2dtty1, dxmax, dx1, dttx1, dttx2,
+               comz5, comz4, comz1, comz6,
+               dy3, dy5, dy1, dymax, dtty1, dtty2, 
+               dz4, dz5, dz1, dttz2, dttz1, dzmax,
+               bt,
+               successor,
+               predecessor,
+               in_buffer,
+               out_buffer,
+               comm_solve,
+               comm_rhs,
+               ss,
+               sr,
+               b_size,
+         )
 
        end
 
        timer_stop(1)
        t = timer_read(1)
 
-       verified = verify(class)
+       verified = verify(class, ss, sr, b_size)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
 

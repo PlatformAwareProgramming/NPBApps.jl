@@ -2,7 +2,20 @@
 #   block-diagonal matrix-vector multiplication                       
 #---------------------------------------------------------------------
 
-function tzetar(c)
+function tzetar(c,
+               cell_size,
+               cell_start,
+               cell_end,
+               rhs,
+               u,
+               us,
+               vs,
+               ws,
+               qs,
+               speed,
+               ainv,
+               bt,
+               c2iv)
 
 #---------------------------------------------------------------------
 #      treat only one cell                                             
@@ -36,8 +49,7 @@ function tzetar(c)
                 rhs[i, j, k, 2, c] = -uzik1*r2 + xvel*t2
                 rhs[i, j, k, 3, c] =  uzik1*r1 + yvel*t2
                 rhs[i, j, k, 4, c] =  zvel*t2  + t3
-                rhs[i, j, k, 5, c] =  uzik1*(-xvel*r2 + yvel*r1) +
-                          qs[i, j, k, c]*t2 + c2iv*ac2u*t1 + zvel*t3
+                rhs[i, j, k, 5, c] =  uzik1*(-xvel*r2 + yvel*r1) + qs[i, j, k, c]*t2 + c2iv*ac2u*t1 + zvel*t3
 
              end
           end
