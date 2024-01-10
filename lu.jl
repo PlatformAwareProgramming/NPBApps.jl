@@ -1,4 +1,4 @@
 using Pkg
 Pkg.activate(".")
-using NPB_MZ_Multicluster
+using NPBApps
 LU.go()
