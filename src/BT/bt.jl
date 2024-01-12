@@ -242,7 +242,7 @@ function go()
 
        timer_start(1)
 
-       timer_clear(99)
+       timer_clear(64)
 
        for STEP = 1:niter
 
@@ -353,7 +353,7 @@ function go()
                               verified, npbversion)
        end
 
-       ttt = timer_read(99)
+       ttt = timer_read(64)
        @printf(stdout, " Time x_solve_cell =             %12.2F\n", ttt)
 
        if (!timeron) @goto L999 end
