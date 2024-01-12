@@ -4,7 +4,7 @@
 #     nearest neighbor                                                   
 #---------------------------------------------------------------------
 
-function make_set()
+function make_set(grid_points)
 
 #---------------------------------------------------------------------
 #     compute square root; add small number to allow for roundoff

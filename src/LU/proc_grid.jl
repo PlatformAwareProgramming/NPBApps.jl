@@ -40,7 +40,7 @@ end
 #  calculate sub-domain array size
 #---------------------------------------------------------------------
 
-function proc_grid()
+function proc_grid(isiz01, isiz02, isiz03)
 
       xdiv = isqrt2(no_nodes)
 

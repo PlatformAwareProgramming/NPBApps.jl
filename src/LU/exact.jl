@@ -4,7 +4,7 @@
 #
 #---------------------------------------------------------------------
 
-function exact(i, j, k, u000ijk)
+function exact(i, j, k, u000ijk, nx0, ny0, nz0)
 
       xi  = ( float( i - 1 ) ) / ( nx0 - 1 )
       eta  = ( float( j - 1 ) ) / ( ny0 - 1 )

@@ -102,7 +102,7 @@ module LU
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")
     include("common/print_results.jl")
-    include("LU/npbparams.jl")
+    include("LU/classes.jl")
     include("LU/nodedim.jl")
     include("LU/neighbors.jl")
     include("LU/subdomain.jl")

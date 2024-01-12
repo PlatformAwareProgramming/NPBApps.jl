@@ -23,7 +23,7 @@ const bb = 2
 const cc = 3
 const BLOCK_SIZE = 5
 
-grid_points = zeros(Integer, 3)
+# grid_points = zeros(Integer, 3)
 
 const EAST = 2000 
 const WEST = 3000      

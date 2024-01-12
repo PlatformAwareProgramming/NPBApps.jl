@@ -59,11 +59,13 @@ function go(class::CLASS)
    
    niter = sp_class[class].niter
    dt    = sp_class[class].dt
+
+   grid_points = zeros(Integer, 3)
    grid_points[1] = problem_size
    grid_points[2] = problem_size
    grid_points[3] = problem_size
 
-   go(class, grid_points, niter, dt)
+   go(grid_points, niter, dt)
 
 end
 
@@ -75,6 +77,7 @@ function go(params_file::String)
 
       fstatus = isfile(params_file) ? 0 : 1
    #
+      grid_points = zeros(Integer, 3)
       if fstatus == 0
          @printf(stdout, " Reading from input file params_file\n", )
          f = open(params_file,"r")
@@ -94,7 +97,6 @@ function go(params_file::String)
          grid_points[3] = problem_size
       end
 
-      class = set_class(niter)
    else
       niter = -1
       dt = -1
@@ -109,24 +111,28 @@ function go(params_file::String)
    grid_points[2] = grid_points_0[2]
    grid_points[3] = grid_points_0[3]
 
-   perform(class, grid_points, niter, dt)
+   perform(grid_points, niter, dt)
 end
 
 function go()
    go("inputsp.data")
 end
 
-function go(class, grid_points, niter, dt)
+function go(grid_points, niter, dt)
 
    setup_mpi()
 
-   perform(class, grid_points,niter, dt)
+   class = set_class(niter, grid_points)
+
+   perform(grid_points, niter, dt)
 
 end
 
-function perform(class, grid_points, niter, dt)
+function perform(grid_points, niter, dt)
 
        if (!active) @goto L999 end
+
+       class = set_class(niter, grid_points)
 
 #---------------------------------------------------------------------
 #      Root node reads input file (if it exists) else takes
@@ -154,7 +160,7 @@ function perform(class, grid_points, niter, dt)
 
        alloc_space(grid_points[1])
 
-       make_set()
+       make_set(grid_points)
 
        for c = 1:ncells
           if (cell_size[1, c] > IMAX) ||(cell_size[2, c] > JMAX) ||(cell_size[3, c] > KMAX)
@@ -368,7 +374,7 @@ function perform(class, grid_points, niter, dt)
        timer_stop(1)
        t = timer_read(1)
 
-       verified = verify(class, dt, ss, sr, b_size)
+       verified = verify(class, grid_points, dt, ss, sr, b_size)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
 

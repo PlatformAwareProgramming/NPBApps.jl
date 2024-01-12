@@ -10,12 +10,12 @@ end
 const bt_class = Dict([ (CLASS_UNDEFINED, Params(12, 60, 0.010e0)),
                         (CLASS_S, Params(12, 60, 0.010e0)),
                         (CLASS_W, Params(24, 200, 0.0008e0)),
-                        (CLASS_A, Params(64, 400, 0.0015e0)),
-                        (CLASS_B, Params(102, 400, 0.001e0)),
-                        (CLASS_C, Params(162 ,400, 0.00067e0)),
-                        (CLASS_D, Params(408, 500, 0.0003e0)),
-                        (CLASS_E, Params(1020, 500, 0.0001e0)),
-                        (CLASS_F, Params(2560, 500, 0.15e-4)),
+                        (CLASS_A, Params(64, 200, 0.0003e0)),
+                        (CLASS_B, Params(102, 200, 0.0001e0)),
+                        (CLASS_C, Params(162 ,200, 0.00067e0)),
+                        (CLASS_D, Params(408, 250, 0.00002e0)),
+                        (CLASS_E, Params(1020, 250, 0.4e-5)),
+                        (CLASS_F, Params(2560, 250, 0.6e-6)),
                         ])
 
 export CLASS

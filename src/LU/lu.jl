@@ -49,24 +49,101 @@
 #
 #---------------------------------------------------------------------
 
-#---------------------------------------------------------------------
- function go()
-#---------------------------------------------------------------------
-
-      t_recs = "total", "rhs", "blts", "buts", "#jacld", "#jacu",
+const t_recs = "total", "rhs", "blts", "buts", "#jacld", "#jacu",
             "exch", "lcomm", "ucomm", "rcomm",
             " totcomp", " totcomm"
+
+function go(class::CLASS)
+
+      init_comm()
+         
+      itmax = bt_class[class].itmax
+      inorm = bt_class[class].inorm
+      dt    = bt_class[class].dt
+      isiz01 = bt_class[class].isiz01
+      isiz02 = bt_class[class].isiz02
+      isiz03 = bt_class[class].isiz03
+   
+      go(isiz01, isiz02, isiz03, itmax, inorm, dt)
+   
+   end
+   
+function go(params_file::String)
+
+      init_comm()
+
+      isiz01, isiz02, isiz03, itmax, inorm, dt = read_input(params_file)
+
+      perform(isiz01, isiz02, isiz03, itmax, inorm, dt)
+end
+
+function go()
+      go("inputlu.data")
+end
+
+function go(isiz01, isiz02, isiz03, itmax, inorm, dt)
+
+      init_comm()
+
+      perform(isiz01, isiz02, isiz03, itmax, inorm, dt)
+
+end
+
+
+function perform(isiz01, isiz02, isiz03, itmax, inorm, dt)   
+
+      npbversion = "3.4.2"
+
+      class = set_class(itmax, isiz01, isiz02, isiz03)
 
 #---------------------------------------------------------------------
 #   initialize communications
 #---------------------------------------------------------------------
-      init_comm()
       if (!active) @goto L999 end
 
 #---------------------------------------------------------------------
 #   read input data
 #---------------------------------------------------------------------
-      class = read_input()
+      
+      omega = omega_default
+      tolrsd = tolrsddef
+      nx0 = isiz01
+      ny0 = isiz02
+      nz0 = isiz03
+
+      if id == root
+
+         @printf(stdout, "\n\n NAS Parallel Benchmarks 3.4 -- LU Benchmark\n\n", )
+
+         timeron = check_timer_flag()
+
+#---------------------------------------------------------------------
+#   check problem size
+#---------------------------------------------------------------------
+         if (nx0 < 4) || (ny0 < 4 ) || (nz0 < 4)
+
+            @printf(stdout, "     PROBLEM SIZE IS TOO SMALL - \n     SET EACH OF NX, NY AND NZ AT LEAST EQUAL TO 5\n", )
+            MPI.Abort(MPI.COMM_WORLD, MPI.MPI_ERR_OTHER)
+
+         end
+
+         #=if (nx0 > isiz01) || (ny0 > isiz02) || (nz0 > isiz03)
+
+            @printf(stdout, "     PROBLEM SIZE IS TOO LARGE - \n     NX, NY AND NZ SHOULD BE LESS THAN OR EQUAL TO \n     ISIZ01, ISIZ02 AND ISIZ03 RESPECTIVELY\n", )
+            MPI.Abort(MPI.COMM_WORLD, MPI.MPI_ERR_OTHER)
+
+         end=#
+
+         @printf(stdout, " Size: %4ix%4ix%4i  (class %s)\n", nx0, ny0, nz0, class)
+         @printf(stdout, " Iterations: %4i\n", itmax)
+
+         @printf(stdout, " Total number of processes: %6i\n", total_nodes)
+         if (total_nodes != no_nodes) @printf(stdout, " WARNING: Number of processes is not in a form of (n1*n2, n1/n2 <= 2).\n Number of active processes: %6i\n", no_nodes) end
+         println(stdout, )
+
+      else
+         timeron = false
+      end
 
       for i = 1:t_last
          timer_clear(i)
@@ -75,7 +152,7 @@
 #---------------------------------------------------------------------
 #   set up processor grid
 #---------------------------------------------------------------------
-      proc_grid()
+      proc_grid(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   allocate space
@@ -90,27 +167,27 @@
 #---------------------------------------------------------------------
 #   set up sub-domain sizes
 #---------------------------------------------------------------------
-      subdomain()
+      subdomain(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   set up coefficients
 #---------------------------------------------------------------------
-      setcoeff()
+      setcoeff(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   set the boundary values for dependent variables
 #---------------------------------------------------------------------
-      setbv()
+      setbv(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   set the initial values for dependent variables
 #---------------------------------------------------------------------
-      setiv()
+      setiv(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   compute the forcing term based on prescribed exact solution
 #---------------------------------------------------------------------
-      erhs()
+      erhs(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   perform one SSOR iteration to touch all data and program pages 
@@ -167,8 +244,8 @@
 #---------------------------------------------------------------------
 #   reset the boundary and initial values
 #---------------------------------------------------------------------
-      setbv()
-      setiv()
+      setbv(nx0, ny0, nz0)
+      setiv(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   perform the SSOR iterations
@@ -226,18 +303,18 @@
 #---------------------------------------------------------------------
 #   compute the solution error
 #---------------------------------------------------------------------
-      ERROR()
+      ERROR(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   compute the surface integral
 #---------------------------------------------------------------------
-      frc = pintgr()
+      frc = pintgr(ny0, nz0)
       
 #---------------------------------------------------------------------
 #   verification test
 #---------------------------------------------------------------------
       if id == 0
-         verified = verify( rsdnm, errnm, frc, class)
+         verified = verify( rsdnm, errnm, frc, class, dt)
          mflops = 1.0e-6*float(itmax)*(1984.77*float( nx0 )*
               float( ny0 )*
               float( nz0 )-

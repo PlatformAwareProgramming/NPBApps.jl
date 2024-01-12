@@ -18,7 +18,7 @@
 #      niter_default: default number of iterations for this problem size
 #---------------------------------------------------------------------
 
-grid_points = zeros(Integer, 3)
+#grid_points = zeros(Integer, 3)
 
 const EAST = 2000 
 const WEST = 3000      

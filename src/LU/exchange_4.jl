@@ -2,7 +2,7 @@
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
- function exchange_4(g, h, ibeg, ifin1, jbeg, jfin1)
+ function exchange_4(g, h, ibeg, ifin1, jbeg, jfin1, isiz02)
 
       dum = Array{Float64}(undef, 2*isiz02+4)
 

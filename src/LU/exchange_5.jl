@@ -2,7 +2,7 @@
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
- function exchange_5(g, ibeg, ifin1)
+ function exchange_5(g, ibeg, ifin1, isiz03)
 
       msgid1 = Ref{MPI.Request}()
 

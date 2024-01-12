@@ -50,11 +50,13 @@ function go(class::CLASS)
    
    niter = bt_class[class].niter
    dt    = bt_class[class].dt
+
+   grid_points = zeros(Integer, 3)
    grid_points[1] = problem_size
    grid_points[2] = problem_size
    grid_points[3] = problem_size
 
-   go(class, grid_points, niter, dt)
+   go(grid_points, niter, dt)
 
 end
 
@@ -66,6 +68,7 @@ function go(params_file::String)
 
       fstatus = isfile(params_file) ? 0 : 1
    #
+      grid_points = zeros(Integer, 3)
       if fstatus == 0
          @printf(stdout, " Reading from input file params_file\n", )
          f = open(params_file,"r")
@@ -84,8 +87,6 @@ function go(params_file::String)
          grid_points[2] = problem_size
          grid_points[3] = problem_size
       end
-
-      class = set_class(niter)
    else
       niter = -1
       dt = -1
@@ -100,24 +101,26 @@ function go(params_file::String)
    grid_points[2] = grid_points_0[2]
    grid_points[3] = grid_points_0[3]
 
-   perform(class, grid_points, niter, dt)
+   perform(grid_points, niter, dt)
 end
 
 function go()
    go("inputbt.data")
 end
 
-function go(class, grid_points, niter, dt)
+function go(grid_points, niter, dt)
 
    setup_mpi()
 
-   perform(class, grid_points, niter, dt)
+   perform(grid_points, niter, dt)
 
 end
 
-function perform(class, grid_points, niter, dt)
+function perform(grid_points, niter, dt)
 
        npbversion="3.4.2"
+
+       class = set_class(niter, grid_points)
 
        tsum = Array{Float64}(undef, t_last)
        t1 = Array{Float64}(undef, t_last)
@@ -127,8 +130,6 @@ function perform(class, grid_points, niter, dt)
        t_recs = "total", "i/o", "rhs", "xsolve", "ysolve", "zsolve",
                 "bpack", "exch", "xcomm", "ycomm", "zcomm",
                 " totcomp", " totcomm"
-
-       setup_mpi()
 
        if (!active) @goto L999 end
 
@@ -142,28 +143,6 @@ function perform(class, grid_points, niter, dt)
 
           global timeron = check_timer_flag()
 
-#=          fstatus = isfile("inputbt.data") ? 0 : 1
-#
-          if fstatus == 0
-            @printf(stdout, " Reading from input file inputbt.data\n", )
-            f = open("inputbt.data","r")
-            global niter = parse(Int, readline(f))
-            global dt = parse(Int, readline(f))
-            grid_points[1] = parse(Int, readline(f))
-            grid_points[2] = parse(Int, readline(f))
-            grid_points[3] = parse(Int, readline(f))
-            close(f)
-          else
-            @printf(stdout, " No input file inputbt.data. Using compiled defaults\n", )
-            global niter = niter_default
-            global dt    = dt_default
-            grid_points[1] = problem_size
-            grid_points[2] = problem_size
-            grid_points[3] = problem_size
-          end
-
-          class = set_class(niter)
-=#
           @printf(stdout, " Size: %4ix%4ix%4i  (class %s)\n", grid_points[1], grid_points[2], grid_points[3], class)
           @printf(stdout, " Iterations: %4i    dt: %11.7F\n", niter, dt)
           @printf(stdout, " Total number of processes: %6i\n", total_nodes)
@@ -179,7 +158,7 @@ function perform(class, grid_points, niter, dt)
 
        alloc_space(grid_points[1])
 
-       make_set()
+       make_set(grid_points)
 
        for c = 1:maxcells
           if (cell_size[1, c] > IMAX) || (cell_size[2, c] > JMAX) ||(cell_size[3, c] > KMAX)
@@ -304,7 +283,7 @@ function perform(class, grid_points, niter, dt)
 
        timer_start(1)
 
-       timer_clear(99)
+       timer_clear(64)
 
        for STEP = 1:niter
 
@@ -396,7 +375,7 @@ function perform(class, grid_points, niter, dt)
        t1[1] = timer_read(t_enorm)
 
        timer_clear(t_enorm)
-       verified = verify(class, ss, sr, b_size)
+       verified = verify(class, grid_points, dt, ss, sr, b_size)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
 
@@ -415,7 +394,7 @@ function perform(class, grid_points, niter, dt)
                               verified, npbversion)
        end
 
-       ttt = timer_read(99)
+       ttt = timer_read(64)
        @printf(stdout, " Time x_solve_cell =             %12.2F\n", ttt)
 
        if (!timeron) @goto L999 end

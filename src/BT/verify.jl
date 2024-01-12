@@ -2,7 +2,7 @@
 #  set problem class based on problem size
 #---------------------------------------------------------------------
 
-function set_class(no_time_steps)
+function set_class(no_time_steps, grid_points)
 
 
         if (grid_points[1]  == 12     ) &&(
@@ -74,7 +74,7 @@ end
 #  verification routine                         
 #---------------------------------------------------------------------
 
-function verify(class, sr, ss, b_size)
+function verify(class, grid_points, dt, sr, ss, b_size)
 
 #        use bt_data
 #        use mpinpb
@@ -104,7 +104,7 @@ function verify(class, sr, ss, b_size)
 #   compute the error norm and the residual norm, and exit if not printing
 #---------------------------------------------------------------------
 
-        error_norm(xce)
+        error_norm(xce, grid_points)
 
         copy_faces(ss, 
                   sr, 
@@ -163,7 +163,7 @@ function verify(class, sr, ss, b_size)
                   successor,
                )
 
-        rhs_norm(xcr)
+        rhs_norm(xcr, grid_points)
 
         #for m = 1:5
         #   xcr[m] = xcr[m] / dt
