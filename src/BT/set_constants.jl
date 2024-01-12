@@ -54,7 +54,7 @@ const ce = SA_F64[2.0e0 0.0e0 0.0e0 4.0e0 5.0e0 3.0e0 0.5e0 0.02e0 0.01e0 0.03e0
                   2.0e0 2.0e0 0.0e0 0.0e0 0.0e0 2.0e0 3.0e0 0.03e0 0.05e0 0.04e0 0.2e0 0.1e0 0.3e0;
                   5.0e0 4.0e0 3.0e0 2.0e0 0.1e0 0.4e0 0.3e0 0.05e0 0.04e0 0.03e0 0.1e0 0.3e0 0.2e0]
 
-function set_constants()
+function set_constants(dt, grid_points)
 
       global dnxm1 = 1.0e0 / float(grid_points[1]-1)
       global dnym1 = 1.0e0 / float(grid_points[2]-1)

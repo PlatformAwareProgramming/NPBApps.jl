@@ -52,7 +52,7 @@ const t_last = 10
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
-function alloc_space()
+function alloc_space(problem_size)
 
       global MAX_CELL_DIM = div(problem_size,maxcells)+1
 
