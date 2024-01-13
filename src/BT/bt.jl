@@ -41,9 +41,86 @@
 #
 #---------------------------------------------------------------------
 
-#---------------------------------------------------------------------
+
+function go(class::CLASS)
+
+   setup_mpi()
+
+   problem_size = bt_class[class].problem_size
+   
+   niter = bt_class[class].niter
+   dt    = bt_class[class].dt
+
+   grid_points = zeros(Integer, 3)
+   grid_points[1] = problem_size
+   grid_points[2] = problem_size
+   grid_points[3] = problem_size
+
+   go(grid_points, niter, dt)
+
+end
+
+function go(params_file::String)
+
+   setup_mpi()
+
+   if node == root
+
+      fstatus = isfile(params_file) ? 0 : 1
+   #
+      grid_points = zeros(Integer, 3)
+      if fstatus == 0
+         @printf(stdout, " Reading from input file params_file\n", )
+         f = open(params_file,"r")
+         niter = parse(Int, readline(f))
+         dt = parse(Int, readline(f))
+         grid_points[1] = parse(Int, readline(f))
+         grid_points[2] = parse(Int, readline(f))
+         grid_points[3] = parse(Int, readline(f))
+         close(f)
+      else
+         @printf(stdout, " No input file params_file. Using defaults (class S) \n", )
+         problem_size =  class[S].problem_size
+         niter = class[S].niter
+         dt    = class[S].dt
+         grid_points[1] = problem_size
+         grid_points[2] = problem_size
+         grid_points[3] = problem_size
+      end
+   else
+      niter = -1
+      dt = -1
+      class = CLASS_UNDEFINED
+   end
+
+   niter = MPI.bcast(niter, comm_setup; root=root)
+   dt = MPI.bcast(dt, comm_setup; root=root)
+
+   grid_points_0 = MPI.bcast(grid_points, comm_setup; root=root)
+   grid_points[1] = grid_points_0[1]
+   grid_points[2] = grid_points_0[2]
+   grid_points[3] = grid_points_0[3]
+
+   perform(grid_points, niter, dt)
+end
+
 function go()
-#---------------------------------------------------------------------
+   go("inputbt.data")
+end
+
+function go(grid_points, niter, dt)
+
+   setup_mpi()
+
+   perform(grid_points, niter, dt)
+
+end
+
+function perform(grid_points, niter, dt)
+
+       npbversion="3.4.2"
+
+       class = set_class(niter, grid_points)
 
        tsum = Array{Float64}(undef, t_last)
        t1 = Array{Float64}(undef, t_last)
@@ -53,8 +130,6 @@ function go()
        t_recs = "total", "i/o", "rhs", "xsolve", "ysolve", "zsolve",
                 "bpack", "exch", "xcomm", "ycomm", "zcomm",
                 " totcomp", " totcomm"
-
-       setup_mpi()
 
        if (!active) @goto L999 end
 
@@ -68,28 +143,6 @@ function go()
 
           global timeron = check_timer_flag()
 
-          fstatus = isfile("inputbt.data") ? 0 : 1
-#
-          if fstatus == 0
-            @printf(stdout, " Reading from input file inputbt.data\n", )
-            f = open("inputbt.data","r")
-            global niter = parse(Int, readline(f))
-            global dt = parse(Int, readline(f))
-            grid_points[1] = parse(Int, readline(f))
-            grid_points[2] = parse(Int, readline(f))
-            grid_points[3] = parse(Int, readline(f))
-            close(f)
-          else
-            @printf(stdout, " No input file inputbt.data. Using compiled defaults\n", )
-            global niter = niter_default
-            global dt    = dt_default
-            grid_points[1] = problem_size
-            grid_points[2] = problem_size
-            grid_points[3] = problem_size
-          end
-
-          class = set_class(niter)
-
           @printf(stdout, " Size: %4ix%4ix%4i  (class %s)\n", grid_points[1], grid_points[2], grid_points[3], class)
           @printf(stdout, " Iterations: %4i    dt: %11.7F\n", niter, dt)
           @printf(stdout, " Total number of processes: %6i\n", total_nodes)
@@ -98,26 +151,14 @@ function go()
           end
           println(stdout)
        else
-            global niter = -1
-            global dt = -1
             global timeron = -1
-            class = "U"
        end
-
-       niter = MPI.bcast(niter, comm_setup; root=root)
-
-       dt = MPI.bcast(dt, comm_setup; root=root)
-
-       grid_points_0 = MPI.bcast(grid_points, comm_setup; root=root)
-       grid_points[1] = grid_points_0[1]
-       grid_points[2] = grid_points_0[2]
-       grid_points[3] = grid_points_0[3]
 
        timeron = MPI.bcast(timeron, comm_setup; root=root)
 
-       alloc_space()
+       alloc_space(grid_points[1])
 
-       make_set()
+       make_set(grid_points)
 
        for c = 1:maxcells
           if (cell_size[1, c] > IMAX) || (cell_size[2, c] > JMAX) ||(cell_size[3, c] > KMAX)
@@ -131,7 +172,7 @@ function go()
           timer_clear(i)
        end
 
-       set_constants()
+       set_constants(dt, grid_points)
 
        initialize()
 
@@ -334,7 +375,7 @@ function go()
        t1[1] = timer_read(t_enorm)
 
        timer_clear(t_enorm)
-       verified = verify(class, ss, sr, b_size)
+       verified = verify(class, grid_points, dt, ss, sr, b_size)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
 

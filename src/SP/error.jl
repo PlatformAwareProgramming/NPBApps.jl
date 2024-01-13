@@ -3,7 +3,7 @@
 # computed solution and the exact solution
 #---------------------------------------------------------------------
 
-function error_norm(rms)
+function error_norm(rms, grid_points)
 
        rms_work = zeros(Float64,5)
        u_exact = Array{Float64}(undef,5)
@@ -46,7 +46,7 @@ end
 
 
 
-function rhs_norm(rms)
+function rhs_norm(rms, grid_points)
 
        rms_work = zeros(Float64, 5)
 

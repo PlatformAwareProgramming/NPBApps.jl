@@ -2,26 +2,26 @@
 #  set problem class based on problem size
 #---------------------------------------------------------------------
 
- function set_class()
+ function set_class(itmax, nx0, ny0, nz0)
 
         if (nx0 == 12) && (ny0 == 12) && (nz0 == 12) && (itmax == 50)
-           class = "S"
+           class = CLASS_S
         elseif (nx0 == 33) && (ny0 == 33) && (nz0 == 33) && (itmax  == 300)
-           class = "W"   #SPEC95fp size
+           class = CLASS_W   #SPEC95fp size
         elseif (nx0 == 64) &&(ny0 == 64) &&(nz0 == 64) && (itmax  == 250)
-           class = "A"
+           class = CLASS_A
         elseif (nx0 == 102) && (ny0 == 102) && (nz0 == 102) && (itmax  == 250)
-           class = "B"
+           class = CLASS_B
         elseif (nx0 == 162) && (ny0 == 162) && (nz0 == 162) && (itmax  == 250)
-           class = "C"
+           class = CLASS_C
         elseif (nx0 == 408) &&(ny0 == 408) && (nz0 == 408) && (itmax  == 300)
-           class = "D"
+           class = CLASS_D
         elseif (nx0 == 1020) && (ny0 == 1020) && (nz0 == 1020) && (itmax  == 300)
-           class = "E"
+           class = CLASS_E
         elseif (nx0 == 2560) && (ny0 == 2560) && (nz0 == 2560) && (itmax  == 300)
-           class = "F"
+           class = CLASS_F
         else
-           class = "U"
+           class = CLASS_UNDEFINED
         end
 
         return class
@@ -32,7 +32,7 @@ end
 #  verification routine                         
 #---------------------------------------------------------------------
 
- function verify(xcr, xce, xci, class)
+ function verify(xcr, xce, xci, class, dt)
 
          xcrref = Array{Float64}(undef, 5)
          xceref = Array{Float64}(undef, 5)
@@ -52,7 +52,7 @@ end
         end
         xciref = 1.0
 
-        if class == "S"
+        if class == CLASS_S
 
          dtref = 5.0e-1
 #---------------------------------------------------------------------
@@ -81,7 +81,7 @@ end
 #---------------------------------------------------------------------
          xciref = 7.8418928865937083e+00
 
-        elseif class == "W"
+        elseif class == CLASS_W
 
            dtref = 1.5e-3
 #---------------------------------------------------------------------
@@ -111,7 +111,7 @@ end
 #---------------------------------------------------------------------
            xciref    =   0.1161399311023e+02
 
-        elseif class == "A"
+        elseif class == CLASS_A
 
            dtref = 2.0e+0
 #---------------------------------------------------------------------
@@ -140,7 +140,7 @@ end
 #---------------------------------------------------------------------
          xciref = 2.6030925604886277e+01
 
-        elseif class == "B"
+        elseif class == CLASS_B
 
            dtref = 2.0e+0
 
@@ -170,7 +170,7 @@ end
 #---------------------------------------------------------------------
          xciref = 4.7887162703308227e+01
 
-        elseif class == "C"
+        elseif class == CLASS_C
 
            dtref = 2.0e+0
 
@@ -200,7 +200,7 @@ end
 #---------------------------------------------------------------------
          xciref = 6.66404553572181300e+01
 
-        elseif class == "D"
+        elseif class == CLASS_D
 
            dtref = 1.0e+0
 
@@ -230,7 +230,7 @@ end
 #---------------------------------------------------------------------
          xciref =    0.8334101392503e+02
 
-        elseif class == "E"
+        elseif class == CLASS_E
 
            dtref = 0.5e+0
 
@@ -260,7 +260,7 @@ end
 #---------------------------------------------------------------------
          xciref =    0.9512163272273e+02
 
-        elseif class == "F"
+        elseif class == CLASS_F
 
            dtref = 0.2e+0
 
@@ -316,12 +316,12 @@ end
 #    Output the comparison of computed results to known cases.
 #---------------------------------------------------------------------
 
-        if class != "U"
+        if class != CLASS_UNDEFINED
            @printf(stdout, "\n Verification being performed for class %s\n", class)
            @printf(stdout, " Accuracy setting for epsilon = %20.13E\n", epsilon)
            verified = (abs(dt-dtref) <= epsilon)
            if !verified
-              class = "U"
+              class = CLASS_UNDEFINED
               @printf(stdout, " DT does not match the reference value of %15.8E\n", dtref)
            end
         else
@@ -329,14 +329,14 @@ end
         end
 
 
-        if class != "U"
+        if class != CLASS_UNDEFINED
            @printf(stdout, " Comparison of RMS-norms of residual\n", )
         else
            @printf(stdout, " RMS-norms of residual\n", )
         end
 
         for m = 1:5
-           if class == "U"
+           if class == CLASS_UNDEFINED
               @printf(stdout, "          %2i  %20.13E\n", m, xcr[m])
            elseif xcrdif[m] != NaN && xcrdif[m] <= epsilon
               @printf(stdout, "          %2i  %20.13E%20.13E%20.13E\n", m, xcr[m], xcrref[m], xcrdif[m])
@@ -346,14 +346,14 @@ end
            end
         end
 
-        if class != "U"
+        if class != CLASS_UNDEFINED
            @printf(stdout, " Comparison of RMS-norms of solution error\n", )
         else
            @printf(stdout, " RMS-norms of solution error\n", )
         end
 
         for m = 1:5
-           if class == "U"
+           if class == CLASS_UNDEFINED
               @printf(stdout, "          %2i  %20.13E\n", m, xce[m])
            elseif xcedif[m] != NaN && xcedif[m] <= epsilon
               @printf(stdout, "          %2i  %20.13E%20.13E%20.13E\n", m, xce[m], xceref[m], xcedif[m])
@@ -363,13 +363,13 @@ end
            end
         end
 
-        if class != "U"
+        if class != CLASS_UNDEFINED
            @printf(stdout, " Comparison of surface integral\n", )
         else
            @printf(stdout, " Surface integral\n", )
         end
 
-        if class == "U"
+        if class == CLASS_UNDEFINED
            @printf(stdout, "              %20.13E\n", xci)
         elseif xcidif <= epsilon
            @printf(stdout, "              %20.13E%20.13E%20.13E\n", xci, xciref, xcidif)
@@ -378,7 +378,7 @@ end
            @printf(stdout, " FAILURE:     %20.13E%20.13E%20.13E\n", xci, xciref, xcidif)
         end
 
-        if class == "U"
+        if class == CLASS_UNDEFINED
            @printf(stdout, " No reference values provided\n", )
            @printf(stdout, " No verification performed\n", )
         elseif verified

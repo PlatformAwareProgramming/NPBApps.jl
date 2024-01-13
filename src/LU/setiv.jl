@@ -12,7 +12,7 @@ ue_ijnz = Array{Float64}(undef, 5)
 #
 #---------------------------------------------------------------------
 
-function setiv()
+function setiv(nx0, ny0, nz0)
 
      for k = 2:nz - 1
          zeta = ( float(k-1) ) / (nz-1)
@@ -24,12 +24,12 @@ function setiv()
               iglob = ipt + i
               if iglob != 1 && iglob != nx0
                xi = ( float(iglob-1) ) / (nx0-1)
-               exact(1, jglob, k, ue_1jk)
-               exact(nx0, jglob, k, ue_nx0jk)
-               exact(iglob, 1, k, ue_i1k)
-               exact(iglob, ny0, k, ue_iny0k)
-               exact(iglob, jglob, 1, ue_ij1)
-               exact(iglob, jglob, nz, ue_ijnz)
+               exact(1, jglob, k, ue_1jk, nx0, ny0, nz0)
+               exact(nx0, jglob, k, ue_nx0jk, nx0, ny0, nz0)
+               exact(iglob, 1, k, ue_i1k, nx0, ny0, nz0)
+               exact(iglob, ny0, k, ue_iny0k, nx0, ny0, nz0)
+               exact(iglob, jglob, 1, ue_ij1, nx0, ny0, nz0)
+               exact(iglob, jglob, nz, ue_ijnz, nx0, ny0, nz0)
                for m = 1:5
                   pxi =   (1.0e+00 - xi) * ue_1jk[m] + xi * ue_nx0jk[m]
                   peta =  (1.0e+00 - eta) * ue_i1k[m] + eta * ue_iny0k[m]

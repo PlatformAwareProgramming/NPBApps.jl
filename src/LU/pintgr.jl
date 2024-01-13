@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
- function pintgr()
+ function pintgr(isiz02, isiz03)
 
 #---------------------------------------------------------------------
 #   set up the sub-domains for integeration in each processor
@@ -62,7 +62,7 @@
 #---------------------------------------------------------------------
 #  communicate in i and j directions
 #---------------------------------------------------------------------
-      exchange_4(phi1, phi2, ibeg, ifin1, jbeg, jfin1)
+      exchange_4(phi1, phi2, ibeg, ifin1, jbeg, jfin1, isiz02)
 
       frc1 = 0.0e+00
 
@@ -134,10 +134,10 @@
 #  communicate in i direction
 #---------------------------------------------------------------------
       if ind1 == 1
-        exchange_5(phi1, ibeg, ifin1)
+        exchange_5(phi1, ibeg, ifin1, isiz03)
       end
       if ind2 == 1
-        exchange_5(phi2, ibeg, ifin1)
+        exchange_5(phi2, ibeg, ifin1, isiz03)
       end
 
       frc2 = 0.0e+00
@@ -209,10 +209,10 @@
 #  communicate in j direction
 #---------------------------------------------------------------------
       if ind1 == 1
-        exchange_6(phi1, jbeg, jfin1)
+        exchange_6(phi1, jbeg, jfin1, isiz03)
       end
       if ind2 == 1
-        exchange_6(phi2, jbeg, jfin1)
+        exchange_6(phi2, jbeg, jfin1, isiz03)
       end
 
       frc3 = 0.0e+00

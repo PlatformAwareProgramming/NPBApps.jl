@@ -18,7 +18,7 @@
 #      niter_default: default number of iterations for this problem size
 #---------------------------------------------------------------------
 
-grid_points = zeros(Integer, 3)
+#grid_points = zeros(Integer, 3)
 
 const EAST = 2000 
 const WEST = 3000      
@@ -52,7 +52,7 @@ const t_last = 10
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
-function alloc_space()
+function alloc_space(problem_size)
 
       global MAX_CELL_DIM = div(problem_size,maxcells)+1
 

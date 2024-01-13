@@ -2,67 +2,67 @@
 #  set problem class based on problem size
 #---------------------------------------------------------------------
 
-function set_class(no_time_steps)
+function set_class(no_time_steps, grid_points)
 
         if (grid_points[1]  == 12     ) &&(
              grid_points[2]  == 12     ) &&(
              grid_points[3]  == 12     ) &&(
              no_time_steps   == 100    )
 
-           class = "S"
+           class = CLASS_S
 
         elseif (grid_points[1] == 36) &&(
                  grid_points[2] == 36) &&(
                  grid_points[3] == 36) &&(
                  no_time_steps  == 400)
 
-           class = "W"
+           class = CLASS_W
 
         elseif (grid_points[1] == 64) &&(
                  grid_points[2] == 64) &&(
                  grid_points[3] == 64) &&(
                  no_time_steps  == 400)
 
-           class = "A"
+           class = CLASS_A
 
         elseif (grid_points[1] == 102) &&(
                  grid_points[2] == 102) &&(
                  grid_points[3] == 102) &&(
                  no_time_steps  == 400)
 
-           class = "B"
+           class = CLASS_B
 
         elseif (grid_points[1] == 162) &&(
                  grid_points[2] == 162) &&(
                  grid_points[3] == 162) &&(
                  no_time_steps  == 400)
 
-           class = "C"
+           class = CLASS_C
 
         elseif (grid_points[1] == 408) &&(
                  grid_points[2] == 408) &&(
                  grid_points[3] == 408) &&(
                  no_time_steps  == 500)
 
-           class = "D"
+           class = CLASS_D
 
         elseif (grid_points[1] == 1020) &&(
                  grid_points[2] == 1020) &&(
                  grid_points[3] == 1020) &&(
                  no_time_steps  == 500)
 
-           class = "E"
+           class = CLASS_E
 
         elseif (grid_points[1] == 2560) &&(
                  grid_points[2] == 2560) &&(
                  grid_points[3] == 2560) &&(
                  no_time_steps  == 500)
 
-           class = "F"
+           class = CLASS_F
 
         else
 
-           class = "U"
+           class = CLASS_UNDEFINED
 
         end
 
@@ -74,7 +74,9 @@ end
 #  verification routine                         
 #---------------------------------------------------------------------
 
-function verify(class,
+function verify(class, 
+                grid_points,
+                dt,
                 ss,
                 sr,
                 b_size,
@@ -95,7 +97,7 @@ function verify(class,
 #---------------------------------------------------------------------
 #   compute the error norm and the residual norm, and exit if not printing
 #---------------------------------------------------------------------
-        error_norm(xce)
+        error_norm(xce, grid_points)
         
         copy_faces(Val(no_nodes),
                   Val(ncells),
@@ -162,7 +164,7 @@ function verify(class,
                   b_size,
                )
 
-        rhs_norm(xcr)
+        rhs_norm(xcr, grid_points)
 
         # VECTORIZED
         xcr .= xcr ./ dt
@@ -177,7 +179,7 @@ function verify(class,
 #---------------------------------------------------------------------
 #    reference data for 12X12X12 grids after 100 time steps, with DT = 1.50d-02
 #---------------------------------------------------------------------
-        if class == "S"
+        if class == CLASS_S
 
            dtref = 1.5e-2
 
@@ -202,7 +204,7 @@ function verify(class,
 #---------------------------------------------------------------------
 #    reference data for 36X36X36 grids after 400 time steps, with DT = 1.5d-03
 #---------------------------------------------------------------------
-        elseif class == "W"
+        elseif class == CLASS_W
 
            dtref = 1.5e-3
 
@@ -227,7 +229,7 @@ function verify(class,
 #---------------------------------------------------------------------
 #    reference data for 64X64X64 grids after 400 time steps, with DT = 1.5d-03
 #---------------------------------------------------------------------
-        elseif class == "A"
+        elseif class == CLASS_A
 
            dtref = 1.5e-3
 
@@ -253,7 +255,7 @@ function verify(class,
 #    reference data for 102X102X102 grids after 400 time steps,
 #    with DT = 1.0d-03
 #---------------------------------------------------------------------
-        elseif class == "B"
+        elseif class == CLASS_B
 
            dtref = 1.0e-3
 
@@ -279,7 +281,7 @@ function verify(class,
 #    reference data for 162X162X162 grids after 400 time steps,
 #    with DT = 0.67d-03
 #---------------------------------------------------------------------
-        elseif class == "C"
+        elseif class == CLASS_C
 
            dtref = 0.67e-3
 
@@ -305,7 +307,7 @@ function verify(class,
 #    reference data for 408X408X408 grids after 500 time steps,
 #    with DT = 0.3d-03
 #---------------------------------------------------------------------
-        elseif class == "D"
+        elseif class == CLASS_D
 
            dtref = 0.30e-3
 
@@ -331,7 +333,7 @@ function verify(class,
 #    reference data for 1020X1020X1020 grids after 500 time steps,
 #    with DT = 0.1d-03
 #---------------------------------------------------------------------
-        elseif class == "E"
+        elseif class == CLASS_E
 
            dtref = 0.10e-3
 
@@ -357,7 +359,7 @@ function verify(class,
 #    reference data for 2560X2560X2560 grids after 500 time steps,
 #    with DT = 0.1d-03
 #---------------------------------------------------------------------
-        elseif class == "F"
+        elseif class == CLASS_F
 
            dtref = 0.15e-4
 
@@ -408,12 +410,12 @@ function verify(class,
 #    Output the comparison of computed results to known cases.
 #---------------------------------------------------------------------
 
-        if class != "U"
+        if class != CLASS_UNDEFINED
            @printf(stdout, " Verification being performed for class %s\n", class)
            @printf(stdout, " accuracy setting for epsilon = %20.13E\n", epsilon)
            verified = (abs(dt-dtref) <= epsilon)
            if !verified
-              class = "U"
+              class = CLASS_UNDEFINED
               @printf(stdout, " DT does not match the reference value of %15.8E\n", dtref)
            end
         else
@@ -421,14 +423,14 @@ function verify(class,
         end
 
 
-        if class != "U"
+        if class != CLASS_UNDEFINED
            @printf(stdout, " Comparison of RMS-norms of residual\n", )
         else
            @printf(stdout, " RMS-norms of residual\n", )
         end
 
         for m = 1:5
-           if class == "U"
+           if class == CLASS_UNDEFINED
               @printf(stdout, "          %2i%20.13E\n", m, xcr[m])
            elseif xcrdif[m] != NaN && xcrdif[m] <= epsilon
               @printf(stdout, "          %2i%20.13E%20.13E%20.13E\n", m, xcr[m], xcrref[m], xcrdif[m])
@@ -438,14 +440,14 @@ function verify(class,
            end
         end
 
-        if class != "U"
+        if class != CLASS_UNDEFINED
            @printf(stdout, " Comparison of RMS-norms of solution error\n", )
         else
            @printf(stdout, " RMS-norms of solution error\n", )
         end
 
         for m = 1:5
-           if class == "U"
+           if class == CLASS_UNDEFINED
               @printf(stdout, "          %2i%20.13E\n", m, xce[m])
            elseif xcedif[m] != NaN && xcedif[m] <= epsilon
               @printf(stdout, "          %2i%20.13E%20.13E%20.13E\n", m, xce[m], xceref[m], xcedif[m])
@@ -455,7 +457,7 @@ function verify(class,
            end
         end
 
-        if class == "U"
+        if class == CLASS_UNDEFINED
            @printf(stdout, " No reference values provided\n", )
            @printf(stdout, " No verification performed\n", )
         elseif verified

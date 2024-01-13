@@ -40,7 +40,7 @@ const ce = SA_F64[2.0e0 0.0e0 0.0e0 4.0e0 5.0e0 3.0e0 0.5e0 0.02e0 0.01e0 0.03e0
                   5.0e0 4.0e0 3.0e0 2.0e0 0.1e0 0.4e0 0.3e0 0.05e0 0.04e0 0.03e0 0.1e0 0.3e0 0.2e0]  # coefficients of the exact solution to the fifth pde
 
 
- function setcoeff()
+ function setcoeff(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #  local variables

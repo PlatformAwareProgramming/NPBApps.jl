@@ -4,7 +4,7 @@
 #
 #---------------------------------------------------------------------
 
- function ERROR()
+ function ERROR(nx0, ny0, nz0)
 
       u000ijk = Array{Float64}(undef, 5)
       dummy = zeros(Float64, 5)
@@ -16,7 +16,7 @@
             jglob = jpt + j
             for i = ist:iend
                iglob = ipt + i
-               exact( iglob, jglob, k, u000ijk )
+               exact( iglob, jglob, k, u000ijk, nx0, ny0, nz0)
                for m = 1:5
                   tmp = ( u000ijk[m] - u[m, i, j, k] )
                   dummy[m] = dummy[m] + tmp ^ 2

@@ -41,10 +41,10 @@ function output_timestep()
       if rd_interval > 0
          if idump_sub >= rd_interval
 
-            rewind(99)
+            rewind(64)
             acc_sub_norms(idump+1)
 
-            rewind(99)
+            rewind(64)
             idump_sub = 0
          end
       end

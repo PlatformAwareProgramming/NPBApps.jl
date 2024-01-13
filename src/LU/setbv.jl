@@ -2,7 +2,7 @@
 #   set the boundary values of dependent variables
 #---------------------------------------------------------------------
 
- function setbv()
+ function setbv(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   set the dependent variable values along the top and bottom faces
@@ -11,8 +11,8 @@
          jglob = jpt + j
          for i = 1:nx
            iglob = ipt + i
-            exact( iglob, jglob, 1, view(u, 1:5, i, j, 1 ) )
-            exact( iglob, jglob, nz, view(u, 1:5, i, j, nz ) )
+            exact( iglob, jglob, 1, view(u, 1:5, i, j, 1 ), nx0, ny0, nz0 )
+            exact( iglob, jglob, nz, view(u, 1:5, i, j, nz ), nx0, ny0, nz0 )
          end
       end
 
@@ -23,7 +23,7 @@
          for k = 1:nz
             for i = 1:nx
                iglob = ipt + i
-               exact( iglob, 1, k, view(u, 1:5, i, 1, k ) )
+               exact( iglob, 1, k, view(u, 1:5, i, 1, k ), nx0, ny0, nz0 )
             end
          end
       end
@@ -32,7 +32,7 @@
           for k = 1:nz
              for i = 1:nx
                 iglob = ipt + i
-                exact( iglob, ny0, k, view(u, 1:5, i, ny, k ) )
+                exact( iglob, ny0, k, view(u, 1:5, i, ny, k ), nx0, ny0, nz0 )
              end
           end
       end
@@ -44,7 +44,7 @@
          for k = 1:nz
             for j = 1:ny
                jglob = jpt + j
-               exact( 1, jglob, k, view(u, 1:5, 1, j, k))
+               exact( 1, jglob, k, view(u, 1:5, 1, j, k), nx0, ny0, nz0)
             end
          end
       end
@@ -53,7 +53,7 @@
          for k = 1:nz
             for j = 1:ny
                jglob = jpt + j
-               exact( nx0, jglob, k, view(u, 1:5, nx, j, k) )
+               exact( nx0, jglob, k, view(u, 1:5, nx, j, k), nx0, ny0, nz0 )
             end
          end
       end

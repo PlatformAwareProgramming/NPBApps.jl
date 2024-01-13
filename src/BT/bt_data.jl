@@ -21,7 +21,7 @@ const bb = 2
 const cc = 3
 const BLOCK_SIZE = 5
 
-const grid_points = zeros(Integer, 3)
+#const grid_points = zeros(Integer, 3)
 
 const EAST = 2000 
 const WEST = 3000      
@@ -68,9 +68,9 @@ const t_last = 13
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
- function alloc_space()
+ function alloc_space(problem_size)
 
-      global MAX_CELL_DIM = div(problem_size,maxcells)+1
+      global MAX_CELL_DIM = div(problem_size, maxcells)+1
 
       global IMAX = MAX_CELL_DIM
       global JMAX = MAX_CELL_DIM
