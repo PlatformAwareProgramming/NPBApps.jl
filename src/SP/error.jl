@@ -3,25 +3,25 @@
 # computed solution and the exact solution
 #---------------------------------------------------------------------
 
-function error_norm(rms, grid_points)
+function error_norm(z, rms, grid_points)
 
        rms_work = zeros(Float64,5)
        u_exact = Array{Float64}(undef,5)
 
        for c = 1:ncells
           kk = 0
-          for k = cell_low[3, c]:cell_high[3, c]
+          for k = cell_low[z][3, c]:cell_high[z][3, c]
              zeta = float(k) * dnzm1
              jj = 0
-             for j = cell_low[2, c]:cell_high[2, c]
+             for j = cell_low[z][2, c]:cell_high[z][2, c]
                 eta = float(j) * dnym1
                 ii = 0
-                for i = cell_low[1, c]:cell_high[1, c]
+                for i = cell_low[z][1, c]:cell_high[z][1, c]
                    xi = float(i) * dnxm1
                    u_exact = exact_solution(xi, eta, zeta)
 
                    for m = 1:5
-                      add = u[ii, jj, kk, m, c]-u_exact[m]
+                      add = u[z][ii, jj, kk, m, c] - u_exact[m]
                       rms_work[m] = rms_work[m] + add*add
                    end
                    ii = ii + 1
@@ -35,9 +35,7 @@ function error_norm(rms, grid_points)
        MPI.Allreduce!(rms_work, rms, MPI.SUM, comm_setup)
 
        for m = 1:5
-          for d = 1:3
-             rms[m] = rms[m] / float(grid_points[d]-2)
-          end
+          rms[m] = rms[m] / (float(grid_points[1]-2)*float(grid_points[2]-2)*float(grid_points[3]-2))
           rms[m] = sqrt(rms[m])
        end
 
@@ -46,29 +44,33 @@ end
 
 
 
-function rhs_norm(rms, grid_points)
+function rhs_norm(z, rms, grid_points)
 
        rms_work = zeros(Float64, 5)
 
        for c = 1:ncells
-          for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
-             for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
-                for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
+          kk = cell_low[z][3, c] + cell_start[z][3, c]
+          for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
+             jj = cell_low[z][2, c] + cell_start[z][2, c]
+             for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
+                ii = cell_low[z][1, c] + cell_start[z][1, c]
+                for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
                    for m = 1:5
-                      add = rhs[i, j, k, m, c]
+                      add = rhs[z][i, j, k, m, c]
                       rms_work[m] = rms_work[m] + add*add
                    end
+                   ii += 1
                 end
+                jj += 1
              end
+             kk += 1
           end
        end
 
        MPI.Allreduce!(rms_work, rms, MPI.SUM, comm_setup)
 
        for m = 1:5
-          for d = 1:3
-             rms[m] = rms[m] / float(grid_points[d]-2)
-          end
+          rms[m] = rms[m] / (float(grid_points[1]-2) * float(grid_points[2]-2) * float(grid_points[3]-2))
           rms[m] = sqrt(rms[m])
        end
 

@@ -49,10 +49,10 @@ function y_solve(
 #     i.e. stage = 1 means the start of the line stage=ncells means end
 #---------------------------------------------------------------------
       for stage = 1:ncells
-         c = slice[2, stage]
-         isize = cell_size[1, c] - 1
-         jsize = cell_size[2, c] - 1
-         ksize = cell_size[3, c] - 1
+         c = slice[z][2, stage]
+         isize = cell_size[z][1, c] - 1
+         jsize = cell_size[z][2, c] - 1
+         ksize = cell_size[z][3, c] - 1
 
 #---------------------------------------------------------------------
 #     set last-cell flag
@@ -162,7 +162,7 @@ function y_solve(
 #     now perform backsubstitution in reverse direction
 #---------------------------------------------------------------------
       for stage = ncells:-1:1
-         c = slice[2, stage]
+         c = slice[z][2, stage]
          FIRST = 0
          LAST = 0
          if (stage == 1) FIRST = 1 end
@@ -247,12 +247,12 @@ function y_unpack_solve_info(c,
          for i = 0:IMAX-1
             for m = 1:BLOCK_SIZE
                for n = 1:BLOCK_SIZE
-                   lhsc[m, n, i, jstart-1, k, c] = out_buffer[ptr+n]
+                   lhsc[m, n, i, jstart-1, k, c] = out_buffer[z][ptr+n]
                end
                ptr = ptr+BLOCK_SIZE
             end
             for n = 1:BLOCK_SIZE
-               rhs[n, i, jstart-1, k, c] = out_buffer[ptr+n]
+               rhs[n, i, jstart-1, k, c] = out_buffer[z][ptr+n]
             end
             ptr = ptr+BLOCK_SIZE
          end
@@ -282,9 +282,9 @@ function y_send_solve_info(c,
                                    successor
                                    ) where ncells
 
-      jsize = cell_size[2, c]-1
-      ip = cell_coord[1, c] - 1
-      kp = cell_coord[3, c] - 1
+      jsize = cell_size[z][2, c]-1
+      ip = cell_coord[z][1, c] - 1
+      kp = cell_coord[z][3, c] - 1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
 
 #---------------------------------------------------------------------
@@ -295,12 +295,12 @@ function y_send_solve_info(c,
          for i = 0:IMAX-1
             for m = 1:BLOCK_SIZE
                for n = 1:BLOCK_SIZE
-                  in_buffer[ptr+n] =  lhsc[m, n, i, jsize, k, c]
+                  in_buffer[z][ptr+n] =  lhsc[m, n, i, jsize, k, c]
                end
                ptr = ptr+BLOCK_SIZE
             end
             for n = 1:BLOCK_SIZE
-               in_buffer[ptr+n] = rhs[n, i, jsize, k, c]
+               in_buffer[z][ptr+n] = rhs[n, i, jsize, k, c]
             end
             ptr = ptr+BLOCK_SIZE
          end
@@ -310,7 +310,7 @@ function y_send_solve_info(c,
 #     send buffer 
 #---------------------------------------------------------------------
       if (timeron) timer_start(t_ycomm) end
-      send_id = MPI.Isend(view(in_buffer,1:buffer_size),successor[2],SOUTH+ip+kp*ncells, comm_solve)
+      send_id = MPI.Isend(view(in_buffer,1:buffer_size),successor[z][2],SOUTH+ip+kp*ncells, comm_solve)
       if (timeron) timer_stop(t_ycomm) end
 
       return send_id
@@ -337,20 +337,20 @@ function y_send_backsub_info(c,
 #     Send element 0 to previous processor
 #---------------------------------------------------------------------
       jstart = 0
-      ip = cell_coord[1, c]-1
-      kp = cell_coord[3, c]-1
+      ip = cell_coord[z][1, c]-1
+      kp = cell_coord[z][3, c]-1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*BLOCK_SIZE
       ptr = 0
       for k = 0:KMAX-1
          for i = 0:IMAX-1
             for n = 1:BLOCK_SIZE
-               in_buffer[ptr+n] = rhs[n, i, jstart, k, c]
+               in_buffer[z][ptr+n] = rhs[n, i, jstart, k, c]
             end
             ptr = ptr+BLOCK_SIZE
          end
       end
       if (timeron) timer_start(t_ycomm) end
-      send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[2], NORTH+ip+kp*ncells, comm_solve)
+      send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[z][2], NORTH+ip+kp*ncells, comm_solve)
       if (timeron) timer_stop(t_ycomm) end
 
       return send_id
@@ -372,7 +372,7 @@ function y_unpack_backsub_info(c,
       for k = 0:KMAX-1
          for i = 0:IMAX-1
             for n = 1:BLOCK_SIZE
-               backsub_info[n, i, k, c] = out_buffer[ptr+n]
+               backsub_info[n, i, k, c] = out_buffer[z][ptr+n]
             end
             ptr = ptr+BLOCK_SIZE
          end
@@ -395,10 +395,10 @@ function y_receive_backsub_info(c,
                                         successor
           )  where ncells
 
-      ip = cell_coord[1, c] - 1
-      kp = cell_coord[3, c] - 1
+      ip = cell_coord[z][1, c] - 1
+      kp = cell_coord[z][3, c] - 1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*BLOCK_SIZE
-      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), successor[2], NORTH+ip+kp*ncells, comm_solve)
+      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), successor[z][2], NORTH+ip+kp*ncells, comm_solve)
       return recv_id
 end
 
@@ -416,10 +416,10 @@ function y_receive_solve_info(c,
                                         predecessor
                                     )  where ncells
 
-      ip = cell_coord[1, c] - 1
-      kp = cell_coord[3, c] - 1
+      ip = cell_coord[z][1, c] - 1
+      kp = cell_coord[z][3, c] - 1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
-      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), predecessor[2], SOUTH+ip+kp*ncells, comm_solve)
+      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), predecessor[z][2], SOUTH+ip+kp*ncells, comm_solve)
 
       return recv_id
 end
@@ -442,12 +442,12 @@ function y_backsubstitute(FIRST, LAST, c,
                                    )
 
       jstart = 0
-      isize = cell_size[1, c]-cell_end[1, c]-1
-      jsize = cell_size[2, c]-1
-      ksize = cell_size[3, c]-cell_end[3, c]-1
+      isize = cell_size[z][1, c]-cell_end[z][1, c]-1
+      jsize = cell_size[z][2, c]-1
+      ksize = cell_size[z][3, c]-cell_end[z][3, c]-1
       if LAST == 0
-         for k = cell_start[3, c]:ksize
-            for i = cell_start[1, c]:isize
+         for k = cell_start[z][3, c]:ksize
+            for i = cell_start[z][1, c]:isize
 #---------------------------------------------------------------------
 #     u[jsize] uses info from previous cell if not last cell
 #---------------------------------------------------------------------
@@ -459,9 +459,9 @@ function y_backsubstitute(FIRST, LAST, c,
             end
          end
       end
-      for k = cell_start[3, c]:ksize
+      for k = cell_start[z][3, c]:ksize
          for j = jsize-1:-1:jstart
-            for i = cell_start[1, c]:isize
+            for i = cell_start[z][1, c]:isize
                for m = 1:BLOCK_SIZE
                   for n = 1:BLOCK_SIZE
                      rhs[m, i, j, k, c] -= lhsc[m, n, i, j, k, c]*rhs[n, i, j+1, k, c]
@@ -506,14 +506,14 @@ function y_solve_cell(FIRST, LAST, c,
       
       
       jstart = 0
-      isize = cell_size[1, c]-cell_end[1, c]-1
-      jsize = cell_size[2, c]-1
-      ksize = cell_size[3, c]-cell_end[3, c]-1
+      isize = cell_size[z][1, c]-cell_end[z][1, c]-1
+      jsize = cell_size[z][2, c]-1
+      ksize = cell_size[z][3, c]-cell_end[z][3, c]-1
 
       lhsabinit(lhsa, lhsb, jsize)
 
-      for k = cell_start[3, c]:ksize
-         for i = cell_start[1, c]:isize
+      for k = cell_start[z][3, c]:ksize
+         for i = cell_start[z][1, c]:isize
 
 #---------------------------------------------------------------------
 #     This function computes the left hand side for the three y-factors   
@@ -523,7 +523,7 @@ function y_solve_cell(FIRST, LAST, c,
 #     Compute the indices for storing the tri-diagonal matrix;
 #     determine a (labeled f) and n jacobians for cell c
 #---------------------------------------------------------------------
-            for j = cell_start[2, c]-1:cell_size[2, c]-cell_end[2, c]
+            for j = cell_start[z][2, c]-1:cell_size[z][2, c]-cell_end[z][2, c]
                utmp[1,j] = 1.0e0 / u[1, i, j, k, c]
                utmp[2,j] = u[2, i, j, k, c]
                utmp[3,j] = u[3, i, j, k, c]
@@ -532,7 +532,7 @@ function y_solve_cell(FIRST, LAST, c,
                utmp[6,j] = qs[i, j, k, c]
             end
 
-            for j = cell_start[2, c]-1:cell_size[2, c]-cell_end[2, c]
+            for j = cell_start[z][2, c]-1:cell_size[z][2, c]-cell_end[z][2, c]
 
                tmp1 = utmp[1,j]
                tmp2 = tmp1 * tmp1
@@ -609,7 +609,7 @@ function y_solve_cell(FIRST, LAST, c,
 #---------------------------------------------------------------------
 #     now joacobians set, so form left hand side in y direction
 #---------------------------------------------------------------------
-            for j = cell_start[2, c]:jsize-cell_end[2, c]
+            for j = cell_start[z][2, c]:jsize-cell_end[z][2, c]
 
                tmp1 = dt * ty1
                tmp2 = dt * ty2

@@ -1,7 +1,7 @@
 
 
 function print_results(name, class, n1, n2, n3, niter,
-                     nprocs_active, nprocs_total,
+                     num_clusters, num_processes,
                      t, mops, optype, verified, npbversion)
 
          @printf(stdout, "\n\n %2s Benchmark Completed.\n", name)
@@ -23,14 +23,17 @@ function print_results(name, class, n1, n2, n3, niter,
 
          @printf(stdout, " Iterations      =             %12i\n", niter)
          @printf(stdout, " Time in seconds =             %12.2F\n", t)
-         @printf(stdout, " Total processes =             %12i\n", nprocs_total)
+         @printf(stdout, " Total clusters  =             %12i\n", num_clusters)
+         for c = 1:num_clusters
+             @printf(stdout, " Total processes (cluster %2i) =             %3i\n", c, num_processes[c])
+         end
 
-         if (nprocs_active != 0) 
-            @printf(stdout, " Active processes=             %12i\n", nprocs_active) 
+         if (num_clusters != 0) 
+            @printf(stdout, " Active processes=             %12i\n", num_clusters) 
          end
 
          @printf(stdout, " Mop/s total     =             %12.2F\n", mops)
-         @printf(stdout, " Mop/s/process   =             %12.2F\n", mops/float( nprocs_total ))
+         @printf(stdout, " Mop/s/process   =             %12.2F\n", mops/float( sum(num_processes) ))
          @printf(stdout, " Operation type  = %24s\n", optype)
 
          if verified

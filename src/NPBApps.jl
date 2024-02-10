@@ -9,17 +9,23 @@ module SP
     using MPI
     using StaticArrays
     using LoopVectorization
+    using MPIClusterManagers
+    using Distributed
     #using Traceur
     #using JET       
     #using InteractiveUtils
     #using ProfileView
+    #using Semaphores
 
+    include("common/DFVariable.jl") 
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")
     include("common/print_results.jl")
     include("SP/classes.jl")
     include("SP/sp_data.jl")
+    include("SP/mpinpb.jl")
     include("SP/setup_mpi.jl") 
+    include("SP/zone_setup.jl")
     include("SP/make_set.jl") 
     include("SP/define.jl") 
     include("SP/initialize.jl") 
@@ -42,7 +48,9 @@ module SP
     include("SP/y_solve.jl") 
     include("SP/z_solve.jl")
     include("SP/adi.jl") 
-    include("SP/sp.jl") 
+    include("SP/sp-node.jl") 
+    include("SP/sp-cluster.jl") 
+    include("SP/sp-driver.jl") 
 end
 
 module BT
@@ -52,7 +60,7 @@ module BT
     using Printf
     using MPI
     using StaticArrays
-    using Traceur
+    #using Traceur
  
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")
@@ -98,7 +106,7 @@ module LU
     using Printf
     using MPI
     using StaticArrays
-    using Traceur
+    #using Traceur
 
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")

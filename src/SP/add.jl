@@ -10,7 +10,6 @@ function add(_::Val{ncells},
              u,
              rhs) where ncells
 
-
       for c = 1:ncells
          for m = 1:5
              for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
@@ -21,25 +20,7 @@ function add(_::Val{ncells},
                 end
              end
           end
-       end
-
- # VECTORIZATION ATTEMPT (does not work)
-    #= for c = 1:ncells
-         uu = view(u, cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1, 
-                      cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1,
-                      cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1,
-                      1:5,
-                      c)
-         rhsrhs = view(rhs, cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1, 
-                            cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1,
-                            cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1,
-                            1:5,
-                            c)
-          uu .+= rhsrhs
-       end =# 
-
-
-   
+       end   
 
        return nothing
 end

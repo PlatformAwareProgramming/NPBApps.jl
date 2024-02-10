@@ -3,7 +3,7 @@
 # tri-linear transfinite interpolation of the boundary values     
 #---------------------------------------------------------------------
 
-function initialize()
+function initialize(z)
 
       Pface1 = Array{Array{Float64}}(undef,2)
       Pface2 = Array{Array{Float64}}(undef,2)
@@ -17,14 +17,14 @@ function initialize()
 #  values are nonzero by initializing the whole thing here. 
 #---------------------------------------------------------------------
       for c = 1:ncells
-         for kk = -1:IMAX
-            for jj = -1:IMAX
-               for ii = -1:IMAX
-                  u[ii, jj, kk, 1, c] = 1.0
-                  u[ii, jj, kk, 2, c] = 0.0
-                  u[ii, jj, kk, 3, c] = 0.0
-                  u[ii, jj, kk, 4, c] = 0.0
-                  u[ii, jj, kk, 5, c] = 1.0
+         for kk = -1:KMAX[z]
+            for jj = -1:JMAX[z]
+               for ii = -1:IMAX[z]
+                  u[z][ii, jj, kk, 1, c] = 1.0
+                  u[z][ii, jj, kk, 2, c] = 0.0
+                  u[z][ii, jj, kk, 3, c] = 0.0
+                  u[z][ii, jj, kk, 4, c] = 0.0
+                  u[z][ii, jj, kk, 5, c] = 1.0
                end
             end
          end
@@ -33,17 +33,16 @@ function initialize()
 #---------------------------------------------------------------------
 # first store the "interpolated" values everywhere on the grid    
 #---------------------------------------------------------------------
-       for c = 1:ncells
+      for c = 1:ncells
           kk = 0
-          for k = cell_low[3, c]:cell_high[3, c]
+          for k = cell_low[z][3, c]:cell_high[z][3, c]
              zeta = float(k) * dnzm1
              jj = 0
-             for j = cell_low[2, c]:cell_high[2, c]
+             for j = cell_low[z][2, c]:cell_high[z][2, c]
                 eta = float(j) * dnym1
                 ii = 0
-                for i = cell_low[1, c]:cell_high[1, c]
+                for i = cell_low[z][1, c]:cell_high[z][1, c]
                    xi = float(i) * dnxm1
-
 
                    for ix = 1:2
                      Pface1[ix] = exact_solution(float(ix-1), eta, zeta)
@@ -52,9 +51,10 @@ function initialize()
                    for iy = 1:2
                      Pface2[iy] = exact_solution(xi, float(iy-1) , zeta)
                    end
-
+ 
                    for iz = 1:2
                      Pface3[iz] = exact_solution(xi, eta, float(iz-1))
+                    # @info "$(xi), $(eta), $(float(iz-1)) --- $(Pface3[iz])"
                    end
 
                    for m = 1:5
@@ -62,10 +62,7 @@ function initialize()
                       Peta  = eta  * Pface2[2][m] +(1.0e0-eta)  * Pface2[1][m]
                       Pzeta = zeta * Pface3[2][m] +(1.0e0-zeta) * Pface3[1][m]
 
-                      u[ii, jj, kk, m, c] = Pxi + Peta + Pzeta -
-                                Pxi*Peta - Pxi*Pzeta - Peta*Pzeta +
-                                Pxi*Peta*Pzeta
-
+                      u[z][ii, jj, kk, m, c] = Pxi + Peta + Pzeta - Pxi*Peta - Pxi*Pzeta - Peta*Pzeta + Pxi*Peta*Pzeta
                    end
                    ii = ii + 1
                 end
@@ -82,18 +79,18 @@ function initialize()
 #---------------------------------------------------------------------
 # west face                                                  
 #---------------------------------------------------------------------
-       c = slice[1, 1]
+       c = slice[z][1, 1]
        ii = 0
        xi = 0.0e0
        kk = 0
-       for k = cell_low[3, c]:cell_high[3, c]
+       for k = cell_low[z][3, c]:cell_high[z][3, c]
           zeta = float(k) * dnzm1
           jj = 0
-          for j = cell_low[2, c]:cell_high[2, c]
+          for j = cell_low[z][2, c]:cell_high[z][2, c]
              eta = float(j) * dnym1
              temp = exact_solution(xi, eta, zeta)
              for m = 1:5
-                u[ii, jj, kk, m, c] = temp[m]
+                u[z][ii, jj, kk, m, c] = temp[m]
              end
              jj = jj + 1
           end
@@ -103,18 +100,18 @@ function initialize()
 #---------------------------------------------------------------------
 # east face                                                      
 #---------------------------------------------------------------------
-       c  = slice[1, ncells]
-       ii = cell_size[1, c]-1
+       c  = slice[z][1, ncells]
+       ii = cell_size[z][1, c]-1
        xi = 1.0e0
        kk = 0
-       for k = cell_low[3, c]:cell_high[3, c]
+       for k = cell_low[z][3, c]:cell_high[z][3, c]
           zeta = float(k) * dnzm1
           jj = 0
-          for j = cell_low[2, c]:cell_high[2, c]
+          for j = cell_low[z][2, c]:cell_high[z][2, c]
              eta = float(j) * dnym1
              temp = exact_solution(xi, eta, zeta)
              for m = 1:5
-                u[ii, jj, kk, m, c] = temp[m]
+                u[z][ii, jj, kk, m, c] = temp[m]
              end
              jj = jj + 1
           end
@@ -124,18 +121,18 @@ function initialize()
 #---------------------------------------------------------------------
 # south face                                                 
 #---------------------------------------------------------------------
-       c = slice[2, 1]
+       c = slice[z][2, 1]
        jj = 0
        eta = 0.0e0
        kk = 0
-       for k = cell_low[3, c]:cell_high[3, c]
+       for k = cell_low[z][3, c]:cell_high[z][3, c]
           zeta = float(k) * dnzm1
           ii = 0
-          for i = cell_low[1, c]:cell_high[1, c]
+          for i = cell_low[z][1, c]:cell_high[z][1, c]
              xi = float(i) * dnxm1
              temp = exact_solution(xi, eta, zeta)
              for m = 1:5
-                u[ii, jj, kk, m, c] = temp[m]
+                u[z][ii, jj, kk, m, c] = temp[m]
              end
              ii = ii + 1
           end
@@ -146,18 +143,18 @@ function initialize()
 #---------------------------------------------------------------------
 # north face                                    
 #---------------------------------------------------------------------
-       c = slice[2, ncells]
-       jj = cell_size[2, c]-1
+       c = slice[z][2, ncells]
+       jj = cell_size[z][2, c]-1
        eta = 1.0e0
        kk = 0
-       for k = cell_low[3, c]:cell_high[3, c]
+       for k = cell_low[z][3, c]:cell_high[z][3, c]
           zeta = float(k) * dnzm1
           ii = 0
-          for i = cell_low[1, c]:cell_high[1, c]
+          for i = cell_low[z][1, c]:cell_high[z][1, c]
              xi = float(i) * dnxm1
              temp = exact_solution(xi, eta, zeta)
              for m = 1:5
-                u[ii, jj, kk, m, c] = temp[m]
+                u[z][ii, jj, kk, m, c] = temp[m]
              end
              ii = ii + 1
           end
@@ -167,18 +164,18 @@ function initialize()
 #---------------------------------------------------------------------
 # bottom face                                       
 #---------------------------------------------------------------------
-       c = slice[3, 1]
+       c = slice[z][3, 1]
        kk = 0
        zeta = 0.0e0
        jj = 0
-       for j = cell_low[2, c]:cell_high[2, c]
+       for j = cell_low[z][2, c]:cell_high[z][2, c]
           eta = float(j) * dnym1
           ii = 0
-          for i = cell_low[1, c]:cell_high[1, c]
+          for i = cell_low[z][1, c]:cell_high[z][1, c]
              xi = float(i) *dnxm1
              temp = exact_solution(xi, eta, zeta)
              for m = 1:5
-                u[ii, jj, kk, m, c] = temp[m]
+                u[z][ii, jj, kk, m, c] = temp[m]
              end
              ii = ii + 1
           end
@@ -188,18 +185,18 @@ function initialize()
 #---------------------------------------------------------------------
 # top face     
 #---------------------------------------------------------------------
-       c = slice[3, ncells]
-       kk = cell_size[3, c]-1
+       c = slice[z][3, ncells]
+       kk = cell_size[z][3, c]-1
        zeta = 1.0e0
        jj = 0
-       for j = cell_low[2, c]:cell_high[2, c]
+       for j = cell_low[z][2, c]:cell_high[z][2, c]
           eta = float(j) * dnym1
           ii = 0
-          for i = cell_low[1, c]:cell_high[1, c]
+          for i = cell_low[z][1, c]:cell_high[z][1, c]
              xi = float(i) * dnxm1
              temp = exact_solution(xi, eta, zeta)
              for m = 1:5
-                u[ii, jj, kk, m, c] = temp[m]
+                u[z][ii, jj, kk, m, c] = temp[m]
              end
              ii = ii + 1
           end
@@ -210,7 +207,7 @@ function initialize()
 end
 
 
-function lhsinit()
+function lhsinit(z)
 
 #---------------------------------------------------------------------
 # loop over all cells                                       
@@ -221,15 +218,15 @@ function lhsinit()
 #         first, initialize the start and end arrays
 #---------------------------------------------------------------------
           for d = 1:3
-             if cell_coord[d, c] == 1
-                cell_start[d, c] = 1
+             if cell_coord[z][d, c] == 1
+                cell_start[z][d, c] = 1
              else
-                cell_start[d, c] = 0
+                cell_start[z][d, c] = 0
              end
-             if cell_coord[d, c] == ncells
-                cell_end[d, c] = 1
+             if cell_coord[z][d, c] == ncells
+                cell_end[z][d, c] = 1
              else
-                cell_end[d, c] = 0
+                cell_end[z][d, c] = 0
              end
           end
 
@@ -237,10 +234,10 @@ function lhsinit()
 #     zap the whole left hand side for starters
 #---------------------------------------------------------------------
           for n = 1:15
-             for k = 0:cell_size[3, c]-1
-                for j = 0:cell_size[2, c]-1
-                   for i = 0:cell_size[1, c]-1
-                      lhs[i, j, k, n, c] = 0.0e0
+             for k = 0:cell_size[z][3, c]-1
+                for j = 0:cell_size[z][2, c]-1
+                   for i = 0:cell_size[z][1, c]-1
+                      lhs[z][i, j, k, n, c] = 0.0e0
                    end
                 end
              end
@@ -250,10 +247,10 @@ function lhsinit()
 # next, set all diagonal values to 1. This is overkill, but convenient
 #---------------------------------------------------------------------
           for n = 1:3
-             for k = 0:cell_size[3, c]-1
-                for j = 0:cell_size[2, c]-1
-                   for i = 0:cell_size[1, c]-1
-                      lhs[i, j, k, 5*n-2, c] = 1.0e0
+             for k = 0:cell_size[z][3, c]-1
+                for j = 0:cell_size[z][2, c]-1
+                   for i = 0:cell_size[z][1, c]-1
+                      lhs[z][i, j, k, 5*n-2, c] = 1.0e0
                    end
                 end
              end

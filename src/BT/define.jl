@@ -14,11 +14,11 @@ function compute_buffer_size(dim)
       global east_size = 0
 
       for c = 1:ncells
-         face_size = cell_size[2, c] * cell_size[3, c] * dim * 2
-         if (cell_coord[1, c] != 1) 
+         face_size = cell_size[z][2, c] * cell_size[z][3, c] * dim * 2
+         if (cell_coord[z][1, c] != 1) 
             west_size = west_size + face_size 
          end
-         if (cell_coord[1, c] != ncells) 
+         if (cell_coord[z][1, c] != ncells) 
             east_size = east_size + face_size 
          end
       end
@@ -26,11 +26,11 @@ function compute_buffer_size(dim)
       global north_size = 0
       global south_size = 0
       for c = 1:ncells
-         face_size = cell_size[1, c]*cell_size[3, c] * dim * 2
-         if (cell_coord[2, c] != 1) 
+         face_size = cell_size[z][1, c]*cell_size[z][3, c] * dim * 2
+         if (cell_coord[z][2, c] != 1) 
             south_size = south_size + face_size 
          end
-         if (cell_coord[2, c] != ncells) 
+         if (cell_coord[z][2, c] != ncells) 
             north_size = north_size + face_size 
          end
       end
@@ -38,11 +38,11 @@ function compute_buffer_size(dim)
       global top_size = 0
       global bottom_size = 0
       for c = 1:ncells
-         face_size = cell_size[1, c] * cell_size[2, c] * dim * 2
-         if (cell_coord[3, c] != 1) 
+         face_size = cell_size[z][1, c] * cell_size[z][2, c] * dim * 2
+         if (cell_coord[z][3, c] != 1) 
             bottom_size = bottom_size + face_size  
          end
-         if (cell_coord[3, c] != ncells) 
+         if (cell_coord[z][3, c] != ncells) 
             top_size = top_size + face_size 
          end
       end

@@ -12,9 +12,9 @@ function exact_rhs()
 #---------------------------------------------------------------------
 #     initialize                                  
 #---------------------------------------------------------------------
-         for k = 0:cell_size[3, c]-1
-            for j = 0:cell_size[2, c]-1
-               for i = 0:cell_size[1, c]-1
+         for k = 0:cell_size[z][3, c]-1
+            for j = 0:cell_size[z][2, c]-1
+               for i = 0:cell_size[z][1, c]-1
                   for m = 1:5
                      forcing[m, i, j, k, c] = 0.0e0
                   end
@@ -25,13 +25,13 @@ function exact_rhs()
 #---------------------------------------------------------------------
 #     xi-direction flux differences                      
 #---------------------------------------------------------------------
-         for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
-            zeta = float(k+cell_low[3, c]) * dnzm1
-            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
-               eta = float(j+cell_low[2, c]) * dnym1
+         for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
+            zeta = float(k+cell_low[z][3, c]) * dnzm1
+            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
+               eta = float(j+cell_low[z][2, c]) * dnym1
 
-               for i = -2*(1-cell_start[1, c]):cell_size[1, c]+1-2*cell_end[1, c]
-                  xi = float(i+cell_low[1, c]) * dnxm1
+               for i = -2*(1-cell_start[z][1, c]):cell_size[z][1, c]+1-2*cell_end[z][1, c]
+                  xi = float(i+cell_low[z][1, c]) * dnxm1
 
                   dtemp = exact_solution(xi, eta, zeta)
                   for m = 1:5
@@ -52,7 +52,7 @@ function exact_rhs()
 
                end
 
-               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
+               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
                   im1 = i-1
                   ip1 = i+1
 
@@ -89,7 +89,7 @@ function exact_rhs()
 #---------------------------------------------------------------------
 #     Fourth-order dissipation                         
 #---------------------------------------------------------------------
-               if cell_start[1, c] > 0
+               if cell_start[z][1, c] > 0
                   for m = 1:5
                      i = 1
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp *(
@@ -101,7 +101,7 @@ function exact_rhs()
                   end
                end
 
-               for i = cell_start[1, c]*3:cell_size[1, c]-3*cell_end[1, c]-1
+               for i = cell_start[z][1, c]*3:cell_size[z][1, c]-3*cell_end[z][1, c]-1
                   for m = 1:5
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp*(
                           ue[i-2, m] - 4.0e0*ue[i-1, m] +
@@ -109,13 +109,13 @@ function exact_rhs()
                   end
                end
 
-               if cell_end[1, c] > 0
+               if cell_end[z][1, c] > 0
                   for m = 1:5
-                     i = cell_size[1, c]-3
+                     i = cell_size[z][1, c]-3
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp *(
                           ue[i-2, m] - 4.0e0*ue[i-1, m] +
                           6.0e0*ue[i, m] - 4.0e0*ue[i+1, m])
-                     i = cell_size[1, c]-2
+                     i = cell_size[z][1, c]-2
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp *(
                           ue[i-2, m] - 4.0e0*ue[i-1, m] + 5.0e0*ue[i, m])
                   end
@@ -127,13 +127,13 @@ function exact_rhs()
 #---------------------------------------------------------------------
 #     eta-direction flux differences             
 #---------------------------------------------------------------------
-         for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
-            zeta = float(k+cell_low[3, c]) * dnzm1
-            for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-               xi = float(i+cell_low[1, c]) * dnxm1
+         for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
+            zeta = float(k+cell_low[z][3, c]) * dnzm1
+            for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+               xi = float(i+cell_low[z][1, c]) * dnxm1
 
-               for j = -2*(1-cell_start[2, c]):cell_size[2, c]+1-2*cell_end[2, c]
-                  eta = float(j+cell_low[2, c]) * dnym1
+               for j = -2*(1-cell_start[z][2, c]):cell_size[z][2, c]+1-2*cell_end[z][2, c]
+                  eta = float(j+cell_low[z][2, c]) * dnym1
 
                   dtemp = exact_solution(xi, eta, zeta)
                   for m = 1:5
@@ -153,7 +153,7 @@ function exact_rhs()
                        buf[j, 4]*ue[j, 4])
                end
 
-               for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
                   jm1 = j-1
                   jp1 = j+1
 
@@ -190,7 +190,7 @@ function exact_rhs()
 #---------------------------------------------------------------------
 #     Fourth-order dissipation                      
 #---------------------------------------------------------------------
-               if cell_start[2, c] > 0
+               if cell_start[z][2, c] > 0
                   for m = 1:5
                      j = 1
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp *(
@@ -202,7 +202,7 @@ function exact_rhs()
                   end
                end
 
-               for j = cell_start[2, c]*3:cell_size[2, c]-3*cell_end[2, c]-1
+               for j = cell_start[z][2, c]*3:cell_size[z][2, c]-3*cell_end[z][2, c]-1
                   for m = 1:5
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp*(
                           ue[j-2, m] - 4.0e0*ue[j-1, m] +
@@ -210,13 +210,13 @@ function exact_rhs()
                   end
                end
 
-               if cell_end[2, c] > 0
+               if cell_end[z][2, c] > 0
                   for m = 1:5
-                     j = cell_size[2, c]-3
+                     j = cell_size[z][2, c]-3
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp *(
                           ue[j-2, m] - 4.0e0*ue[j-1, m] +
                           6.0e0*ue[j, m] - 4.0e0*ue[j+1, m])
-                     j = cell_size[2, c]-2
+                     j = cell_size[z][2, c]-2
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp *(
                           ue[j-2, m] - 4.0e0*ue[j-1, m] + 5.0e0*ue[j, m])
 
@@ -229,13 +229,13 @@ function exact_rhs()
 #---------------------------------------------------------------------
 #     zeta-direction flux differences                      
 #---------------------------------------------------------------------
-         for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
-            eta = float(j+cell_low[2, c]) * dnym1
-            for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
-               xi = float(i+cell_low[1, c]) * dnxm1
+         for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
+            eta = float(j+cell_low[z][2, c]) * dnym1
+            for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+               xi = float(i+cell_low[z][1, c]) * dnxm1
 
-               for k = -2*(1-cell_start[3, c]):cell_size[3, c]+1-2*cell_end[3, c]
-                  zeta = float(k+cell_low[3, c]) * dnzm1
+               for k = -2*(1-cell_start[z][3, c]):cell_size[z][3, c]+1-2*cell_end[z][3, c]
+                  zeta = float(k+cell_low[z][3, c]) * dnzm1
 
                   dtemp = exact_solution(xi, eta, zeta)
                   for m = 1:5
@@ -253,7 +253,7 @@ function exact_rhs()
                   q[k] = 0.5e0*(buf[k, 2]*ue[k, 2] + buf[k, 3]*ue[k, 3] + buf[k, 4]*ue[k, 4])
                end
 
-               for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+               for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
                   km1 = k-1
                   kp1 = k+1
 
@@ -290,7 +290,7 @@ function exact_rhs()
 #---------------------------------------------------------------------
 #     Fourth-order dissipation                        
 #---------------------------------------------------------------------
-               if cell_start[3, c] > 0
+               if cell_start[z][3, c] > 0
                   for m = 1:5
                      k = 1
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp *(
@@ -302,7 +302,7 @@ function exact_rhs()
                   end
                end
 
-               for k = cell_start[3, c]*3:cell_size[3, c]-3*cell_end[3, c]-1
+               for k = cell_start[z][3, c]*3:cell_size[z][3, c]-3*cell_end[z][3, c]-1
                   for m = 1:5
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp*(
                           ue[k-2, m] - 4.0e0*ue[k-1, m] +
@@ -310,13 +310,13 @@ function exact_rhs()
                   end
                end
 
-               if cell_end[3, c] > 0
+               if cell_end[z][3, c] > 0
                   for m = 1:5
-                     k = cell_size[3, c]-3
+                     k = cell_size[z][3, c]-3
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp *(
                           ue[k-2, m] - 4.0e0*ue[k-1, m] +
                           6.0e0*ue[k, m] - 4.0e0*ue[k+1, m])
-                     k = cell_size[3, c]-2
+                     k = cell_size[z][3, c]-2
                      forcing[m, i, j, k, c] = forcing[m, i, j, k, c] - dssp *(
                           ue[k-2, m] - 4.0e0*ue[k-1, m] + 5.0e0*ue[k, m])
                   end
@@ -328,9 +328,9 @@ function exact_rhs()
 #---------------------------------------------------------------------
 #     now change the sign of the forcing function, 
 #---------------------------------------------------------------------
-         for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
-            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
-               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
+         for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
+            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
+               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
                   for m = 1:5
                      forcing[m, i, j, k, c] = -1.0e0 * forcing[m, i, j, k, c]
                   end

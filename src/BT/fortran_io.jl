@@ -44,16 +44,16 @@ function output_timestep()
 #      integer ix, jio, kio, cio
 
       for cio = 1:ncells
-          for kio = 0:cell_size[3, cio]-1
-              for jio = 0:cell_size[2, cio]-1
-                  iseek = (cell_low[3, cio]+kio) +
+          for kio = 0:cell_size[z][3, cio]-1
+              for jio = 0:cell_size[z][2, cio]-1
+                  iseek = (cell_low[z][3, cio]+kio) +
                          PROBLEM_SIZE*idump_sub
-                  iseek = (cell_low[2, cio]+jio) +
+                  iseek = (cell_low[z][2, cio]+jio) +
                          PROBLEM_SIZE*iseek
-                  iseek = (cell_low[1, cio]) +
+                  iseek = (cell_low[z][1, cio]) +
                          PROBLEM_SIZE*iseek
 
-                  for ix = 0:cell_size[1, cio]-1
+                  for ix = 0:cell_size[z][1, cio]-1
                       println(99, u[1, ix, jio, kio, cio],
                             u[2, ix, jio, kio, cio],
                             u[3, ix, jio, kio, cio],
@@ -95,17 +95,17 @@ function acc_sub_norms(idump_cur)
       ichunk = idump_cur - idump_sub + 1
       for ii = 0:idump_sub-1
         for cio = 1:ncells
-          for kio = 0:cell_size[3, cio]-1
-              for jio = 0:cell_size[2, cio]-1
-                  iseek = (cell_low[3, cio]+kio) +
+          for kio = 0:cell_size[z][3, cio]-1
+              for jio = 0:cell_size[z][2, cio]-1
+                  iseek = (cell_low[z][3, cio]+kio) +
                          PROBLEM_SIZE*ii
-                  iseek = (cell_low[2, cio]+jio) +
+                  iseek = (cell_low[z][2, cio]+jio) +
                          PROBLEM_SIZE*iseek
-                  iseek = (cell_low[1, cio]) +
+                  iseek = (cell_low[z][1, cio]) +
                          PROBLEM_SIZE*iseek
 
 
-                  for ix = 0:cell_size[1, cio]-1
+                  for ix = 0:cell_size[z][1, cio]-1
                       READ(99, u[1, ix, jio, kio, cio],
                             u[2, ix, jio, kio, cio],
                             u[3, ix, jio, kio, cio],

@@ -32,9 +32,9 @@ function output_timestep()
 
       for cio = 1:ncells
           println(99, ((((u[aio, ix, jio, kio, cio], aio = 1, 5),
-                   ix = 0, cell_size[1, cio]-1),
-                   jio = 0, cell_size[2, cio]-1),
-                   kio = 0, cell_size[3, cio]-1))
+                   ix = 0, cell_size[z][1, cio]-1),
+                   jio = 0, cell_size[z][2, cio]-1),
+                   kio = 0, cell_size[z][3, cio]-1))
       end
 
       idump_sub = idump_sub + 1
@@ -61,9 +61,9 @@ function acc_sub_norms(idump_cur)
       for ii = 0:idump_sub-1
         for cio = 1:ncells
           READ(99, ((((u[m, ix, jio, kio, cio], m = 1, 5),
-                   ix = 0, cell_size[1, cio]-1),
-                   jio = 0, cell_size[2, cio]-1),
-                   kio = 0, cell_size[3, cio]-1))
+                   ix = 0, cell_size[z][1, cio]-1),
+                   jio = 0, cell_size[z][2, cio]-1),
+                   kio = 0, cell_size[z][3, cio]-1))
         end
 
         if (node == root) println(stdout, "Reading data set ", ii+ichunk) end

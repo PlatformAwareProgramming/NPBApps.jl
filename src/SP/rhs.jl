@@ -193,6 +193,9 @@ function compute_rhs(ncells,
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = 3*cell_start[1, c]:cell_size[1, c]-3*cell_end[1, c]-1
                       rhs[i, j, k, m, c] -= dssp *(u[i-2, j, k, m, c] - 4.0e0*u[i-1, j, k, m, c] + 6.0*u[i, j, k, m, c] - 4.0e0*u[i+1, j, k, m, c] + u[i+2, j, k, m, c] )
+                      #if i==0
+                        #@info "i=-2 !!! rhs[$z][$i, $j, $k, $m, $c] =  $(rhs[i, j, k, m, c]) -- $(u[i-2, j, k, m, c])"
+                      #end
                    end
                 end
              end
@@ -301,6 +304,9 @@ function compute_rhs(ncells,
                 for j = 3*cell_start[2, c]:cell_size[2, c]-3*cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                       rhs[i, j, k, m, c] -= dssp *(u[i, j-2, k, m, c] - 4.0e0*u[i, j-1, k, m, c] + 6.0*u[i, j, k, m, c] - 4.0e0*u[i, j+1, k, m, c] + u[i, j+2, k, m, c] )
+                      #if j==0
+                        #@info "j=-2 !!! rhs[$z][$i, $j, $k, $m, $c] =  $(rhs[i, j, k, m, c]) -- $(u[i, j-2, k, m, c])"
+                      #end
                    end
                 end
              end
@@ -408,6 +414,9 @@ function compute_rhs(ncells,
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                    for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                       rhs[i, j, k, m, c]-= dssp *(u[i, j, k-2, m, c] - 4.0e0*u[i, j, k-1, m, c] + 6.0*u[i, j, k, m, c] - 4.0e0*u[i, j, k+1, m, c] + u[i, j, k+2, m, c])
+                      #if k==0
+                        #@info "k=-2 !!! rhs[$z][$i, $j, $k, $m, $c] =  $(rhs[i, j, k, m, c])"
+                      #end
                    end
                 end
              end
@@ -444,6 +453,7 @@ function compute_rhs(ncells,
           end
 
        end
+
 
        if (timeron) timer_stop(t_rhs) end
 

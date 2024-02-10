@@ -161,7 +161,7 @@ function perform(grid_points, niter, dt)
        make_set(grid_points)
 
        for c = 1:maxcells
-          if (cell_size[1, c] > IMAX) || (cell_size[2, c] > JMAX) ||(cell_size[3, c] > KMAX)
+          if (cell_size[z][1, c] > IMAX) || (cell_size[z][2, c] > JMAX) ||(cell_size[z][3, c] > KMAX)
              println(stdout, node, c, view(cell_size, 1:3, c)...)
              println(stdout, " Problem size too big for compiled array sizes")
              @goto L999

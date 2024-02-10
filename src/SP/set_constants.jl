@@ -53,11 +53,11 @@ const ce = SA_F64[2.0e0 0.0e0 0.0e0 4.0e0 5.0e0 3.0e0 0.5e0 0.02e0 0.01e0 0.03e0
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
- function set_constants(dt, grid_points)
+ function set_constants(z, dt, gx_size, gy_size, gz_size, x_zones, y_zones)
 
-       global dnxm1 = 1.0e0 / float(grid_points[1]-1)
-       global dnym1 = 1.0e0 / float(grid_points[2]-1)
-       global dnzm1 = 1.0e0 / float(grid_points[3]-1)
+       global dnxm1 = 1.0e0 / (float(gx_size - 1)/float(x_zones))
+       global dnym1 = 1.0e0 / (float(gy_size - 1)/float(y_zones))
+       global dnzm1 = 1.0e0 /  float(gz_size - 1)
        
        global tx1 = 1.0e0 / (dnxm1 * dnxm1)
        global tx2 = 1.0e0 / (2.0e0 * dnxm1)
@@ -89,45 +89,45 @@ const ce = SA_F64[2.0e0 0.0e0 0.0e0 4.0e0 5.0e0 3.0e0 0.5e0 0.02e0 0.01e0 0.03e0
        global comz5  = 5.0e0*dtdssp
        global comz6  = 6.0e0*dtdssp
                             
-       global  c3c4tx3 = c3c4*tx3
+       global c3c4tx3 = c3c4*tx3
        global c3c4ty3 = c3c4*ty3
-       global  c3c4tz3 = c3c4*tz3
+       global c3c4tz3 = c3c4*tz3
        
        global dx1tx1 = dx1*tx1
-       global  dx2tx1 = dx2*tx1
+       global dx2tx1 = dx2*tx1
        global dx3tx1 = dx3*tx1
-       global  dx4tx1 = dx4*tx1
-       global  dx5tx1 = dx5*tx1
+       global dx4tx1 = dx4*tx1
+       global dx5tx1 = dx5*tx1
        
        global dy1ty1 = dy1*ty1
        global dy2ty1 = dy2*ty1
        global dy3ty1 = dy3*ty1
-       global  dy4ty1 = dy4*ty1
+       global dy4ty1 = dy4*ty1
        global dy5ty1 = dy5*ty1
        
-       global  dz1tz1 = dz1*tz1
-       global  dz2tz1 = dz2*tz1
-       global  dz3tz1 = dz3*tz1
-       global  dz4tz1 = dz4*tz1
-       global  dz5tz1 = dz5*tz1
+       global dz1tz1 = dz1*tz1
+       global dz2tz1 = dz2*tz1
+       global dz3tz1 = dz3*tz1
+       global dz4tz1 = dz4*tz1
+       global dz5tz1 = dz5*tz1
        
-       global  xxcon1 = c3c4tx3*con43*tx3
-       global  xxcon2 = c3c4tx3*tx3
-       global  xxcon3 = c3c4tx3*conz1*tx3
-       global  xxcon4 = c3c4tx3*con16*tx3
-       global  xxcon5 = c3c4tx3*c1c5*tx3
+       global xxcon1 = c3c4tx3*con43*tx3
+       global xxcon2 = c3c4tx3*tx3
+       global xxcon3 = c3c4tx3*conz1*tx3
+       global xxcon4 = c3c4tx3*con16*tx3
+       global xxcon5 = c3c4tx3*c1c5*tx3
        
-       global  yycon1 = c3c4ty3*con43*ty3
-       global  yycon2 = c3c4ty3*ty3
-       global  yycon3 = c3c4ty3*conz1*ty3
-       global  yycon4 = c3c4ty3*con16*ty3
-       global  yycon5 = c3c4ty3*c1c5*ty3
+       global yycon1 = c3c4ty3*con43*ty3
+       global yycon2 = c3c4ty3*ty3
+       global yycon3 = c3c4ty3*conz1*ty3
+       global yycon4 = c3c4ty3*con16*ty3
+       global yycon5 = c3c4ty3*c1c5*ty3
        
-       global  zzcon1 = c3c4tz3*con43*tz3
-       global  zzcon2 = c3c4tz3*tz3
-       global  zzcon3 = c3c4tz3*conz1*tz3
-       global  zzcon4 = c3c4tz3*con16*tz3
-       global  zzcon5 = c3c4tz3*c1c5*tz3  
+       global zzcon1 = c3c4tz3*con43*tz3
+       global zzcon2 = c3c4tz3*tz3
+       global zzcon3 = c3c4tz3*conz1*tz3
+       global zzcon4 = c3c4tz3*con16*tz3
+       global zzcon5 = c3c4tz3*c1c5*tz3  
 
        return nothing
 end

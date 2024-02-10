@@ -1,123 +1,482 @@
-#---------------------------------------------------------------------
-#  set problem class based on problem size
-#---------------------------------------------------------------------
+function set_class(no_time_steps, x_zones, y_zones, gx_size, gy_size, gz_size)
 
-function set_class(no_time_steps, grid_points)
-
-        if (grid_points[1]  == 12     ) &&(
-             grid_points[2]  == 12     ) &&(
-             grid_points[3]  == 12     ) &&(
-             no_time_steps   == 100    )
-
-           class = CLASS_S
-
-        elseif (grid_points[1] == 36) &&(
-                 grid_points[2] == 36) &&(
-                 grid_points[3] == 36) &&(
-                 no_time_steps  == 400)
-
-           class = CLASS_W
-
-        elseif (grid_points[1] == 64) &&(
-                 grid_points[2] == 64) &&(
-                 grid_points[3] == 64) &&(
-                 no_time_steps  == 400)
-
-           class = CLASS_A
-
-        elseif (grid_points[1] == 102) &&(
-                 grid_points[2] == 102) &&(
-                 grid_points[3] == 102) &&(
-                 no_time_steps  == 400)
-
-           class = CLASS_B
-
-        elseif (grid_points[1] == 162) &&(
-                 grid_points[2] == 162) &&(
-                 grid_points[3] == 162) &&(
-                 no_time_steps  == 400)
-
-           class = CLASS_C
-
-        elseif (grid_points[1] == 408) &&(
-                 grid_points[2] == 408) &&(
-                 grid_points[3] == 408) &&(
-                 no_time_steps  == 500)
-
-           class = CLASS_D
-
-        elseif (grid_points[1] == 1020) &&(
-                 grid_points[2] == 1020) &&(
-                 grid_points[3] == 1020) &&(
-                 no_time_steps  == 500)
-
-           class = CLASS_E
-
-        elseif (grid_points[1] == 2560) &&(
-                 grid_points[2] == 2560) &&(
-                 grid_points[3] == 2560) &&(
-                 no_time_steps  == 500)
-
-           class = CLASS_F
-
+        if x_zones == sp_class[CLASS_S].x_zones &&             
+           y_zones == sp_class[CLASS_S].y_zones &&
+           gx_size == sp_class[CLASS_S].gx_size &&
+           gy_size == sp_class[CLASS_S].gy_size &&
+           gz_size == sp_class[CLASS_S].gz_size &&
+           no_time_steps == sp_class[CLASS_S].niter
+             class = CLASS_S
+        elseif x_zones == sp_class[CLASS_W].x_zones &&             
+               y_zones == sp_class[CLASS_W].y_zones &&
+               gx_size == sp_class[CLASS_W].gx_size &&
+               gy_size == sp_class[CLASS_W].gy_size &&
+               gz_size == sp_class[CLASS_W].gz_size &&
+               no_time_steps == sp_class[CLASS_W].niter
+             class = CLASS_W
+        elseif x_zones == sp_class[CLASS_A].x_zones &&             
+               y_zones == sp_class[CLASS_A].y_zones &&
+               gx_size == sp_class[CLASS_A].gx_size &&
+               gy_size == sp_class[CLASS_A].gy_size &&
+               gz_size == sp_class[CLASS_A].gz_size &&
+               no_time_steps == sp_class[CLASS_A].niter
+             class = CLASS_A
+        elseif x_zones == sp_class[CLASS_B].x_zones &&             
+               y_zones == sp_class[CLASS_B].y_zones &&
+               gx_size == sp_class[CLASS_B].gx_size &&
+               gy_size == sp_class[CLASS_B].gy_size &&
+               gz_size == sp_class[CLASS_B].gz_size &&
+               no_time_steps == sp_class[CLASS_B].niter
+             class = CLASS_B
+        elseif x_zones == sp_class[CLASS_C].x_zones &&             
+               y_zones == sp_class[CLASS_C].y_zones &&
+               gx_size == sp_class[CLASS_C].gx_size &&
+               gy_size == sp_class[CLASS_C].gy_size &&
+               gz_size == sp_class[CLASS_C].gz_size &&
+               no_time_steps == sp_class[CLASS_C].niter
+             class = CLASS_C
+        elseif x_zones == sp_class[CLASS_D].x_zones &&             
+               y_zones == sp_class[CLASS_D].y_zones &&
+               gx_size == sp_class[CLASS_D].gx_size &&
+               gy_size == sp_class[CLASS_D].gy_size &&
+               gz_size == sp_class[CLASS_D].gz_size &&
+               no_time_steps == sp_class[CLASS_D].niter
+             class = CLASS_D
+        elseif x_zones == sp_class[CLASS_E].x_zones &&             
+               y_zones == sp_class[CLASS_E].y_zones &&
+               gx_size == sp_class[CLASS_E].gx_size &&
+               gy_size == sp_class[CLASS_E].gy_size &&
+               gz_size == sp_class[CLASS_E].gz_size &&
+               no_time_steps == sp_class[CLASS_E].niter
+             class = CLASS_E
+        elseif x_zones == sp_class[CLASS_F].x_zones &&             
+               y_zones == sp_class[CLASS_F].y_zones &&
+               gx_size == sp_class[CLASS_F].gx_size &&
+               gy_size == sp_class[CLASS_F].gy_size &&
+               gz_size == sp_class[CLASS_F].gz_size &&
+               no_time_steps == sp_class[CLASS_F].niter
+             class = CLASS_F
         else
-
-           class = CLASS_UNDEFINED
-
+             class = CLASS_UNDEFINED
         end
 
         return class
 
 end
 
-#---------------------------------------------------------------------
-#  verification routine                         
-#---------------------------------------------------------------------
+# AT CLUSTER MASTER
+function putVerificationReport(xcr_node, xce_node)
+   remotecall(putVerificationReport, 1, clusterid, xcr_node, xce_node; role=:worker)
+end
 
-function verify(class, 
-                grid_points,
-                dt,
-                ss,
-                sr,
-                b_size,
-)
+# AT DRIVER MASTER
+function putVerificationReport(clusterid, xcr_cluster, xce_cluster)
+   lock(verified_signal[clusterid+1])
+   try
+      lock(lk_update_verify)
+      try
+         xcr .= xcr + xcr_cluster
+         xce .= xce + xce_cluster
+      finally
+         unlock(lk_update_verify)
+      end
+      verified_signal_condition[clusterid+1] = true
+      notify(verified_signal[clusterid+1])
+   finally
+      unlock(verified_signal[clusterid+1])
+   end
+end
 
+
+#---------------------------------------------------------------------
+#---------------------------------------------------------------------
+# AT DRIVER MASTER
+function verify(class, dt, no_time_steps)
+
+        global verified_signal_condition = Array{Bool}(undef, num_clusters)
+        global verified_signal = Array{Threads.Condition}(undef, num_clusters)
+        for i in 1:num_clusters
+            verified_signal_condition[i] = false
+            verified_signal[i] = Threads.Condition()             
+        end
+
+        global lk_update_verify = ReentrantLock()
+                
         xcrref = Array{Float64}(undef, 5)
         xceref = Array{Float64}(undef, 5)
         xcrdif = Array{Float64}(undef, 5)
         xcedif = Array{Float64}(undef, 5)
-        xce = Array{Float64}(undef, 5)
-        xcr = Array{Float64}(undef, 5)
+
+#---------------------------------------------------------------------
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+#  verification routine                         
+#---------------------------------------------------------------------
+
+#        use, intrinsic :: ieee_arithmetic, only : ieee_is_nan
+
+#        use sp_data
+#        use mpinpb
+
+#        implicit none
+
+#        integer zone, num_zones
+#        DOUBLEPRECISION rho_i[*], us[*], vs[*], ws[*], speed[*],  
+#                         qs[*], square[*], rhs[*], forcing[*], u[*]
+
+#        DOUBLEPRECISION xcrref[5],xceref[5],xcrdif[5],xcedif[5],  
+#                         epsilon, xce[5], xcr[5], dtref,  
+#                         xce_sub[5], xcr_sub[5]
+#        integer m, no_time_steps, niterref, iz, ip
+#        integer nx[*], nxmax[*], ny[*], nz[*]
+#        logical verified
 
 #---------------------------------------------------------------------
 #   tolerance level
 #---------------------------------------------------------------------
         epsilon = 1.0e-08
 
+        for i = 1:num_clusters
+            lock(verified_signal[i])
+            try
+               while !verified_signal_condition[i]
+                  wait(verified_signal[i])
+               end
+            finally
+               unlock(verified_signal[i])
+            end
+        end
+   
+        verified = true
+
+        for m = 1:5
+           xcrref[m] = 1.0
+           xceref[m] = 1.0
+        end
+
 #---------------------------------------------------------------------
-#   compute the error norm and the residual norm, and exit if not printing
+#    reference data for class S
 #---------------------------------------------------------------------
-        error_norm(xce, grid_points)
-        
-        copy_faces(Val(no_nodes),
+        if class == CLASS_S
+           dtref = 1.5e-2
+           niterref = 100
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of residual.
+#---------------------------------------------------------------------
+           xcrref[1] = 0.7698876173566e+01
+           xcrref[2] = 0.1517766790280e+01
+           xcrref[3] = 0.2686805141546e+01
+           xcrref[4] = 0.1893688083690e+01
+           xcrref[5] = 0.1369739859738e+02
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of solution error.
+#---------------------------------------------------------------------
+           xceref[1] = 0.9566808043467e+01
+           xceref[2] = 0.3894109553741e+01
+           xceref[3] = 0.4516022447464e+01
+           xceref[4] = 0.4099103995615e+01
+           xceref[5] = 0.7776038881521e+01
+
+#---------------------------------------------------------------------
+#    reference data for class W
+#---------------------------------------------------------------------
+        elseif class == CLASS_W
+           dtref = 1.5e-3
+           niterref = 400
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of residual.
+#---------------------------------------------------------------------
+           xcrref[1] = 0.1887636218359e+03
+           xcrref[2] = 0.1489637963542e+02
+           xcrref[3] = 0.4851711701400e+02
+           xcrref[4] = 0.3384633608154e+02
+           xcrref[5] = 0.4036632495857e+03
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of solution error.
+#---------------------------------------------------------------------
+           xceref[1] = 0.2975895149929e+02
+           xceref[2] = 0.1341508175806e+02
+           xceref[3] = 0.1585310846491e+02
+           xceref[4] = 0.1450916426713e+02
+           xceref[5] = 0.5854137431023e+02
+
+#---------------------------------------------------------------------
+#    reference data for class A
+#---------------------------------------------------------------------
+        elseif class == CLASS_A
+           dtref = 1.5e-3
+           niterref = 400
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of residual.
+#---------------------------------------------------------------------
+           xcrref[1] = 0.2800097900548e+03
+           xcrref[2] = 0.2268349014438e+02
+           xcrref[3] = 0.7000852739901e+02
+           xcrref[4] = 0.5000771004061e+02
+           xcrref[5] = 0.5552068537578e+03
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of solution error.
+#---------------------------------------------------------------------
+           xceref[1] = 0.3112046666578e+02
+           xceref[2] = 0.1172197785348e+02
+           xceref[3] = 0.1486616708032e+02
+           xceref[4] = 0.1313680576292e+02
+           xceref[5] = 0.7365834058154e+02
+
+#---------------------------------------------------------------------
+#    reference data for class B
+#---------------------------------------------------------------------
+        elseif class == CLASS_B
+           dtref = 1.0e-3
+           niterref = 400
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of residual.
+#---------------------------------------------------------------------
+           xcrref[1] = 0.5190422977921e+04
+           xcrref[2] = 0.3655458539065e+03
+           xcrref[3] = 0.1261126592633e+04
+           xcrref[4] = 0.1002038338842e+04
+           xcrref[5] = 0.1075902511165e+05
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of solution error.
+#---------------------------------------------------------------------
+           xceref[1] = 0.5469182054223e+03
+           xceref[2] = 0.4983658028989e+02
+           xceref[3] = 0.1418301776602e+03
+           xceref[4] = 0.1097717156175e+03
+           xceref[5] = 0.1260195162174e+04
+
+#---------------------------------------------------------------------
+#    reference data for class C
+#---------------------------------------------------------------------
+        elseif class == CLASS_C
+           dtref = 0.67e-3
+           niterref = 400
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of residual.
+#---------------------------------------------------------------------
+           xcrref[1] = 0.5886814493676e+05
+           xcrref[2] = 0.3967324375474e+04
+           xcrref[3] = 0.1444126529019e+05
+           xcrref[4] = 0.1210582211196e+05
+           xcrref[5] = 0.1278941567976e+06
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of solution error.
+#---------------------------------------------------------------------
+           xceref[1] = 0.6414069213021e+04
+           xceref[2] = 0.4069468353404e+03
+           xceref[3] = 0.1585311908719e+04
+           xceref[4] = 0.1270243185759e+04
+           xceref[5] = 0.1441398372869e+05
+
+#---------------------------------------------------------------------
+#    reference data for class D
+#---------------------------------------------------------------------
+        elseif class == "D"
+           dtref = 0.3e-3
+           niterref = 500
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of residual.
+#---------------------------------------------------------------------
+           xcrref[1] = 0.7650595424723e+06
+           xcrref[2] = 0.5111519817683e+05
+           xcrref[3] = 0.1857213937602e+06
+           xcrref[4] = 0.1624096784059e+06
+           xcrref[5] = 0.1642416844328e+07
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of solution error.
+#---------------------------------------------------------------------
+           xceref[1] = 0.8169589578340e+05
+           xceref[2] = 0.5252150843148e+04
+           xceref[3] = 0.1984739188642e+05
+           xceref[4] = 0.1662852404547e+05
+           xceref[5] = 0.1761381855235e+06
+
+#---------------------------------------------------------------------
+#    reference data for class E
+#---------------------------------------------------------------------
+        elseif class == CLASS_E
+           dtref = 0.2e-3
+           niterref = 500
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of residual.
+#---------------------------------------------------------------------
+           xcrref[1] = 0.5058298119039e+07
+           xcrref[2] = 0.3576837494299e+06
+           xcrref[3] = 0.1230856227329e+07
+           xcrref[4] = 0.1093895671677e+07
+           xcrref[5] = 0.1073671658903e+08
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of solution error.
+#---------------------------------------------------------------------
+           xceref[1] = 0.5288293042051e+06
+           xceref[2] = 0.3471875724140e+05
+           xceref[3] = 0.1282998930808e+06
+           xceref[4] = 0.1095483394612e+06
+           xceref[5] = 0.1129716454231e+07
+
+#---------------------------------------------------------------------
+#    reference data for class F
+#---------------------------------------------------------------------
+        elseif class == CLASS_F
+           dtref = 0.1e-3
+           niterref = 500
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of residual.
+#---------------------------------------------------------------------
+           xcrref[1] = 0.3974469160412e+08
+           xcrref[2] = 0.3260760921834e+07
+           xcrref[3] = 0.9756215393494e+07
+           xcrref[4] = 0.8278472138497e+07
+           xcrref[5] = 0.7547269314441e+08
+
+#---------------------------------------------------------------------
+#    Reference values of RMS-norms of solution error.
+#---------------------------------------------------------------------
+           xceref[1] = 0.3475757666334e+07
+           xceref[2] = 0.2386799228183e+06
+           xceref[3] = 0.8436705443034e+06
+           xceref[4] = 0.7339112115118e+06
+           xceref[5] = 0.7327832757877e+07
+
+           if no_time_steps == 50
+
+           niterref = 50
+           xcrref[1] = 0.3198801286787e+09
+           xcrref[2] = 0.3435698123358e+08
+           xcrref[3] = 0.8489831174901e+08
+           xcrref[4] = 0.6940707552477e+08
+           xcrref[5] = 0.4478684103255e+09
+
+           xceref[1] = 0.6761099692230e+07
+           xceref[2] = 0.5361561494769e+06
+           xceref[3] = 0.1662878706114e+07
+           xceref[4] = 0.1443852092060e+07
+           xceref[5] = 0.1260678700480e+08
+
+           end
+        else
+           dtref = 0.0e0
+           niterref = 0
+           verified = false
+        end
+
+#---------------------------------------------------------------------
+#    Compute the difference of solution values and the known reference values.
+#---------------------------------------------------------------------
+
+        # VETORIZED
+        xcrdif = abs.((xcr .- xcrref)./xcrref)
+        xcedif = abs.((xce .- xceref)./xceref)
+
+#---------------------------------------------------------------------
+#    Output the comparison of computed results to known cases.
+#---------------------------------------------------------------------
+
+        @printf(stdout, " Verification being performed for class %s\n", class)
+        @printf(stdout, " accuracy setting for epsilon = %20.13E\n", epsilon)
+        if abs(dt-dtref) > epsilon
+           verified = false
+           @printf(stdout, " DT does not match the reference value of %15.8E\n", dtref)
+        elseif no_time_steps != niterref
+           verified = false
+           @printf(stdout, " NITER does not match the reference value of %5i\n", niterref)
+        end
+
+        @printf(stdout, " Comparison of RMS-norms of residual\n", )
+
+        for m = 1:5
+           if xcrdif[m] != NaN && xcrdif[m] <= epsilon
+              @printf(stdout, "          %2i%20.13E%20.13E%20.13E\n", m, xcr[m], xcrref[m], xcrdif[m])
+           else
+              verified = false
+              @printf(stdout, " FAILURE: %2i%20.13E%20.13E%20.13E\n", m, xcr[m], xcrref[m], xcrdif[m])
+           end
+        end
+
+        @printf(stdout, " Comparison of RMS-norms of solution error\n", )
+
+        for m = 1:5
+           if  xcedif[m] != NaN && xcedif[m] <= epsilon
+              @printf(stdout, "          %2i%20.13E%20.13E%20.13E\n", m, xce[m], xceref[m], xcedif[m])
+           else
+              verified = false
+              @printf(stdout, " FAILURE: %2i%20.13E%20.13E%20.13E\n", m, xce[m], xceref[m], xcedif[m])
+           end
+        end
+
+        if verified
+           @printf(stdout, " Verification Successful\n", )
+        else
+           @printf(stdout, " Verification failed\n", )
+        end
+
+        return verified
+end
+
+
+# AT NODE WORKER
+function verify(dt, ss, sr, b_size, 
+                proc_num_zones,
+                rho_i, us, vs, ws, speed, qs, square,
+                rhs, forcing, u, nx, ny, nz)
+
+        xce = Array{Float64}(undef, 5)
+        xcr = Array{Float64}(undef, 5)
+        xce_sub = Array{Float64}(undef, 5)
+        xcr_sub = Array{Float64}(undef, 5)
+
+#---------------------------------------------------------------------
+#   compute the error norm and the residual norm
+#---------------------------------------------------------------------
+
+        for m = 1:5
+          xcr[m] = 0.0e0
+          xce[m] = 0.0e0
+        end
+
+        for zone = 1:proc_num_zones          
+
+          error_norm(zone, xce_sub, [nx[zone], ny[zone], nz[zone]])
+          
+          copy_faces(false, zone,
+                  Val(no_nodes),
                   Val(ncells),
-                  successor, # ::Vector{Int64},
-                  predecessor, # ::Vector{Int64},
-                  cell_size,
-                  cell_start,
-                  cell_end,
-                  cell_coord,
-                  u,
-                  rhs,
-                  rho_i,
-                  us,
-                  vs,
-                  ws,
-                  square,
-                  qs,
-                  ainv,
-                  speed,
-                  forcing,
+                  successor[zone],
+                  predecessor[zone],
+                  cell_size[zone],
+                  cell_start[zone],
+                  cell_end[zone],
+                  cell_coord[zone],
+                  cell_low[zone],
+                  cell_high[zone],
+                  u[zone],
+                  rhs[zone],
+                  rho_i[zone],
+                  us[zone],
+                  vs[zone],
+                  ws[zone],
+                  square[zone],
+                  qs[zone],
+                  ainv[zone],
+                  speed[zone],
+                  forcing[zone],
                   dt,
                   tx2,
                   ty2,
@@ -154,318 +513,26 @@ function verify(class,
                   zzcon5,
                   dssp,
                   con43,
-                  in_buffer,
-                  out_buffer,
+                  in_buffer[zone],
+                  out_buffer[zone],
                   Array{MPI.Request}(undef,12),
                   timeron,
-                  comm_rhs,
+                  comm_rhs[zone],
                   ss,
                   sr,
                   b_size,
                )
 
-        rhs_norm(xcr, grid_points)
+          rhs_norm(zone, xcr_sub, [nx[zone], ny[zone], nz[zone]])
 
-        # VECTORIZED
-        xcr .= xcr ./ dt
-
-        if (node != 0) return end
-
-        verified = true
-       
-        xcrref .= 1.0
-        xceref .= 1.0
-
-#---------------------------------------------------------------------
-#    reference data for 12X12X12 grids after 100 time steps, with DT = 1.50d-02
-#---------------------------------------------------------------------
-        if class == CLASS_S
-
-           dtref = 1.5e-2
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of residual.
-#---------------------------------------------------------------------
-           xcrref[1] = 2.7470315451339479e-02
-           xcrref[2] = 1.0360746705285417e-02
-           xcrref[3] = 1.6235745065095532e-02
-           xcrref[4] = 1.5840557224455615e-02
-           xcrref[5] = 3.4849040609362460e-02
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of solution error.
-#---------------------------------------------------------------------
-           xceref[1] = 2.7289258557377227e-05
-           xceref[2] = 1.0364446640837285e-05
-           xceref[3] = 1.6154798287166471e-05
-           xceref[4] = 1.5750704994480102e-05
-           xceref[5] = 3.4177666183390531e-05
-
-#---------------------------------------------------------------------
-#    reference data for 36X36X36 grids after 400 time steps, with DT = 1.5d-03
-#---------------------------------------------------------------------
-        elseif class == CLASS_W
-
-           dtref = 1.5e-3
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of residual.
-#---------------------------------------------------------------------
-           xcrref[1] = 0.1893253733584e-02
-           xcrref[2] = 0.1717075447775e-03
-           xcrref[3] = 0.2778153350936e-03
-           xcrref[4] = 0.2887475409984e-03
-           xcrref[5] = 0.3143611161242e-02
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of solution error.
-#---------------------------------------------------------------------
-           xceref[1] = 0.7542088599534e-04
-           xceref[2] = 0.6512852253086e-05
-           xceref[3] = 0.1049092285688e-04
-           xceref[4] = 0.1128838671535e-04
-           xceref[5] = 0.1212845639773e-03
-
-#---------------------------------------------------------------------
-#    reference data for 64X64X64 grids after 400 time steps, with DT = 1.5d-03
-#---------------------------------------------------------------------
-        elseif class == CLASS_A
-
-           dtref = 1.5e-3
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of residual.
-#---------------------------------------------------------------------
-           xcrref[1] = 2.4799822399300195e0
-           xcrref[2] = 1.1276337964368832e0
-           xcrref[3] = 1.5028977888770491e0
-           xcrref[4] = 1.4217816211695179e0
-           xcrref[5] = 2.1292113035138280e0
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of solution error.
-#---------------------------------------------------------------------
-           xceref[1] = 1.0900140297820550e-04
-           xceref[2] = 3.7343951769282091e-05
-           xceref[3] = 5.0092785406541633e-05
-           xceref[4] = 4.7671093939528255e-05
-           xceref[5] = 1.3621613399213001e-04
-
-#---------------------------------------------------------------------
-#    reference data for 102X102X102 grids after 400 time steps,
-#    with DT = 1.0d-03
-#---------------------------------------------------------------------
-        elseif class == CLASS_B
-
-           dtref = 1.0e-3
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of residual.
-#---------------------------------------------------------------------
-           xcrref[1] = 0.6903293579998e+02
-           xcrref[2] = 0.3095134488084e+02
-           xcrref[3] = 0.4103336647017e+02
-           xcrref[4] = 0.3864769009604e+02
-           xcrref[5] = 0.5643482272596e+02
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of solution error.
-#---------------------------------------------------------------------
-           xceref[1] = 0.9810006190188e-02
-           xceref[2] = 0.1022827905670e-02
-           xceref[3] = 0.1720597911692e-02
-           xceref[4] = 0.1694479428231e-02
-           xceref[5] = 0.1847456263981e-01
-
-#---------------------------------------------------------------------
-#    reference data for 162X162X162 grids after 400 time steps,
-#    with DT = 0.67d-03
-#---------------------------------------------------------------------
-        elseif class == CLASS_C
-
-           dtref = 0.67e-3
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of residual.
-#---------------------------------------------------------------------
-           xcrref[1] = 0.5881691581829e+03
-           xcrref[2] = 0.2454417603569e+03
-           xcrref[3] = 0.3293829191851e+03
-           xcrref[4] = 0.3081924971891e+03
-           xcrref[5] = 0.4597223799176e+03
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of solution error.
-#---------------------------------------------------------------------
-           xceref[1] = 0.2598120500183e+00
-           xceref[2] = 0.2590888922315e-01
-           xceref[3] = 0.5132886416320e-01
-           xceref[4] = 0.4806073419454e-01
-           xceref[5] = 0.5483377491301e+00
-
-#---------------------------------------------------------------------
-#    reference data for 408X408X408 grids after 500 time steps,
-#    with DT = 0.3d-03
-#---------------------------------------------------------------------
-        elseif class == CLASS_D
-
-           dtref = 0.30e-3
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of residual.
-#---------------------------------------------------------------------
-           xcrref[1] = 0.1044696216887e+05
-           xcrref[2] = 0.3204427762578e+04
-           xcrref[3] = 0.4648680733032e+04
-           xcrref[4] = 0.4238923283697e+04
-           xcrref[5] = 0.7588412036136e+04
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of solution error.
-#---------------------------------------------------------------------
-           xceref[1] = 0.5089471423669e+01
-           xceref[2] = 0.5323514855894e+00
-           xceref[3] = 0.1187051008971e+01
-           xceref[4] = 0.1083734951938e+01
-           xceref[5] = 0.1164108338568e+02
-
-#---------------------------------------------------------------------
-#    reference data for 1020X1020X1020 grids after 500 time steps,
-#    with DT = 0.1d-03
-#---------------------------------------------------------------------
-        elseif class == CLASS_E
-
-           dtref = 0.10e-3
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of residual.
-#---------------------------------------------------------------------
-           xcrref[1] = 0.6255387422609e+05
-           xcrref[2] = 0.1495317020012e+05
-           xcrref[3] = 0.2347595750586e+05
-           xcrref[4] = 0.2091099783534e+05
-           xcrref[5] = 0.4770412841218e+05
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of solution error.
-#---------------------------------------------------------------------
-           xceref[1] = 0.6742735164909e+02
-           xceref[2] = 0.5390656036938e+01
-           xceref[3] = 0.1680647196477e+02
-           xceref[4] = 0.1536963126457e+02
-           xceref[5] = 0.1575330146156e+03
-
-#---------------------------------------------------------------------
-#    reference data for 2560X2560X2560 grids after 500 time steps,
-#    with DT = 0.1d-03
-#---------------------------------------------------------------------
-        elseif class == CLASS_F
-
-           dtref = 0.15e-4
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of residual.
-#---------------------------------------------------------------------
-           xcrref[1] = 0.9281628449462e+05
-           xcrref[2] = 0.2230152287675e+05
-           xcrref[3] = 0.3493102358632e+05
-           xcrref[4] = 0.3114096186689e+05
-           xcrref[5] = 0.7424426448298e+05
-
-#---------------------------------------------------------------------
-#    Reference values of RMS-norms of solution error.
-#---------------------------------------------------------------------
-           xceref[1] = 0.2683717702444e+03
-           xceref[2] = 0.2030647554028e+02
-           xceref[3] = 0.6734864248234e+02
-           xceref[4] = 0.5947451301640e+02
-           xceref[5] = 0.5417636652565e+03
-
-        else
-
-           verified = false
+          for m = 1:5
+            xcr[m] = xcr[m] + xcr_sub[m] / dt
+            xce[m] = xce[m] + xce_sub[m]
+          end
 
         end
 
-#---------------------------------------------------------------------
-#    verification test for residuals if gridsize is one of 
-#    the defined grid sizes above (class .ne. 'U')
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
-#    Compute the difference of solution values and the known reference values.
-#---------------------------------------------------------------------
-        #=for m = 1:5
-
-           xcrdif[m] = abs((xcr[m]-xcrref[m])/xcrref[m])
-           xcedif[m] = abs((xce[m]-xceref[m])/xceref[m])
-
-        end=#
- 
-        # VETORIZED
-        xcrdif = abs.((xcr .- xcrref)./xcrref)
-        xcedif = abs.((xce .- xceref)./xceref)
-
-#---------------------------------------------------------------------
-#    Output the comparison of computed results to known cases.
-#---------------------------------------------------------------------
-
-        if class != CLASS_UNDEFINED
-           @printf(stdout, " Verification being performed for class %s\n", class)
-           @printf(stdout, " accuracy setting for epsilon = %20.13E\n", epsilon)
-           verified = (abs(dt-dtref) <= epsilon)
-           if !verified
-              class = CLASS_UNDEFINED
-              @printf(stdout, " DT does not match the reference value of %15.8E\n", dtref)
-           end
-        else
-           @printf(stdout, " Unknown class\n", )
+        if node == root
+           remotecall(putVerificationReport, 1, xcr, xce; role = :worker)
         end
-
-
-        if class != CLASS_UNDEFINED
-           @printf(stdout, " Comparison of RMS-norms of residual\n", )
-        else
-           @printf(stdout, " RMS-norms of residual\n", )
-        end
-
-        for m = 1:5
-           if class == CLASS_UNDEFINED
-              @printf(stdout, "          %2i%20.13E\n", m, xcr[m])
-           elseif xcrdif[m] != NaN && xcrdif[m] <= epsilon
-              @printf(stdout, "          %2i%20.13E%20.13E%20.13E\n", m, xcr[m], xcrref[m], xcrdif[m])
-           else
-              verified = false
-              @printf(stdout, " FAILURE: %2i%20.13E%20.13E%20.13E\n", m, xcr[m], xcrref[m], xcrdif[m])
-           end
-        end
-
-        if class != CLASS_UNDEFINED
-           @printf(stdout, " Comparison of RMS-norms of solution error\n", )
-        else
-           @printf(stdout, " RMS-norms of solution error\n", )
-        end
-
-        for m = 1:5
-           if class == CLASS_UNDEFINED
-              @printf(stdout, "          %2i%20.13E\n", m, xce[m])
-           elseif xcedif[m] != NaN && xcedif[m] <= epsilon
-              @printf(stdout, "          %2i%20.13E%20.13E%20.13E\n", m, xce[m], xceref[m], xcedif[m])
-           else
-              verified = false
-              @printf(stdout, " FAILURE: %2i%20.13E%20.13E%20.13E\n", m, xce[m], xceref[m], xcedif[m])
-           end
-        end
-
-        if class == CLASS_UNDEFINED
-           @printf(stdout, " No reference values provided\n", )
-           @printf(stdout, " No verification performed\n", )
-        elseif verified
-           @printf(stdout, " Verification Successful\n", )
-        else
-           @printf(stdout, " Verification failed\n", )
-        end
-
-        return verified
-
 end

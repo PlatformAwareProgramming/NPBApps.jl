@@ -5,7 +5,7 @@
 # systems for the x-lines. Boundary conditions are non-periodic
 #---------------------------------------------------------------------
 
-function x_solve(_::Val{ncells}, # ::Int64,
+function x_solve(_::Val{ncells}, 
                  successor, # ::Vector{Int64},
                  predecessor, # ::Vector{Int64},
                  slice, # ::Array{Int64,2},

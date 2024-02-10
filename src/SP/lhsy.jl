@@ -104,7 +104,7 @@ function lhsy(c,
                 lhs[i, j, k, 2+5, c]  = lhs[i, j, k, 2, c] - dtty2 * speed[i, j-1, k, c]
                 lhs[i, j, k, 3+5, c]  = lhs[i, j, k, 3, c]
                 lhs[i, j, k, 4+5, c]  = lhs[i, j, k, 4, c] + dtty2 * speed[i, j+1, k, c]
-                lhs[i, j, k, 5+5, c] = lhs[i, j, k, 5, c]
+                lhs[i, j, k, 5+5, c]  = lhs[i, j, k, 5, c]
                 lhs[i, j, k, 1+10, c] = lhs[i, j, k, 1, c]
                 lhs[i, j, k, 2+10, c] = lhs[i, j, k, 2, c] + dtty2 * speed[i, j-1, k, c]
                 lhs[i, j, k, 3+10, c] = lhs[i, j, k, 3, c]

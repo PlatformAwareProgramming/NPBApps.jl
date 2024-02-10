@@ -5,7 +5,7 @@
 # nearest neighbor                                                   
 #---------------------------------------------------------------------
 
-function make_set(grid_points)
+function make_set(z, grid_points)
 
 #---------------------------------------------------------------------
 #     compute square root; add small number to allow for roundoff
@@ -23,9 +23,9 @@ function make_set(grid_points)
 #      determine the location of the cell at the bottom of the 3D 
 #      array of cells
 #---------------------------------------------------------------------
-       cell_coord[1, 1] = mod(node, p)
-       cell_coord[2, 1] = div(node,p)
-       cell_coord[3, 1] = 0
+       cell_coord[z][1, 1] = mod(node, p)
+       cell_coord[z][2, 1] = div(node,p)
+       cell_coord[z][3, 1] = 0
 
 #---------------------------------------------------------------------
 #      set the cell_coords for cells in the rest of the z-layers; 
@@ -34,9 +34,9 @@ function make_set(grid_points)
 #---------------------------------------------------------------------
 
        for c = 2:p
-          cell_coord[1, c] = mod(cell_coord[1, c-1]+1, p)
-          cell_coord[2, c] = mod(cell_coord[2, c-1]-1+p, p)
-          cell_coord[3, c] = c-1
+          cell_coord[z][1, c] = mod(cell_coord[z][1, c-1]+1, p)
+          cell_coord[z][2, c] = mod(cell_coord[z][2, c-1]-1+p, p)
+          cell_coord[z][3, c] = c-1
        end
 
 #---------------------------------------------------------------------
@@ -44,17 +44,17 @@ function make_set(grid_points)
 #---------------------------------------------------------------------
        for dir = 1:3
           for c = 1:p
-             cell_coord[dir, c] = cell_coord[dir, c] + 1
+             cell_coord[z][dir, c] = cell_coord[z][dir, c] + 1
           end
        end
 
 #---------------------------------------------------------------------
-#      slice[dir,n] contains the sequence number of the cell that is in
+#      slice[z][dir,n] contains the sequence number of the cell that is in
 #      coordinate plane n in the dir direction
 #---------------------------------------------------------------------
        for dir = 1:3
           for c = 1:p
-             slice[dir, cell_coord[dir, c]] = c
+             slice[z][dir, cell_coord[z][dir, c]] = c
           end
        end
 
@@ -65,15 +65,15 @@ function make_set(grid_points)
 #      added to those arguments to the mod functions that might
 #      otherwise return wrong values when using the modulo function
 #---------------------------------------------------------------------
-       i = cell_coord[1, 1]-1
-       j = cell_coord[2, 1]-1
+       i = cell_coord[z][1, 1]-1
+       j = cell_coord[z][2, 1]-1
 
-       predecessor[1] = mod(i-1+p, p) + p*j
-       predecessor[2] = i + p*mod(j-1+p, p)
-       predecessor[3] = mod(i+1, p) + p*mod(j-1+p, p)
-       successor[1]   = mod(i+1, p) + p*j
-       successor[2]   = i + p*mod(j+1, p)
-       successor[3]   = mod(i-1+p, p) + p*mod(j+1, p)
+       predecessor[z][1] = mod(i-1+p, p) + p*j
+       predecessor[z][2] = i + p*mod(j-1+p, p)
+       predecessor[z][3] = mod(i+1, p) + p*mod(j-1+p, p)
+       successor[z][1]   = mod(i+1, p) + p*j
+       successor[z][2]   = i + p*mod(j+1, p)
+       successor[z][3]   = mod(i-1+p, p) + p*mod(j+1, p)
 
 #---------------------------------------------------------------------
 # now compute the sizes of the cells                                    
@@ -82,19 +82,19 @@ function make_set(grid_points)
 #---------------------------------------------------------------------
 #         set cell_coord range for each direction                            
 #---------------------------------------------------------------------
-          SIZE   = grid_points[dir]/p
+          SIZE   = div(grid_points[dir], p)
           excess = mod(grid_points[dir], p)
           for c = 1:ncells
-             if cell_coord[dir, c] <= excess
-                cell_size[dir, c] = SIZE+1
-                cell_low[dir, c] = (cell_coord[dir, c]-1)*(SIZE+1)
-                cell_high[dir, c] = cell_low[dir, c]+SIZE
+             if cell_coord[z][dir, c] <= excess
+                cell_size[z][dir, c] = SIZE+1
+                cell_low[z][dir, c] = (cell_coord[z][dir, c]-1)*(SIZE+1)
+                cell_high[z][dir, c] = cell_low[z][dir, c]+SIZE
              else
-                cell_size[dir, c] = SIZE
-                cell_low[dir, c]  = excess*(SIZE+1)+(cell_coord[dir, c]-excess-1)*SIZE
-                cell_high[dir, c] = cell_low[dir, c]+SIZE-1
+                cell_size[z][dir, c] = SIZE
+                cell_low[z][dir, c]  = excess*(SIZE+1)+(cell_coord[z][dir, c]-excess-1)*SIZE
+                cell_high[z][dir, c] = cell_low[z][dir, c]+SIZE-1
              end
-             if cell_size[dir, c] <= 2
+             if cell_size[z][dir, c] <= 2
                 @printf(stdout, " Error: Cell size too small. Min size is 3\n", )
                 ierrcode = 1
                 MPI.Abort(MPI.COMM_WORLD, ierrcode)

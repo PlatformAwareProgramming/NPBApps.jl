@@ -42,9 +42,9 @@
 #
 # Internal dimensions of cells can differ slightly between cells
 #
-           subsizes[1] = cell_size[1, c]
-           subsizes[2] = cell_size[2, c]
-           subsizes[3] = cell_size[3, c]
+           subsizes[1] = cell_size[z][1, c]
+           subsizes[2] = cell_size[z][2, c]
+           subsizes[3] = cell_size[z][3, c]
 #
 # Cell is 4th dimension, 1 cell per cell type to handle varying 
 # cell sub-array sizes
@@ -92,16 +92,16 @@
 #
 # Size of c'th cell
 #
-           subsizes[1] = cell_size[1, c]
-           subsizes[2] = cell_size[2, c]
-           subsizes[3] = cell_size[3, c]
+           subsizes[1] = cell_size[z][1, c]
+           subsizes[2] = cell_size[z][2, c]
+           subsizes[3] = cell_size[z][3, c]
 
 #
 # Starting point in full array of c'th cell
 #
-           starts[1] = cell_low[1, c]
-           starts[2] = cell_low[2, c]
-           starts[3] = cell_low[3, c]
+           starts[1] = cell_low[z][1, c]
+           starts[2] = cell_low[z][2, c]
+           starts[3] = cell_low[z][3, c]
 
            MPI_Type_create_subarray(3, sizes, subsizes,
                 starts, MPI_ORDER_FORTRAN,

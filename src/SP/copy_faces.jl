@@ -8,7 +8,8 @@
 # adds so much overhead that it's not clearly useful. 
 #---------------------------------------------------------------------
 
-function copy_faces(_::Val{1},
+function copy_faces(flag, z,
+                     _::Val{1},
                      _::Val{ncells},
                      successor, # ::Vector{Int64},
                      predecessor, # ::Vector{Int64},
@@ -16,6 +17,8 @@ function copy_faces(_::Val{1},
                      cell_start,
                      cell_end,
                      cell_coord,
+                     cell_low,
+                     cell_high,
                      u,
                      rhs,
                      rho_i,
@@ -129,7 +132,8 @@ function copy_faces(_::Val{1},
                con43)    
 end 
 
-function copy_faces(_::Val{no_nodes},
+function copy_faces(flag, z,
+                     _::Val{no_nodes},
                      _::Val{ncells},
                      successor, # ::Vector{Int64},
                      predecessor, # ::Vector{Int64},
@@ -137,6 +141,8 @@ function copy_faces(_::Val{no_nodes},
                      cell_start,
                      cell_end,
                      cell_coord,
+                     cell_low,
+                     cell_high,
                      u,
                      rhs,
                      rho_i,
@@ -194,8 +200,6 @@ function copy_faces(_::Val{no_nodes},
                      b_size,
                      ) where {ncells, no_nodes}  
 
-
-
 #---------------------------------------------------------------------
 # because the difference stencil for the diagonalized scheme is 
 # orthogonal, we do not have to perform the staged copying of faces, 
@@ -212,12 +216,12 @@ function copy_faces(_::Val{no_nodes},
 
        for c = 1:ncells
           for m = 1:5
-
-#---------------------------------------------------------------------
+            #---------------------------------------------------------------------
 #            fill the buffer to be sent to eastern neighbors (i-dir)
 #---------------------------------------------------------------------
              if cell_coord[1, c] != ncells
-                for k = 0:cell_size[3, c]-1
+                 # inner face (inter-cell)
+                 for k = 0:cell_size[3, c]-1
                    for j = 0:cell_size[2, c]-1
                       for i = cell_size[1, c]-2:cell_size[1, c]-1
                         out_buffer[ss[1] + p0] = u[i, j, k, m, c]
@@ -225,12 +229,20 @@ function copy_faces(_::Val{no_nodes},
                       end
                    end
                 end
-             end
+             elseif flag
+                # outer face (inter-zone)
+               u_face = view(u, cell_size[1, c]-2, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
+                                cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
+               remotecall(deposit_face, 1, z, m, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
+                                                 cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
+                                           u_face, Val(1); role=:worker)
+            end
 
 #---------------------------------------------------------------------
 #            fill the buffer to be sent to western neighbors 
 #---------------------------------------------------------------------
              if cell_coord[1, c] != 1
+                 # inner face (inter-cell)
                 for k = 0:cell_size[3, c]-1
                    for j = 0:cell_size[2, c]-1
                       for i = 0:1
@@ -239,14 +251,20 @@ function copy_faces(_::Val{no_nodes},
                       end
                    end
                 end
-
-
-             end
+             elseif flag
+                # outer face (inter-zone)
+               u_face = view(u, 1,  cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
+                                   cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
+               remotecall(deposit_face, 1, z, m, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
+                                                 cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
+                                           u_face, Val(2); role=:worker)
+            end
 
 #---------------------------------------------------------------------
 #            fill the buffer to be sent to northern neighbors (j_dir)
 #---------------------------------------------------------------------
              if cell_coord[2, c] != ncells
+                 # inner face (inter-cell)
                 for k = 0:cell_size[3, c]-1
                    for j = cell_size[2, c]-2:cell_size[2, c]-1
                       for i = 0:cell_size[1, c]-1
@@ -255,12 +273,20 @@ function copy_faces(_::Val{no_nodes},
                       end
                    end
                 end
+             elseif flag
+                # outer face (inter-zone)
+                u_face = view(u, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, #=1=# cell_size[2, c]-2, 
+                                 cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
+                remotecall(deposit_face, 1, z, m, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
+                                                  cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
+                                            u_face, Val(3); role=:worker)
              end
 
 #---------------------------------------------------------------------
 #            fill the buffer to be sent to southern neighbors 
 #---------------------------------------------------------------------
              if cell_coord[2, c] != 1
+                # inner face (inter-cell)
                 for k = 0:cell_size[3, c]-1
                    for j = 0:1
                       for i = 0:cell_size[1, c]-1
@@ -269,13 +295,20 @@ function copy_faces(_::Val{no_nodes},
                       end
                    end
                 end
-             end
+             elseif flag
+                u_face = view(u, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 1 #=cell_size[2, c]-2=#, 
+                                    cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
+                remotecall(deposit_face, 1, z, m, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
+                                                  cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
+                                            u_face, Val(4); role=:worker)
+            end
 
 #---------------------------------------------------------------------
 #            fill the buffer to be sent to top neighbors (k-dir)
 #---------------------------------------------------------------------
              if cell_coord[3, c] != ncells
-                for k = cell_size[3, c]-2:cell_size[3, c]-1
+                 # inner face (inter-cell)
+                 for k = cell_size[3, c]-2:cell_size[3, c]-1
                    for j = 0:cell_size[2, c]-1
                       for i = 0:cell_size[1, c]-1
                          out_buffer[ss[5] + p4] = u[i, j, k, m, c]
@@ -289,6 +322,7 @@ function copy_faces(_::Val{no_nodes},
 #            fill the buffer to be sent to bottom neighbors
 #---------------------------------------------------------------------
              if cell_coord[3, c] != 1
+                 # inner face (inter-cell)
                  for k = 0:1
                     for j = 0:cell_size[2, c]-1
                        for i = 0:cell_size[1, c]-1
@@ -307,7 +341,8 @@ function copy_faces(_::Val{no_nodes},
 #---------------------------------------------------------------------
 #       cell loop
 #---------------------------------------------------------------------
-        end
+       end
+
        if (timeron) timer_stop(t_bpack) end
 
        if (timeron) timer_start(t_exch) end
@@ -345,6 +380,7 @@ function copy_faces(_::Val{no_nodes},
           for m = 1:5
 
              if cell_coord[1, c] != 1
+                # inner face (inter-cell)
                 for k = 0:cell_size[3, c]-1
                    for j = 0:cell_size[2, c]-1
                       for i = -2:-1
@@ -353,9 +389,16 @@ function copy_faces(_::Val{no_nodes},
                       end
                    end
                 end
+             elseif flag
+                u_face = remotecall(collect_face, 1, z, m, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2, c] + 1, 
+                                                           cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3, c] + 1, 
+                                                     Val(2); role=:worker)
+                view(u, 0, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
+                              cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c) .= fetch(u_face; role=:worker)
              end
 
              if cell_coord[1, c] != ncells
+                # inner face (inter-cell)
                 for k = 0:cell_size[3, c]-1
                    for j = 0:cell_size[2, c]-1
                       for i = cell_size[1, c]:cell_size[1, c]+1
@@ -364,9 +407,16 @@ function copy_faces(_::Val{no_nodes},
                       end
                    end
                 end
+             elseif flag
+                u_face = remotecall(collect_face, 1, z, m, cell_low[2, c] + cell_start[2, c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
+                                                           cell_low[3, c] + cell_start[3, c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
+                                                     Val(1); role=:worker)
+                view(u, cell_size[1, c]-1, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
+                                                 cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c) .= fetch(u_face; role=:worker)
              end
 
              if cell_coord[2, c] != 1
+                # inner face (inter-cell)
                 for k = 0:cell_size[3, c]-1
                    for j = -2:-1
                       for i = 0:cell_size[1, c]-1
@@ -375,10 +425,16 @@ function copy_faces(_::Val{no_nodes},
                       end
                    end
                 end
-
-             end
+             elseif flag
+               u_face = remotecall(collect_face, 1, z, m, cell_low[1, c] + cell_start[1, c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
+                                                          cell_low[3, c] + cell_start[3, c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
+                                                    Val(4); role=:worker)
+               view(u, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 0, 
+                          cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c) .= fetch(u_face; role=:worker)  
+            end
 
              if cell_coord[2, c] != ncells
+                # inner face (inter-cell)
                 for k = 0:cell_size[3, c]-1
                    for j = cell_size[2, c]:cell_size[2, c]+1
                       for i = 0:cell_size[1, c]-1
@@ -387,9 +443,16 @@ function copy_faces(_::Val{no_nodes},
                       end
                    end
                 end
-             end
+             elseif flag
+                u_face = remotecall(collect_face, 1, z, m, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
+                                                           cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
+                                                     Val(3); role=:worker)
+                view(u, cell_start[1,c]:cell_size[1,c]-cell_end[1,c]-1, cell_size[2, c]-1, 
+                           cell_start[3,c]:cell_size[3,c]-cell_end[3,c]-1, m, c) .= fetch(u_face; role=:worker)
+              end
 
              if cell_coord[3, c] != 1
+                # inner face (inter-cell)
                 for k = -2:-1
                    for j = 0:cell_size[2, c]-1
                       for i = 0:cell_size[1, c]-1
@@ -401,6 +464,7 @@ function copy_faces(_::Val{no_nodes},
              end
 
              if cell_coord[3, c] != ncells
+                # inner face (inter-cell)
                 for k = cell_size[3, c]:cell_size[3, c]+1
                    for j = 0:cell_size[2, c]-1
                       for i = 0:cell_size[1, c]-1
@@ -426,56 +490,56 @@ function copy_faces(_::Val{no_nodes},
 # now that we have all the data, compute the rhs
 #---------------------------------------------------------------------
        compute_rhs(ncells,
-                  cell_size,
-                  cell_start,
-                  cell_end,
-                  u,
-                  rhs,
-                  rho_i,
-                  us,
-                  vs,
-                  ws,
-                  square,
-                  qs,
-                  ainv,
-                  speed,
-                  forcing,
-                  dt,
-                  tx2,
-                  ty2,
-                  tz2,
-                  c1,
-                  c2,
-                  c1c2,
-                  dx1tx1,
-                  dx2tx1,
-                  dx3tx1, 
-                  dx4tx1,
-                  dx5tx1,
-                  dy1ty1,
-                  dy2ty1,
-                  dy3ty1,
-                  dy4ty1,
-                  dy5ty1,
-                  dz1tz1,
-                  dz2tz1,
-                  dz3tz1,
-                  dz4tz1,
-                  dz5tz1,
-                  xxcon2,
-                  xxcon3,
-                  xxcon4,
-                  xxcon5,
-                  yycon2,
-                  yycon3,
-                  yycon4,
-                  yycon5,
-                  zzcon2,
-                  zzcon3,
-                  zzcon4,
-                  zzcon5,
-                  dssp,
-                  con43)
+                   cell_size,
+                   cell_start,
+                   cell_end,
+                   u,
+                   rhs,
+                   rho_i,
+                   us,
+                   vs,
+                   ws,
+                   square,
+                   qs,
+                   ainv,
+                   speed,
+                   forcing,
+                   dt,
+                   tx2,
+                   ty2,
+                   tz2,
+                   c1,
+                   c2,
+                   c1c2,
+                   dx1tx1,
+                   dx2tx1,
+                   dx3tx1, 
+                   dx4tx1,
+                   dx5tx1,
+                   dy1ty1,
+                   dy2ty1,
+                   dy3ty1,
+                   dy4ty1,
+                   dy5ty1,
+                   dz1tz1,
+                   dz2tz1,
+                   dz3tz1,
+                   dz4tz1,
+                   dz5tz1,
+                   xxcon2,
+                   xxcon3,
+                   xxcon4,
+                   xxcon5,
+                   yycon2,
+                   yycon3,
+                   yycon4,
+                   yycon5,
+                   zzcon2,
+                   zzcon3,
+                   zzcon4,
+                   zzcon5,
+                   dssp,
+                   con43)
 
 return nothing
 end

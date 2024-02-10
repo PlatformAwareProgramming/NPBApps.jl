@@ -30,7 +30,7 @@ function txinvr(_::Val{ncells},
                    vv = vs[i, j, k, c]
                    ww = ws[i, j, k, c]
                    ac = speed[i, j, k, c]
-                   ac2inv = ainv[i, j, k, c]*ainv[i, j, k, c]
+                   ac2inv = 1.0/(ac*ac) #ainv[i, j, k, c]*ainv[i, j, k, c]
 
                    r1 = rhs[i, j, k, 1, c]
                    r2 = rhs[i, j, k, 2, c]
