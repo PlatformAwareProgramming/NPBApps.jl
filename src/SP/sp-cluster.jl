@@ -64,7 +64,7 @@ function deposit_face(z, m, l1, h1, l2, h2, buffer, _::Val{1})
          westiz = iz_west[proc_zone_id[clusterid + 1][z]]
          westid = zone_proc_id[westiz] 
          if westid != clusterid  
-            remotecall_fetch(send_east_face, westid + 2, z, faces_out[z][1]; role=:worker)
+            remotecall(send_east_face, westid + 2, z, faces_out[z][1]; role=:worker)
          else
             send_east_face(z, faces_out[z][1])
          end
@@ -82,7 +82,7 @@ function deposit_face(z, m, l1, h1, l2, h2, buffer, _::Val{2})
          eastiz = iz_east[proc_zone_id[clusterid + 1][z]]
          eastid = zone_proc_id[eastiz] 
          if eastid != clusterid
-            remotecall_fetch(send_west_face, eastid + 2, z, faces_out[z][2]; role=:worker)
+            remotecall(send_west_face, eastid + 2, z, faces_out[z][2]; role=:worker)
          else
             send_west_face(z, faces_out[z][2])
          end
@@ -100,7 +100,7 @@ function deposit_face(z, m, l1, h1, l2, h2, buffer, _::Val{3})
          southiz = iz_south[proc_zone_id[clusterid + 1][z]]
          southid = zone_proc_id[southiz]
          if southid != clusterid 
-            remotecall_fetch(send_north_face, southid + 2, z, faces_out[z][3]; role=:worker)
+            remotecall(send_north_face, southid + 2, z, faces_out[z][3]; role=:worker)
          else 
             send_north_face(z, faces_out[z][3])
          end
@@ -118,7 +118,7 @@ function deposit_face(z, m, l1, h1, l2, h2, buffer, _::Val{4})
          northiz = iz_north[proc_zone_id[clusterid + 1][z]]
          northid = zone_proc_id[northiz]
          if northid != clusterid  
-            remotecall_fetch(send_south_face, northid + 2, z, faces_out[z][4]; role=:worker)
+            remotecall(send_south_face, northid + 2, z, faces_out[z][4]; role=:worker)
          else
             send_south_face(z, faces_out[z][4])
          end
