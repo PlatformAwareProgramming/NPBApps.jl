@@ -112,7 +112,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
-       for zone = 1:proc_num_zones
+       Threads.@threads for zone = 1:proc_num_zones
          adi(zone, 
                Val(no_nodes),
                Val(ncells),
@@ -212,7 +212,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        @label L997
 
-       for STEP = 1:niter
+       Threads.@threads for STEP = 1:niter
 
           if node == root
              if mod(STEP, 20) == 0 || STEP == 1

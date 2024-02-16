@@ -72,8 +72,11 @@ function go(class::CLASS; itimer=0, npb_verbose=0)
    #end
 
    clusters = Array{Tuple{Int64,Int64}}(undef, nworkers(role=:master)) 
-   clusters .= map(w -> (w, fetch(@spawnat w nworkers(role=:master))), workers())
-
+   @info "pass 1"
+#   clusters .= map(w -> (w, fetch(@spawnat w nworkers(role=:master))), workers(role=:master))
+   clusters .= map(w -> (w, @fetchfrom w nworkers(role=:master)), workers(role=:master))
+   @info "pass 2 $clusters"
+  
    global num_clusters = length(clusters) 
    global max_zones = x_zones*y_zones
    num_zones = max_zones
