@@ -2,12 +2,12 @@
 #                                                                         !
 #        N  A  S     P A R A L L E L     B E N C H M A R K S  3.4         !
 #                                                                         !
-#                                   S P                                   !
+#                                   B T                                   !
 #                                                                         !
 #-------------------------------------------------------------------------!
 #                                                                         !
 #    This benchmark is part of the NAS Parallel Benchmark 3.4 suite.      !
-#    It is described in NAS Technical Reports 95-020 and 02-007           !
+#    It is described in NAS Technical Reports 95-020 and 02-007.          !
 #                                                                         !
 #    Permission to use, copy, distribute and modify this software         !
 #    for any purpose with or without fee is hereby granted.  We           !
@@ -33,13 +33,13 @@
 #                                                                         !
 #-------------------------------------------------------------------------!
 
-
 #---------------------------------------------------------------------
 #
 # Authors: R. F. Van der Wijngaart
-#          W. Saphir
+#          T. Harris
+#          M. Yarrow
+#
 #---------------------------------------------------------------------
-
 
 
 
@@ -101,94 +101,90 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
        s = Array{Array{Float64}}(undef,proc_num_zones)
+       utmp = Array{OffsetArray{Float64, 2, Array{Float64, 2}}}(undef,proc_num_zones)
        for iz = 1:proc_num_zones
          requests[iz] = Array{MPI.Request}(undef,12)
          s[iz] = Array{Float64}(undef,5)
-       end
+         utmp[iz] = OffsetArray(zeros(Float64, 6, JMAX[iz]+4), 1:6, -2:JMAX[iz]+1)
+      end
+
 
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
        Threads.@threads for zone = 1:proc_num_zones
-         adi(zone, 
-               Val(no_nodes),
-               Val(ncells),
-               slice[zone],
-               cell_size[zone],
-               cell_start[zone],
-               cell_end[zone],
-               cell_coord[zone],
-               cell_low[zone],
-               cell_high[zone],
-               u[zone],
-               rhs[zone],
-               lhs[zone],
-               rho_i[zone],
-               us[zone],
-               cv[zone],
-               rhoq[zone],
-               rhon[zone],
-               rhos[zone],
-               vs[zone],
-               ws[zone],
-               square[zone],
-               qs[zone],
-               ainv[zone],
-               speed[zone],
-               forcing[zone],
-               dt,
-               tx2,
-               ty2,
-               tz2,
-               c1,
-               c2,
-               c1c2,
-               dx1tx1,
-               dx2tx1,
-               dx3tx1, 
-               dx4tx1,
-               dx5tx1,
-               dy1ty1,
-               dy2ty1,
-               dy3ty1,
-               dy4ty1,
-               dy5ty1,
-               dz1tz1,
-               dz2tz1,
-               dz3tz1,
-               dz4tz1,
-               dz5tz1,
-               xxcon2,
-               xxcon3,
-               xxcon4,
-               xxcon5,
-               yycon2,
-               yycon3,
-               yycon4,
-               yycon5,
-               zzcon2,
-               zzcon3,
-               zzcon4,
-               zzcon5,
-               dssp,
-               con43,
-               dx2, dx5, c3c4, c1c5, c2dtty1, dxmax, dx1, dttx1, dttx2,
-               comz5, comz4, comz1, comz6,
-               dy3, dy5, dy1, dymax, dtty1, dtty2, 
-               dz4, dz5, dz1, dttz2, dttz1, dzmax,
-               bt,
-               successor[zone],
-               predecessor[zone],
-               in_buffer[zone],
-               out_buffer[zone],
-               comm_solve[zone],
-               comm_rhs[zone],
-               ss,
-               sr,
-               b_size,
-               s[zone],
-               requests[zone]
-            )
+         adi(zone, ss, sr, b_size,
+            MAX_CELL_DIM[zone],
+            IMAX[zone],
+            JMAX[zone],
+            KMAX[zone],
+            cell_coord[zone],
+            cell_size[zone],
+            cell_start[zone],
+            cell_end[zone],
+            cell_low[zone],
+            cell_high[zone],
+            slice[zone],
+            forcing[zone],           
+            u[zone],
+            rhs[zone],
+            lhsc[zone],
+            backsub_info[zone],
+            in_buffer[zone],
+            out_buffer[zone],
+            fjac[zone],
+            njac[zone],
+            lhsa[zone],
+            lhsb[zone],
+            us[zone],
+            vs[zone],
+            ws[zone],
+            qs[zone],
+            rho_i[zone],
+            square[zone],
+            dt,
+            timeron,
+            Val(ncells),
+            tx1,
+            tx2,
+            ty1,
+            ty2,
+            tz1,
+            tz2,
+            dx1tx1,
+            dx2tx1,
+            dx3tx1,
+            dx4tx1,
+            dx5tx1,
+            dy1ty1,
+            dy2ty1,
+            dy3ty1,
+            dy4ty1,
+            dy5ty1,
+            dz1tz1,
+            dz2tz1,
+            dz3tz1,
+            dz4tz1,
+            dz5tz1,
+            xxcon2,
+            xxcon3,
+            xxcon4,
+            xxcon5,
+            yycon2,
+            yycon3,
+            yycon4,
+            yycon5,
+            zzcon2,
+            zzcon3,
+            zzcon4,
+            zzcon5,
+            Val(no_nodes), 
+            comm_solve[zone],
+            comm_rhs[zone],
+            predecessor[zone],
+            successor[zone],
+            utmp[zone],
+         )
        end
 
        for zone = 1:proc_num_zones
@@ -217,86 +213,78 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
               end
           end
 
-          for zone = 1:proc_num_zones
-                          
-              adi(zone, 
-                  Val(no_nodes),
-                  Val(ncells),
-                  slice[zone],
-                  cell_size[zone],
-                  cell_start[zone],
-                  cell_end[zone],
-                  cell_coord[zone],
-                  cell_low[zone],
-                  cell_high[zone],
-                  u[zone],
-                  rhs[zone],
-                  lhs[zone],
-                  rho_i[zone],
-                  us[zone],
-                  cv[zone],
-                  rhoq[zone],
-                  rhon[zone],
-                  rhos[zone],
-                  vs[zone],
-                  ws[zone],
-                  square[zone],
-                  qs[zone],
-                  ainv[zone],
-                  speed[zone],
-                  forcing[zone],
-                  dt,
-                  tx2,
-                  ty2,
-                  tz2,
-                  c1,
-                  c2,
-                  c1c2,
-                  dx1tx1,
-                  dx2tx1,
-                  dx3tx1, 
-                  dx4tx1,
-                  dx5tx1,
-                  dy1ty1,
-                  dy2ty1,
-                  dy3ty1,
-                  dy4ty1,
-                  dy5ty1,
-                  dz1tz1,
-                  dz2tz1,
-                  dz3tz1,
-                  dz4tz1,
-                  dz5tz1,
-                  xxcon2,
-                  xxcon3,
-                  xxcon4,
-                  xxcon5,
-                  yycon2,
-                  yycon3,
-                  yycon4,
-                  yycon5,
-                  zzcon2,
-                  zzcon3,
-                  zzcon4,
-                  zzcon5,
-                  dssp,
-                  con43,
-                  dx2, dx5, c3c4, c1c5, c2dtty1, dxmax, dx1, dttx1, dttx2,
-                  comz5, comz4, comz1, comz6,
-                  dy3, dy5, dy1, dymax, dtty1, dtty2, 
-                  dz4, dz5, dz1, dttz2, dttz1, dzmax,
-                  bt,
-                  successor[zone],
-                  predecessor[zone],
-                  in_buffer[zone],
-                  out_buffer[zone],
-                  comm_solve[zone],
-                  comm_rhs[zone],
-                  ss,
-                  sr,
-                  b_size,
-                  s[zone],
-                  requests[zone]
+          for zone = 1:proc_num_zones                          
+            adi(zone, ss, sr, b_size,
+               MAX_CELL_DIM[zone],
+               IMAX[zone],
+               JMAX[zone],
+               KMAX[zone],
+               cell_coord[zone],
+               cell_size[zone],
+               cell_start[zone],
+               cell_end[zone],
+               cell_low[zone],
+               cell_high[zone],
+               slice[zone],
+               forcing[zone],           
+               u[zone],
+               rhs[zone],
+               lhsc[zone],
+               backsub_info[zone],
+               in_buffer[zone],
+               out_buffer[zone],
+               fjac[zone],
+               njac[zone],
+               lhsa[zone],
+               lhsb[zone],
+               us[zone],
+               vs[zone],
+               ws[zone],
+               qs[zone],
+               rho_i[zone],
+               square[zone],
+               dt,
+               timeron,
+               Val(ncells),
+               tx1,
+               tx2,
+               ty1,
+               ty2,
+               tz1,
+               tz2,
+               dx1tx1,
+               dx2tx1,
+               dx3tx1,
+               dx4tx1,
+               dx5tx1,
+               dy1ty1,
+               dy2ty1,
+               dy3ty1,
+               dy4ty1,
+               dy5ty1,
+               dz1tz1,
+               dz2tz1,
+               dz3tz1,
+               dz4tz1,
+               dz5tz1,
+               xxcon2,
+               xxcon3,
+               xxcon4,
+               xxcon5,
+               yycon2,
+               yycon3,
+               yycon4,
+               yycon5,
+               zzcon2,
+               zzcon3,
+               zzcon4,
+               zzcon5,
+               Val(no_nodes), 
+               comm_solve[zone],
+               comm_rhs[zone],
+               predecessor[zone],
+               successor[zone],
+               utmp[zone],
             )
          end
        end
@@ -308,7 +296,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 #      perform verification and print results
 #---------------------------------------------------------------------
 
-       verify(dt, ss, sr, b_size, proc_num_zones, rho_i, us, vs, ws, speed, qs, square, rhs, forcing, u, nx, ny, nz)
+       verify(dt, ss, sr, b_size, proc_num_zones, rho_i, us, vs, ws, qs, square, rhs, forcing, u, nx, ny, nz)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
        if node == root
@@ -339,3 +327,14 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        return nothing
 end
+
+
+
+
+
+
+
+
+
+
+

@@ -253,12 +253,12 @@ function copy_faces(flag, z,
                 end
              elseif flag
                 # outer face (inter-zone)
-               u_face = view(u, 1,  cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
+               u_face = view(u, 1, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
                                    cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
                remotecall(deposit_face, 1, z, m, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
                                                  cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
                                            u_face, Val(2); role=:worker)
-            end
+             end
 
 #---------------------------------------------------------------------
 #            fill the buffer to be sent to northern neighbors (j_dir)
@@ -297,7 +297,7 @@ function copy_faces(flag, z,
                 end
              elseif flag
                 u_face = view(u, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 1 #=cell_size[2, c]-2=#, 
-                                    cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
+                                 cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
                 remotecall(deposit_face, 1, z, m, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
                                                   cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
                                             u_face, Val(4); role=:worker)

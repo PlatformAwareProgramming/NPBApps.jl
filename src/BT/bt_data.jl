@@ -30,9 +30,9 @@ const SOUTH = 5000
 const BOTTOM = 6000 
 const TOP = 7000
 
-const predecessor = zeros(Int64, 3)
-const successor = zeros(Int64,3)
-const grid_size = zeros(Int64, 3)
+#const predecessor = zeros(Int64, 3)
+#const successor = zeros(Int64,3)
+#const grid_size = zeros(Int64, 3)
 
 #---------------------------------------------------------------------
 #     These are used by btio
@@ -62,102 +62,199 @@ const t_comp = 12
 const t_comm = 13
 const t_enorm = 12
 const t_iov = 13
-const t_last = 13
+const t_rhsx = 14
+const t_rhsy = 15
+const t_rhsz = 16
+const t_add = 17
+const t_rdis1 = 18
+const t_rdis2 = 19
+const t_last = 19
+
+const t_names = ["total", "i/o", "rhs", "xsolve", "ysolve", "zsolve",
+                "bpack", "exch", "xcomm", "ycomm", "zcomm",
+                " totcomp", " totcomm", "rhsx", "rhsy", "rhsz",  
+                "add", "qbc_copy", "qbc_comm", "last"]
+
+t_recs = "total"
+
+function alloc_zone_vectors(x_zones, y_zones)
+
+      global nx = zeros(Int64, max_zones)
+      global ny = zeros(Int64, max_zones)
+      global nz = zeros(Int64, max_zones)
+      global nxmax = zeros(Int64, max_zones)
+
+      global x_start = zeros(Int64, x_zones)   
+      global y_start = zeros(Int64, y_zones)   
+      global x_end = zeros(Int64, x_zones)     
+      global y_end = zeros(Int64, y_zones)     
+      global x_size = zeros(Int64, x_zones)    
+      global y_size = zeros(Int64, y_zones)    
+
+      global iz_west = zeros(Int64, max_zones)    
+      global iz_east = zeros(Int64, max_zones)    
+      global iz_south = zeros(Int64, max_zones)   
+      global iz_north = zeros(Int64, max_zones)   
+
+ 
+end
 
 #---------------------------------------------------------------------
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
- function alloc_space(problem_size)
+ function alloc_field_space(z, grid_points)
 
-      global MAX_CELL_DIM = div(problem_size, maxcells)+1
+      problem_size = maximum(grid_points)
 
-      global IMAX = MAX_CELL_DIM
-      global JMAX = MAX_CELL_DIM
-      global KMAX = MAX_CELL_DIM
+      MAX_CELL_DIM[z] = div(problem_size, maxcells)+1
 
-      global BUF_SIZE = MAX_CELL_DIM*MAX_CELL_DIM*(maxcells-1)*60+1
+      IMAX[z] = MAX_CELL_DIM[z]
+      JMAX[z] = MAX_CELL_DIM[z]
+      KMAX[z] = MAX_CELL_DIM[z]
 
-      global cell_coord = zeros(Int64, 3, maxcells)
-      global cell_low = zeros(Int64, 3, maxcells)
-      global cell_high = zeros(Int64, 3, maxcells)
-      global cell_size = zeros(Int64, 3, maxcells)
-      global cell_start = zeros(Int64, 3, maxcells)
-      global cell_end = zeros(Int64, 3, maxcells)
-      global slice = zeros(Int64, 3, maxcells)
+      BUF_SIZE[z] = MAX_CELL_DIM[z]*MAX_CELL_DIM[z]*(maxcells-1)*60+1
 
-      forcing0 = zeros(Float64, 5, IMAX, JMAX, KMAX, maxcells)
-      global forcing = OffsetArray(forcing0, 1:5, 0:IMAX-1, 0:JMAX-1, 0:KMAX-1, 1:maxcells)            
+      cell_coord[z] = zeros(Int64, 3, maxcells)
+      cell_low[z] = zeros(Int64, 3, maxcells)
+      cell_high[z] = zeros(Int64, 3, maxcells)
+      cell_size[z] = zeros(Int64, 3, maxcells)
+      cell_start[z] = zeros(Int64, 3, maxcells)
+      cell_end[z] = zeros(Int64, 3, maxcells)
+      slice[z] = zeros(Int64, 3, maxcells)
 
-      u0 = zeros(Float64, 5, IMAX+4, JMAX+4, KMAX + 4, maxcells)
-      global u = OffsetArray(u0, 1:5, -2:IMAX+1, -2:JMAX+1, -2:KMAX+1, 1:maxcells)
+      predecessor[z] = zeros(Int64, 3)
+      successor[z] = zeros(Int64,3)
 
-      rhs0 = zeros(Float64, 5, IMAX+1, JMAX+1, KMAX+1, maxcells)
-      global rhs = OffsetArray(rhs0, 1:5, -1:IMAX-1, -1:JMAX-1, -1:KMAX-1, 1:maxcells)
+      forcing0 = zeros(Float64, 5, IMAX[z], JMAX[z], KMAX[z], maxcells)
+      forcing[z] = OffsetArray(forcing0, 1:5, 0:IMAX[z]-1, 0:JMAX[z]-1, 0:KMAX[z]-1, 1:maxcells)            
 
-      lhsc0 = zeros(Float64, 5, 5, IMAX+1, JMAX+1, KMAX+1, maxcells)
-      global lhsc = OffsetArray(lhsc0, 1:5, 1:5, -1:IMAX-1, -1:JMAX-1, -1:KMAX-1, 1:maxcells)
+      u0 = zeros(Float64, 5, IMAX[z]+4, JMAX[z]+4, KMAX[z] + 4, maxcells)
+      u[z] = OffsetArray(u0, 1:5, -2:IMAX[z]+1, -2:JMAX[z]+1, -2:KMAX[z]+1, 1:maxcells)
 
-      backsub_info0 = zeros(Float64, 5, MAX_CELL_DIM+1, MAX_CELL_DIM+1, maxcells)
-      global backsub_info = OffsetArray(backsub_info0, 1:5, 0:MAX_CELL_DIM, 0:MAX_CELL_DIM, 1:maxcells)
+      rhs0 = zeros(Float64, 5, IMAX[z]+1, JMAX[z]+1, KMAX[z]+1, maxcells)
+      rhs[z] = OffsetArray(rhs0, 1:5, -1:IMAX[z]-1, -1:JMAX[z]-1, -1:KMAX[z]-1, 1:maxcells)
 
-      global in_buffer = Array{Float64}(undef, BUF_SIZE)
-      global out_buffer = Array{Float64}(undef, BUF_SIZE)
+      lhsc0 = zeros(Float64, 5, 5, IMAX[z]+1, JMAX[z]+1, KMAX[z]+1, maxcells)
+      lhsc[z] = OffsetArray(lhsc0, 1:5, 1:5, -1:IMAX[z]-1, -1:JMAX[z]-1, -1:KMAX[z]-1, 1:maxcells)
 
-      cv0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global cv = OffsetArray(cv0, -2:MAX_CELL_DIM+1)
+      backsub_info0 = zeros(Float64, 5, MAX_CELL_DIM[z]+1, MAX_CELL_DIM[z]+1, maxcells)
+      backsub_info[z] = OffsetArray(backsub_info0, 1:5, 0:MAX_CELL_DIM[z], 0:MAX_CELL_DIM[z], 1:maxcells)
 
-      rhon0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global rhon = OffsetArray(rhon0, -2:MAX_CELL_DIM+1)
+      in_buffer[z] = Array{Float64}(undef, BUF_SIZE[z])
+      out_buffer[z] = Array{Float64}(undef, BUF_SIZE[z])
 
-      rhos0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global rhos = OffsetArray(rhos0, -2:MAX_CELL_DIM+1)
+      cv0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
+      cv[z] = OffsetArray(cv0, -2:MAX_CELL_DIM[z]+1)
+
+      rhon0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
+      rhon[z] = OffsetArray(rhon0, -2:MAX_CELL_DIM[z]+1)
+
+      rhos0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
+      rhos[z] = OffsetArray(rhos0, -2:MAX_CELL_DIM[z]+1)
       
-      rhoq0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global rhoq = OffsetArray(rhoq0, -2:MAX_CELL_DIM+1)
+      rhoq0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
+      rhoq[z] = OffsetArray(rhoq0, -2:MAX_CELL_DIM[z]+1)
 
-      cuf0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global cuf = OffsetArray(cuf0, -2:MAX_CELL_DIM+1)
+      cuf0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
+      cuf[z] = OffsetArray(cuf0, -2:MAX_CELL_DIM[z]+1)
 
-      q0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global q = OffsetArray(q0, -2:MAX_CELL_DIM+1)
+      q0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
+      q[z] = OffsetArray(q0, -2:MAX_CELL_DIM[z]+1)
       
-      ue0 = zeros(Float64, MAX_CELL_DIM + 4, 5)
-      global ue = OffsetArray(ue0, -2:MAX_CELL_DIM+1, 1:5)
+      ue0 = zeros(Float64, MAX_CELL_DIM[z] + 4, 5)
+      ue[z] = OffsetArray(ue0, -2:MAX_CELL_DIM[z]+1, 1:5)
 
-      buf0 = zeros(Float64, MAX_CELL_DIM + 4, 5)
-      global buf = OffsetArray(buf0, -2:MAX_CELL_DIM+1, 1:5)
+      buf0 = zeros(Float64, MAX_CELL_DIM[z] + 4, 5)
+      buf[z] = OffsetArray(buf0, -2:MAX_CELL_DIM[z]+1, 1:5)
 
-      fjac0 = zeros(Float64, 5, 5, MAX_CELL_DIM + 4)
-      global fjac = OffsetArray(fjac0, 1:5, 1:5, -2:MAX_CELL_DIM+1)
+      fjac0 = zeros(Float64, 5, 5, MAX_CELL_DIM[z] + 4)
+      fjac[z] = OffsetArray(fjac0, 1:5, 1:5, -2:MAX_CELL_DIM[z]+1)
 
-      njac0 = zeros(Float64, 5, 5, MAX_CELL_DIM + 4)
-      global njac = OffsetArray(njac0, 1:5, 1:5, -2:MAX_CELL_DIM+1)
+      njac0 = zeros(Float64, 5, 5, MAX_CELL_DIM[z] + 4)
+      njac[z] = OffsetArray(njac0, 1:5, 1:5, -2:MAX_CELL_DIM[z]+1)
 
-      lhsa0 = zeros(Float64, 5, 5, MAX_CELL_DIM + 2)
-      global lhsa = OffsetArray(lhsa0, 1:5, 1:5, -1:MAX_CELL_DIM)
+      lhsa0 = zeros(Float64, 5, 5, MAX_CELL_DIM[z] + 2)
+      lhsa[z] = OffsetArray(lhsa0, 1:5, 1:5, -1:MAX_CELL_DIM[z])
 
-      lhsb0 = zeros(Float64, 5, 5, MAX_CELL_DIM + 2)
-      global lhsb = OffsetArray(lhsb0, 1:5, 1:5, -1:MAX_CELL_DIM)            
+      lhsb0 = zeros(Float64, 5, 5, MAX_CELL_DIM[z] + 2)
+      lhsb[z] = OffsetArray(lhsb0, 1:5, 1:5, -1:MAX_CELL_DIM[z])            
 
-      us0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global us = OffsetArray(us0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      us0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
+      us[z] = OffsetArray(us0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
       
-      vs0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global vs = OffsetArray(vs0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      vs0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
+      vs[z] = OffsetArray(vs0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
 
-      ws0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global ws = OffsetArray(ws0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      ws0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
+      ws[z] = OffsetArray(ws0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
 
-      qs0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global qs = OffsetArray(qs0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      qs0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
+      qs[z] = OffsetArray(qs0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
       
-      rho_i0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global rho_i = OffsetArray(rho_i0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      rho_i0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
+      rho_i[z] = OffsetArray(rho_i0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
 
-      square0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global square = OffsetArray(square0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      square0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
+      square[z] = OffsetArray(square0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
       
       return nothing
 end
 
+function alloc_field_space_zones(proc_num_zones)
+
+      global MAX_CELL_DIM = Array{Int64}(undef, proc_num_zones) 
+
+      global IMAX = Array{Int64}(undef, proc_num_zones) 
+      global JMAX = Array{Int64}(undef, proc_num_zones) 
+      global KMAX = Array{Int64}(undef, proc_num_zones) 
+
+      global BUF_SIZE = Array{Int64}(undef, proc_num_zones) 
+
+#---------------------------------------------------------------------
+# +1 at end to avoid zero length arrays for 1 node
+#---------------------------------------------------------------------
+
+      global cell_coord = Array{Array{Int64,2}}(undef, proc_num_zones) 
+      global cell_low = Array{Array{Int64,2}}(undef, proc_num_zones) 
+      global cell_high = Array{Array{Int64,2}}(undef, proc_num_zones) 
+      global cell_size = Array{Array{Int64,2}}(undef, proc_num_zones) 
+      global cell_start = Array{Array{Int64,2}}(undef, proc_num_zones) 
+      global cell_end = Array{Array{Int64,2}}(undef, proc_num_zones) 
+      global slice = Array{Array{Int64,2}}(undef, proc_num_zones) 
+
+      global predecessor = Array{Array{Int64}}(undef, proc_num_zones) 
+      global successor = Array{Array{Int64}}(undef, proc_num_zones) 
+      
+      # field arrays
+
+      global forcing = Array{OffsetArray{Float64, 5, Array{Float64, 5}}}(undef, proc_num_zones)
+      global u = Array{OffsetArray{Float64, 5, Array{Float64, 5}}}(undef, proc_num_zones)
+      global rhs = Array{OffsetArray{Float64, 5, Array{Float64, 5}}}(undef, proc_num_zones)
+      global lhsc = Array{OffsetArray{Float64, 6, Array{Float64, 6}}}(undef, proc_num_zones)
+      global backsub_info = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
+      global in_buffer = Array{Array{Float64}}(undef, proc_num_zones)
+      global out_buffer = Array{Array{Float64}}(undef, proc_num_zones)
+      global cv = Array{OffsetArray{Float64, 1, Array{Float64, 1}}}(undef, proc_num_zones)
+      global rhon = Array{OffsetArray{Float64, 1, Array{Float64, 1}}}(undef, proc_num_zones)
+      global rhos = Array{OffsetArray{Float64, 1, Array{Float64, 1}}}(undef, proc_num_zones)
+      global rhoq = Array{OffsetArray{Float64, 1, Array{Float64, 1}}}(undef, proc_num_zones)
+      global cuf = Array{OffsetArray{Float64, 1, Array{Float64, 1}}}(undef, proc_num_zones)
+      global q = Array{OffsetArray{Float64, 1, Array{Float64, 1}}}(undef, proc_num_zones)
+      global ue = Array{OffsetArray{Float64, 2, Array{Float64, 2}}}(undef, proc_num_zones)
+      global buf = Array{OffsetArray{Float64, 2, Array{Float64, 2}}}(undef, proc_num_zones)
+      global fjac = Array{OffsetArray{Float64, 3, Array{Float64, 3}}}(undef, proc_num_zones)
+      global njac = Array{OffsetArray{Float64, 3, Array{Float64, 3}}}(undef, proc_num_zones)
+      global lhsa = Array{OffsetArray{Float64, 3, Array{Float64, 3}}}(undef, proc_num_zones)
+      global lhsb = Array{OffsetArray{Float64, 3, Array{Float64, 3}}}(undef, proc_num_zones)
+      global us = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
+      global vs = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
+      global ws = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
+      global qs = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
+      global ainv = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
+      global rho_i = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
+      global square = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
+             
+      return nothing
+
+end

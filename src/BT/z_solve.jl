@@ -47,10 +47,10 @@ function z_solve(
 #     i.e. stage = 1 means the start of the line stage=ncells means end
 #---------------------------------------------------------------------
       for stage = 1:ncells
-         c = slice[z][3, stage]
-         isize = cell_size[z][1, c] - 1
-         jsize = cell_size[z][2, c] - 1
-         ksize = cell_size[z][3, c] - 1
+         c = slice[3, stage]
+         isize = cell_size[1, c] - 1
+         jsize = cell_size[2, c] - 1
+         ksize = cell_size[3, c] - 1
 #---------------------------------------------------------------------
 #     set last-cell flag
 #---------------------------------------------------------------------
@@ -92,6 +92,7 @@ function z_solve(
             if (timeron) timer_start(t_zcomm) end
             recv_id[] = z_receive_solve_info(c,
                                              MAX_CELL_DIM,
+                                             cell_coord,
                                              out_buffer,
                                              ncells_v,
                                              comm_solve,
@@ -157,7 +158,7 @@ function z_solve(
 #     now perform backsubstitution in reverse direction
 #---------------------------------------------------------------------
       for stage = ncells:-1:1
-         c = slice[z][3, stage]
+         c = slice[3, stage]
          FIRST = 0
          LAST = 0
          if (stage == 1) FIRST = 1 end
@@ -242,12 +243,12 @@ end
          for i = 0:IMAX-1
             for m = 1:BLOCK_SIZE
                for n = 1:BLOCK_SIZE
-                   lhsc[m, n, i, j, kstart-1, c] = out_buffer[z][ptr+n]
+                   lhsc[m, n, i, j, kstart-1, c] = out_buffer[ptr+n]
                end
                ptr = ptr+BLOCK_SIZE
             end
             for n = 1:BLOCK_SIZE
-               rhs[n, i, j, kstart-1, c] = out_buffer[z][ptr+n]
+               rhs[n, i, j, kstart-1, c] = out_buffer[ptr+n]
             end
             ptr = ptr+BLOCK_SIZE
          end
@@ -276,9 +277,9 @@ end
                                    successor,
                         )
 
-      ksize = cell_size[z][3, c]-1
-      ip = cell_coord[z][1, c] - 1
-      jp = cell_coord[z][2, c] - 1
+      ksize = cell_size[3, c]-1
+      ip = cell_coord[1, c] - 1
+      jp = cell_coord[2, c] - 1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
 
 #---------------------------------------------------------------------
@@ -289,12 +290,12 @@ end
          for i = 0:IMAX-1
             for m = 1:BLOCK_SIZE
                for n = 1:BLOCK_SIZE
-                  in_buffer[z][ptr+n] =  lhsc[m, n, i, j, ksize, c]
+                  in_buffer[ptr+n] =  lhsc[m, n, i, j, ksize, c]
                end
                ptr = ptr+BLOCK_SIZE
             end
             for n = 1:BLOCK_SIZE
-               in_buffer[z][ptr+n] = rhs[n, i, j, ksize, c]
+               in_buffer[ptr+n] = rhs[n, i, j, ksize, c]
             end
             ptr = ptr+BLOCK_SIZE
          end
@@ -304,7 +305,7 @@ end
 #     send buffer 
 #---------------------------------------------------------------------
       if (timeron) timer_start(t_zcomm) end
-      send_id = MPI.Isend(view(in_buffer,1:buffer_size), successor[z][3], BOTTOM+ip+jp*ncells, comm_solve)
+      send_id = MPI.Isend(view(in_buffer,1:buffer_size), successor[3], BOTTOM+ip+jp*ncells, comm_solve)
       if (timeron) timer_stop(t_zcomm) end
 
       return send_id
@@ -332,21 +333,21 @@ end
 #     Send element 0 to previous processor
 #---------------------------------------------------------------------
       kstart = 0
-      ip = cell_coord[z][1, c]-1
-      jp = cell_coord[z][2, c]-1
+      ip = cell_coord[1, c]-1
+      jp = cell_coord[2, c]-1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*BLOCK_SIZE
       ptr = 0
       for j = 0:JMAX-1
          for i = 0:IMAX-1
             for n = 1:BLOCK_SIZE
-               in_buffer[z][ptr+n] = rhs[n, i, j, kstart, c]
+               in_buffer[ptr+n] = rhs[n, i, j, kstart, c]
             end
             ptr = ptr+BLOCK_SIZE
          end
       end
 
       if (timeron) timer_start(t_zcomm) end
-      send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[z][3],TOP+ip+jp*ncells, comm_solve)
+      send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[3],TOP+ip+jp*ncells, comm_solve)
       if (timeron) timer_stop(t_zcomm) end
 
       return send_id
@@ -368,7 +369,7 @@ end
       for j = 0:JMAX-1
          for i = 0:IMAX-1
             for n = 1:BLOCK_SIZE
-               backsub_info[n, i, j, c] = out_buffer[z][ptr+n]
+               backsub_info[n, i, j, c] = out_buffer[ptr+n]
             end
             ptr = ptr+BLOCK_SIZE
          end
@@ -391,10 +392,10 @@ end
                                         successor
           )  where ncells
 
-      ip = cell_coord[z][1, c] - 1
-      jp = cell_coord[z][2, c] - 1
+      ip = cell_coord[1, c] - 1
+      jp = cell_coord[2, c] - 1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*BLOCK_SIZE
-      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), successor[z][3], TOP+ip+jp*ncells, comm_solve)
+      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), successor[3], TOP+ip+jp*ncells, comm_solve)
 
       return recv_id
 end
@@ -406,16 +407,17 @@ end
 
  function z_receive_solve_info(c,
                                         MAX_CELL_DIM,
+                                        cell_coord,
                                         out_buffer,
                                         ::Val{ncells},
                                         comm_solve,
                                         predecessor,
                              )  where ncells
 
-      ip = cell_coord[z][1, c] - 1
-      jp = cell_coord[z][2, c] - 1
+      ip = cell_coord[1, c] - 1
+      jp = cell_coord[2, c] - 1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*(BLOCK_SIZE*BLOCK_SIZE + BLOCK_SIZE)
-      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), predecessor[z][3], BOTTOM+ip+jp*ncells, comm_solve)
+      recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), predecessor[3], BOTTOM+ip+jp*ncells, comm_solve)
 
       return recv_id
 end
@@ -438,12 +440,12 @@ end
           )
 
       kstart = 0
-      isize = cell_size[z][1, c]-cell_end[z][1, c]-1
-      jsize = cell_size[z][2, c]-cell_end[z][2, c]-1
-      ksize = cell_size[z][3, c]-1
+      isize = cell_size[1, c]-cell_end[1, c]-1
+      jsize = cell_size[2, c]-cell_end[2, c]-1
+      ksize = cell_size[3, c]-1
       if LAST == 0
-         for j = cell_start[z][2, c]:jsize
-            for i = cell_start[z][1, c]:isize
+         for j = cell_start[2, c]:jsize
+            for i = cell_start[1, c]:isize
 #---------------------------------------------------------------------
 #     u[jsize] uses info from previous cell if not last cell
 #---------------------------------------------------------------------
@@ -456,8 +458,8 @@ end
          end
       end
       for k = ksize-1:-1:kstart
-         for j = cell_start[z][2, c]:jsize
-            for i = cell_start[z][1, c]:isize
+         for j = cell_start[2, c]:jsize
+            for i = cell_start[1, c]:isize
                for m = 1:BLOCK_SIZE
                   for n = 1:BLOCK_SIZE
                      rhs[m, i, j, k, c] -= lhsc[m, n, i, j, k, c]*rhs[n, i, j, k+1, c]
@@ -500,14 +502,14 @@ end
                          )
 
       kstart = 0
-      isize = cell_size[z][1, c]-cell_end[z][1, c]-1
-      jsize = cell_size[z][2, c]-cell_end[z][2, c]-1
-      ksize = cell_size[z][3, c]-1
+      isize = cell_size[1, c]-cell_end[1, c]-1
+      jsize = cell_size[2, c]-cell_end[2, c]-1
+      ksize = cell_size[3, c]-1
 
       lhsabinit(lhsa, lhsb, ksize)
 
-      for j = cell_start[z][2, c]:jsize
-         for i = cell_start[z][1, c]:isize
+      for j = cell_start[2, c]:jsize
+         for i = cell_start[1, c]:isize
 
 #---------------------------------------------------------------------
 #     This function computes the left hand side for the three z-factors   
@@ -517,7 +519,7 @@ end
 #     Compute the indices for storing the block-diagonal matrix;
 #     determine c (labeled f) and s jacobians for cell c
 #---------------------------------------------------------------------
-            for k = cell_start[z][3, c]-1:cell_size[z][3, c]-cell_end[z][3, c]
+            for k = cell_start[3, c]-1:cell_size[3, c]-cell_end[3, c]
                utmp[1,k] = 1.0e0 / u[1, i, j, k, c]
                utmp[2,k] = u[2, i, j, k, c]
                utmp[3,k] = u[3, i, j, k, c]
@@ -526,7 +528,7 @@ end
                utmp[6,k] = qs[i, j, k, c]
             end
 
-            for k = cell_start[z][3, c]-1:cell_size[z][3, c]-cell_end[z][3, c]
+            for k = cell_start[3, c]-1:cell_size[3, c]-cell_end[3, c]
 
                tmp1 = utmp[1,k]
                tmp2 = tmp1 * tmp1
@@ -615,7 +617,7 @@ end
 #---------------------------------------------------------------------
 #     now joacobians set, so form left hand side in z direction
 #---------------------------------------------------------------------
-            for k = cell_start[z][3, c]:ksize-cell_end[z][3, c]
+            for k = cell_start[3, c]:ksize-cell_end[3, c]
 
                tmp1 = dt * tz1
                tmp2 = dt * tz2

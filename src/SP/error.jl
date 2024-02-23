@@ -3,11 +3,14 @@
 # computed solution and the exact solution
 #---------------------------------------------------------------------
 
+
 function error_norm(z, rms, grid_points)
 
        rms_work = zeros(Float64,5)
        u_exact = Array{Float64}(undef,5)
 
+       
+       
        for c = 1:ncells
           kk = 0
           for k = cell_low[z][3, c]:cell_high[z][3, c]

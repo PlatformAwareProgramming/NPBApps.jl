@@ -59,9 +59,9 @@
 #     compute the reciprocal of density, and the kinetic energy, 
 #     and the speed of sound.
 #---------------------------------------------------------------------
-         for k = -1:cell_size[z][3, c]
-            for j = -1:cell_size[z][2, c]
-               for i = -1:cell_size[z][1, c]
+         for k = -1:cell_size[3, c]
+            for j = -1:cell_size[2, c]
+               for i = -1:cell_size[1, c]
                   rho_inv = 1.0e0/u[1, i, j, k, c]
                   rho_i[i, j, k, c] = rho_inv
                   us[i, j, k, c] = u[2, i, j, k, c] * rho_inv
@@ -82,9 +82,9 @@
 # cell,  including the boundary                   
 #---------------------------------------------------------------------
 
-         for k = 0:cell_size[z][3, c]-1
-            for j = 0:cell_size[z][2, c]-1
-               for i = 0:cell_size[z][1, c]-1
+         for k = 0:cell_size[3, c]-1
+            for j = 0:cell_size[2, c]-1
+               for i = 0:cell_size[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] = forcing[m, i, j, k, c]
                   end
@@ -96,9 +96,9 @@
 #---------------------------------------------------------------------
 #     compute xi-direction fluxes 
 #---------------------------------------------------------------------
-         for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+         for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   uijk = us[i, j, k, c]
                   up1  = us[i+1, j, k, c]
                   um1  = us[i-1, j, k, c]
@@ -155,9 +155,9 @@
 #---------------------------------------------------------------------
 #     add fourth order xi-direction dissipation               
 #---------------------------------------------------------------------
-         if cell_start[z][1, c] > 0
-            for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
-               for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
+         if cell_start[1, c] > 0
+            for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+               for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
                   i = 1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
@@ -175,9 +175,9 @@
             end
          end
 
-         for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = 3*cell_start[z][1, c]:cell_size[z][1, c]-3*cell_end[z][1, c]-1
+         for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = 3*cell_start[1, c]:cell_size[1, c]-3*cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                             u[m, i-2, j, k, c] - 4.0e0*u[m, i-1, j, k, c] +
@@ -189,17 +189,17 @@
          end
 
 
-         if cell_end[z][1, c] > 0
-            for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
-               for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-                  i = cell_size[z][1, c]-3
+         if cell_end[1, c] > 0
+            for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+               for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+                  i = cell_size[1, c]-3
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                            u[m, i-2, j, k, c] - 4.0e0*u[m, i-1, j, k, c] +
                           6.0e0*u[m, i, j, k, c] - 4.0e0*u[m, i+1, j, k, c] )
                   end
 
-                  i = cell_size[z][1, c]-2
+                  i = cell_size[1, c]-2
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                            u[m, i-2, j, k, c] - 4.0e0*u[m, i-1, j, k, c] +
@@ -212,9 +212,9 @@
 #---------------------------------------------------------------------
 #     compute eta-direction fluxes 
 #---------------------------------------------------------------------
-         for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+         for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   vijk = vs[i, j, k, c]
                   vp1  = vs[i, j+1, k, c]
                   vm1  = vs[i, j-1, k, c]
@@ -266,10 +266,10 @@
 #---------------------------------------------------------------------
 #     add fourth order eta-direction dissipation         
 #---------------------------------------------------------------------
-         if cell_start[z][2, c] > 0
-            for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
+         if cell_start[2, c] > 0
+            for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                j = 1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                            5.0e0*u[m, i, j, k, c] - 4.0e0*u[m, i, j+1, k, c] +
@@ -278,7 +278,7 @@
                end
 
                j = 2
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                           -4.0e0*u[m, i, j-1, k, c] + 6.0e0*u[m, i, j, k, c] -
@@ -288,9 +288,9 @@
             end
          end
 
-         for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
-            for j = 3*cell_start[z][2, c]:cell_size[z][2, c]-3*cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+         for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+            for j = 3*cell_start[2, c]:cell_size[2, c]-3*cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                             u[m, i, j-2, k, c] - 4.0e0*u[m, i, j-1, k, c] +
@@ -301,10 +301,10 @@
             end
          end
 
-         if cell_end[z][2, c] > 0
-            for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
-               j = cell_size[z][2, c]-3
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+         if cell_end[2, c] > 0
+            for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+               j = cell_size[2, c]-3
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                            u[m, i, j-2, k, c] - 4.0e0*u[m, i, j-1, k, c] +
@@ -312,8 +312,8 @@
                   end
                end
 
-               j = cell_size[z][2, c]-2
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+               j = cell_size[2, c]-2
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                            u[m, i, j-2, k, c] - 4.0e0*u[m, i, j-1, k, c] +
@@ -326,9 +326,9 @@
 #---------------------------------------------------------------------
 #     compute zeta-direction fluxes 
 #---------------------------------------------------------------------
-         for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+         for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   wijk = ws[i, j, k, c]
                   wp1  = ws[i, j, k+1, c]
                   wm1  = ws[i, j, k-1, c]
@@ -381,10 +381,10 @@
 #---------------------------------------------------------------------
 #     add fourth order zeta-direction dissipation                
 #---------------------------------------------------------------------
-         if cell_start[z][3, c] > 0
+         if cell_start[3, c] > 0
             k = 1
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                            5.0e0*u[m, i, j, k, c] - 4.0e0*u[m, i, j, k+1, c] +
@@ -394,8 +394,8 @@
             end
 
             k = 2
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                           -4.0e0*u[m, i, j, k-1, c] + 6.0e0*u[m, i, j, k, c] -
@@ -405,9 +405,9 @@
             end
          end
 
-         for k = 3*cell_start[z][3, c]:cell_size[z][3, c]-3*cell_end[z][3, c]-1
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+         for k = 3*cell_start[3, c]:cell_size[3, c]-3*cell_end[3, c]-1
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                             u[m, i, j, k-2, c] - 4.0e0*u[m, i, j, k-1, c] +
@@ -418,10 +418,10 @@
             end
          end
 
-         if cell_end[z][3, c] > 0
-            k = cell_size[z][3, c]-3
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+         if cell_end[3, c] > 0
+            k = cell_size[3, c]-3
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                            u[m, i, j, k-2, c] - 4.0e0*u[m, i, j, k-1, c] +
@@ -430,9 +430,9 @@
                end
             end
 
-            k = cell_size[z][3, c]-2
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+            k = cell_size[3, c]-2
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] -= dssp *(
                            u[m, i, j, k-2, c] - 4.0e0*u[m, i, j, k-1, c] +
@@ -442,9 +442,9 @@
             end
          end
 
-         for k = cell_start[z][3, c]:cell_size[z][3, c]-cell_end[z][3, c]-1
-            for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1
-               for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
+         for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
+            for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
+               for i = cell_start[1, c]:cell_size[1, c]-cell_end[1, c]-1
                   for m = 1:5
                      rhs[m, i, j, k, c] *= dt
                   end

@@ -108,31 +108,6 @@ function verify(class, dt, no_time_steps)
         xcedif = Array{Float64}(undef, 5)
 
 #---------------------------------------------------------------------
-#---------------------------------------------------------------------
-
-#---------------------------------------------------------------------
-#  verification routine                         
-#---------------------------------------------------------------------
-
-#        use, intrinsic :: ieee_arithmetic, only : ieee_is_nan
-
-#        use sp_data
-#        use mpinpb
-
-#        implicit none
-
-#        integer zone, num_zones
-#        DOUBLEPRECISION rho_i[*], us[*], vs[*], ws[*], speed[*],  
-#                         qs[*], square[*], rhs[*], forcing[*], u[*]
-
-#        DOUBLEPRECISION xcrref[5],xceref[5],xcrdif[5],xcedif[5],  
-#                         epsilon, xce[5], xcr[5], dtref,  
-#                         xce_sub[5], xcr_sub[5]
-#        integer m, no_time_steps, niterref, iz, ip
-#        integer nx[*], nxmax[*], ny[*], nz[*]
-#        logical verified
-
-#---------------------------------------------------------------------
 #   tolerance level
 #---------------------------------------------------------------------
         epsilon = 1.0e-08
@@ -357,18 +332,18 @@ function verify(class, dt, no_time_steps)
 
            if no_time_steps == 50
 
-           niterref = 50
-           xcrref[1] = 0.3198801286787e+09
-           xcrref[2] = 0.3435698123358e+08
-           xcrref[3] = 0.8489831174901e+08
-           xcrref[4] = 0.6940707552477e+08
-           xcrref[5] = 0.4478684103255e+09
+               niterref = 50
+               xcrref[1] = 0.3198801286787e+09
+               xcrref[2] = 0.3435698123358e+08
+               xcrref[3] = 0.8489831174901e+08
+               xcrref[4] = 0.6940707552477e+08
+               xcrref[5] = 0.4478684103255e+09
 
-           xceref[1] = 0.6761099692230e+07
-           xceref[2] = 0.5361561494769e+06
-           xceref[3] = 0.1662878706114e+07
-           xceref[4] = 0.1443852092060e+07
-           xceref[5] = 0.1260678700480e+08
+               xceref[1] = 0.6761099692230e+07
+               xceref[2] = 0.5361561494769e+06
+               xceref[3] = 0.1662878706114e+07
+               xceref[4] = 0.1443852092060e+07
+               xceref[5] = 0.1260678700480e+08
 
            end
         else

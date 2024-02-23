@@ -60,42 +60,38 @@ module BT
     using Printf
     using MPI
     using StaticArrays
-    #using Traceur
+    using MPIClusterManagers
+    using Distributed
  
+    include("common/DFVariable.jl") 
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")
     include("common/print_results.jl")
     include("BT/classes.jl")
-    include("BT/npbparams.jl")
- #   include("BT/bt_data_vec.jl")
     include("BT/bt_data.jl")
     include("BT/set_constants.jl")
+    include("BT/mpinpb.jl")
     include("BT/setup_mpi.jl")
+    include("BT/zone_setup.jl")
     include("BT/make_set.jl")
     include("BT/define.jl")
     include("BT/initialize.jl")
     include("BT/add.jl")
-#    include("BT/btio_common.jl")
     include("BT/btio.jl")
     include("BT/copy_faces.jl")
-#    include("BT/epio.jl")
     include("BT/error.jl")
     include("BT/exact_rhs.jl")
     include("BT/exact_solution.jl")
-#    include("BT/fortran_io.jl")
-#    include("BT/full_mpiio.jl")
     include("BT/rhs.jl")
-#    include("BT/simple_mpiio.jl")
     include("BT/solve_subs.jl")
-#    include("BT/x_solve_vec.jl")
     include("BT/x_solve.jl")
-#    include("BT/y_solve_vec.jl")
     include("BT/y_solve.jl")
-#    include("BT/z_solve_vec.jl")
     include("BT/z_solve.jl")    
     include("BT/verify.jl")
     include("BT/adi.jl")
-    include("BT/bt.jl")
+    include("BT/bt-node.jl") 
+    include("BT/bt-cluster.jl") 
+    include("BT/bt-driver.jl") 
 
 end
 
@@ -106,7 +102,6 @@ module LU
     using Printf
     using MPI
     using StaticArrays
-    #using Traceur
 
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")

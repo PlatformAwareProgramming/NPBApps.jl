@@ -2,12 +2,12 @@
 #                                                                         !
 #        N  A  S     P A R A L L E L     B E N C H M A R K S  3.4         !
 #                                                                         !
-#                                   S P                                   !
+#                                   B T                                   !
 #                                                                         !
 #-------------------------------------------------------------------------!
 #                                                                         !
 #    This benchmark is part of the NAS Parallel Benchmark 3.4 suite.      !
-#    It is described in NAS Technical Reports 95-020 and 02-007           !
+#    It is described in NAS Technical Reports 95-020 and 02-007.          !
 #                                                                         !
 #    Permission to use, copy, distribute and modify this software         !
 #    for any purpose with or without fee is hereby granted.  We           !
@@ -33,11 +33,12 @@
 #                                                                         !
 #-------------------------------------------------------------------------!
 
-
 #---------------------------------------------------------------------
 #
 # Authors: R. F. Van der Wijngaart
-#          W. Saphir
+#          T. Harris
+#          M. Yarrow
+#
 #---------------------------------------------------------------------
 
 const tsum = Array{Float64}(undef, t_last+2)
@@ -45,13 +46,10 @@ const tming = Array{Float64}(undef, t_last+2)
 const tmaxg = Array{Float64}(undef, t_last+2)
 const trecs = Array{Float64}(undef, t_last+2)
 
+
+
 const npbversion="3.4.2"
 
-const t_names = ["total", "rhsx", "rhsy", "rhsz", "rhs", "xsolve", "ysolve", 
-                 "zsolve", "txinvr", "pinvr", "ninvr", "tzetar", "add", 
-                 "qbc_copy", "qbc_comm", "bpack" , "exch" , "xcomm", "ycomm", 
-                 "zcomm", "last"]
-                 
 # "go" is called "everywhere" in a distributed environment, where each worker is deployed in the master node of a cluster
 
 function go(class::CLASS; itimer=0, npb_verbose=0)
@@ -84,8 +82,7 @@ function go(class::CLASS; itimer=0, npb_verbose=0)
    global max_threads = 128
 
    alloc_zone_vectors(x_zones, y_zones)
-   @info "x_zones=$x_zones, y_zones=$y_zones, gx_size=$gx_size, gy_size=$gy_size, gz_size=$gz_size, nx=$nx, nxmax=$nxmax, ny=$ny, nz=$nz, ratio=$ratio"
-
+   
    zone_setup(x_zones, y_zones, gx_size, gy_size, gz_size, nx, nxmax, ny, nz, ratio, npb_verbose) 
 
    for zone = 1:num_zones
@@ -95,10 +92,13 @@ function go(class::CLASS; itimer=0, npb_verbose=0)
    alloc_proc_space(num_clusters, max_zones) 
 
    num_processes .= map(c -> c[2], clusters)
+   @info "clusters = $clusters, num_processes = $num_processes"
    total_processes = reduce(+, num_processes)
    proc_num_zones = map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, 1, total_processes, npb_verbose)    
 
-   @printf(stdout, "\n\n NAS Parallel Benchmarks 3.4 -- SP Benchmark\n\n", )
+   @info "clusters = $clusters, num_processes = $num_processes, total_processes=$total_processes"
+
+   @printf(stdout, "\n\n NAS Parallel Benchmarks 3.4 -- BT Benchmark\n\n", )
    @printf(stdout, " Class %s\n", class)
    @printf(stdout, " Number of clusters: %4i\n", num_clusters)
    for clusterid = 0:num_clusters-1
@@ -121,7 +121,7 @@ function go(class::CLASS; itimer=0, npb_verbose=0)
    verified = false
    t = Threads.@spawn verified = verify(class, dt, niter)
 
-   @everywhere workers() SP.go_cluster($clusters, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $x_size, $y_size, $zone_proc_id, $proc_zone_id, $iz_west, $iz_east, $iz_south, $iz_north, $itimer, $npb_verbose)       
+   @everywhere workers() BT.go_cluster($clusters, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $x_size, $y_size, $zone_proc_id, $proc_zone_id, $iz_west, $iz_east, $iz_south, $iz_north, $itimer, $npb_verbose)       
 
    wait(t)
 
@@ -147,7 +147,7 @@ function go(class::CLASS; itimer=0, npb_verbose=0)
       end
    end
 
-   print_results("SP-MZ", class, gx_size, gy_size, gz_size,
+   print_results("BT-MZ", class, gx_size, gy_size, gz_size,
                      niter, num_clusters, num_processes, tmax, mflops, 
                      "          floating point",
                      verified, npbversion)
@@ -196,5 +196,6 @@ end
 function reportTimersCluster(clusterid, tsum, tming, tmaxg)
    set(timers_all, clusterid+1, (tsum, tming, tmaxg))
 end
+
 
 

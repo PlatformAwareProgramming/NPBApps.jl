@@ -8,5 +8,5 @@ end
 @everywhere workers() @everywhere workers() using NPBApps
 
 using NPBApps
-SP.go(SP.CLASS_W; itimer=2, npb_verbose=3)
+BT.go(BT.CLASS_S; itimer=2, npb_verbose=3)
 

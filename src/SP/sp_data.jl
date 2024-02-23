@@ -105,7 +105,7 @@ function alloc_field_space(z, grid_points)
       slice[z] = zeros(Int64, 3, maxcells)
       predecessor[z] = zeros(Int64, 3)
       successor[z] = zeros(Int64,3)
-      grid_size[z] = zeros(Int64, 3)
+#      grid_size[z] = zeros(Int64, 3)
       
       # field arrays
 
@@ -202,7 +202,7 @@ function alloc_field_space_zones(proc_num_zones)
       global slice = Array{Array{Int64,2}}(undef, proc_num_zones) 
       global predecessor = Array{Array{Int64}}(undef, proc_num_zones) 
       global successor = Array{Array{Int64}}(undef, proc_num_zones) 
-      global grid_size = Array{Array{Int64}}(undef, proc_num_zones) 
+#      global grid_size = Array{Array{Int64}}(undef, proc_num_zones) 
       
       # field arrays
 
