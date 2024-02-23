@@ -217,6 +217,7 @@ function y_solve(
                                              in_buffer,
                                              timeron,
                                              ncells_v,
+                                             comm_solve,
                                              predecessor
                                              ) 
          end
@@ -330,6 +331,7 @@ function y_send_backsub_info(c,
                                    in_buffer,
                                    timeron,
                                    ::Val{ncells},
+                                   comm_solve,
                                    predecessor
                                    )  where ncells
 
