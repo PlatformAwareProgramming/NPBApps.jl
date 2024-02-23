@@ -92,6 +92,7 @@ function z_solve(
             if (timeron) timer_start(t_zcomm) end
             recv_id[] = z_receive_solve_info(c,
                                              MAX_CELL_DIM,
+                                             cell_coord,
                                              out_buffer,
                                              ncells_v,
                                              comm_solve,
@@ -406,6 +407,7 @@ end
 
  function z_receive_solve_info(c,
                                         MAX_CELL_DIM,
+                                        cell_coord,
                                         out_buffer,
                                         ::Val{ncells},
                                         comm_solve,
