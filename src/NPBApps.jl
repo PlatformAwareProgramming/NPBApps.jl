@@ -52,7 +52,6 @@ module BT
     using Printf
     using MPI
     using StaticArrays
-    using Traceur
  
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")
@@ -98,12 +97,11 @@ module LU
     using Printf
     using MPI
     using StaticArrays
-    using Traceur
 
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")
     include("common/print_results.jl")
-    include("LU/classes.jl")
+    include("LU/classes.jl") 
     include("LU/npbparams.jl")
     include("LU/nodedim.jl")
     include("LU/neighbors.jl")
