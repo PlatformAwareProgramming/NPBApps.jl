@@ -50,7 +50,7 @@ const ce = SA_F64[2.0e0 0.0e0 0.0e0 4.0e0 5.0e0 3.0e0 0.5e0 0.02e0 0.01e0 0.03e0
                   2.0e0 2.0e0 0.0e0 0.0e0 0.0e0 2.0e0 3.0e0 0.03e0 0.05e0 0.04e0 0.2e0 0.1e0 0.3e0;
                   5.0e0 4.0e0 3.0e0 2.0e0 0.1e0 0.4e0 0.3e0 0.05e0 0.04e0 0.03e0 0.1e0 0.3e0 0.2e0]
 
- function set_constants(z, dt, gx_size, gy_size, gz_size, x_zones, y_zones)
+ function set_constants(dt, gx_size, gy_size, gz_size, x_zones, y_zones)
 
        global dnxm1 = 1.0e0 / (float(gx_size - 1)/float(x_zones))
        global dnym1 = 1.0e0 / (float(gy_size - 1)/float(y_zones))

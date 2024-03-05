@@ -8,7 +8,7 @@ function setup_mpi(proc_num_zones)
 
       global DEFAULT_TAG = 0
 
-      MPI.Init()
+      MPI.Init_thread(MPI.THREAD_MULTIPLE)
 
 
 #---------------------------------------------------------------------

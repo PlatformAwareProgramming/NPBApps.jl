@@ -92,11 +92,8 @@ function go(class::CLASS; itimer=0, npb_verbose=0)
    alloc_proc_space(num_clusters, max_zones) 
 
    num_processes .= map(c -> c[2], clusters)
-   @info "clusters = $clusters, num_processes = $num_processes"
    total_processes = reduce(+, num_processes)
    proc_num_zones = map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, 1, total_processes, npb_verbose)    
-
-   @info "clusters = $clusters, num_processes = $num_processes, total_processes=$total_processes"
 
    @printf(stdout, "\n\n NAS Parallel Benchmarks 3.4 -- BT Benchmark\n\n", )
    @printf(stdout, " Class %s\n", class)
@@ -105,7 +102,7 @@ function go(class::CLASS; itimer=0, npb_verbose=0)
       @printf(stdout, "  Cluster %4i with %4i processes\n", clusterid, num_processes[clusterid + 1])
       for iz in 1:proc_num_zones[clusterid+1]
          zone_no = proc_zone_id[clusterid+1][iz]
-         @printf(stdout, "  Zone %4i - Size: %4ix%4ix%4i \n", zone_no, nx[iz], ny[iz], nz[iz])
+         @printf(stdout, "  Zone %4i - Size: %4ix%4ix%4i \n", zone_no, nx[zone_no], ny[zone_no], nz[zone_no])
       end
    end
    @printf(stdout, " Iterations: %4i    dt: %11.7F\n", niter, dt)

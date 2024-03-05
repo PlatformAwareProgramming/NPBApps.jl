@@ -4,7 +4,9 @@
 const send_id = Ref{MPI.Request}()
 const recv_id = Ref{MPI.Request}()
 
-function adi(zone, ss, sr, b_size,
+function adi(ss, 
+            sr, 
+            b_size,
             MAX_CELL_DIM,
             IMAX,
             JMAX,
@@ -13,8 +15,6 @@ function adi(zone, ss, sr, b_size,
             cell_size,
             cell_start,
             cell_end,
-            cell_low,
-            cell_high,
             slice,
             forcing,           
             u,
@@ -75,17 +75,16 @@ function adi(zone, ss, sr, b_size,
             predecessor,
             successor,
             utmp,
+            requests,
             )
 
-      copy_faces(true, zone, ss, 
+      copy_faces( ss, 
                   sr, 
                   b_size,
                   cell_coord,
                   cell_size,
                   cell_start,
                   cell_end,
-                  cell_low,
-                  cell_high,
                   forcing,        
                   u,
                   rhs,
@@ -134,7 +133,8 @@ function adi(zone, ss, sr, b_size,
                   comm_rhs,
                   predecessor,
                   successor,
-                          )
+                  requests,
+            )
 
       x_solve(
             MAX_CELL_DIM,
@@ -164,7 +164,7 @@ function adi(zone, ss, sr, b_size,
             tx2,
             comm_solve,
             predecessor,
-            successor,
+            successor
         ) #maxdepth=3 modules=[BT]
 
         y_solve(
@@ -196,7 +196,7 @@ function adi(zone, ss, sr, b_size,
             comm_solve,     
             predecessor,
             successor,
-            utmp,
+            utmp
       )
 
       z_solve(
@@ -227,7 +227,7 @@ function adi(zone, ss, sr, b_size,
             comm_solve,
             predecessor,
             successor,
-            utmp,
+            utmp
      )
 
       add(cell_size,

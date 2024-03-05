@@ -8,7 +8,7 @@ function setup_mpi(proc_num_zones)
 
       global DEFAULT_TAG = 0
 
-      MPI.Init()
+      MPI.Init_thread(MPI.THREAD_MULTIPLE)
 
 
 #---------------------------------------------------------------------
@@ -418,7 +418,7 @@ function map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, mz_blo
                end
                ipg = proc_group[clusterid+1]
                if npb_verbose > 1 #&& node == root
-                  @printf(stdout, " myid%6i group%5i group_size%5i group_pid%5i threads%4i\n", clusterid, group, np, ipg, num_processes[ipg+1])
+                  @printf(stdout, " cluster id%6i group%5i group_size%5i group_pid%5i threads%4i\n", clusterid, group, np, ipg, num_processes[ipg+1])
                end 
             end
       #

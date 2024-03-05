@@ -76,8 +76,7 @@ function exact_rhs(z)
                    forcing[z][5, i, j, k, c] = forcing[z][5, i, j, k, c] - tx2*(
                        buf[z][ip1, 2]*(c1*ue[z][ip1, 5]-c2*q[z][ip1])-
                        buf[z][im1, 2]*(c1*ue[z][im1, 5]-c2*q[z][im1]))+
-                       0.5e0*xxcon3*(buf[z][ip1, 1]-2.0e0*buf[z][i, 1]+
-                                     buf[z][im1, 1])+
+                       0.5e0*xxcon3*(buf[z][ip1, 1]-2.0e0*buf[z][i, 1]+ buf[z][im1, 1])+
                        xxcon4*(cuf[z][ip1]-2.0e0*cuf[z][i]+cuf[z][im1])+
                        xxcon5*(buf[z][ip1, 5]-2.0e0*buf[z][i, 5]+buf[z][im1, 5])+
                        dx5tx1*( ue[z][ip1, 5]-2.0e0* ue[z][i, 5]+ ue[z][im1, 5])
@@ -142,10 +141,8 @@ function exact_rhs(z)
                    end
 
                    cuf[z][j]   = buf[z][j, 3] * buf[z][j, 3]
-                   buf[z][j, 1] = cuf[z][j] + buf[z][j, 2] * buf[z][j, 2] +
-                              buf[z][j, 4] * buf[z][j, 4]
-                   q[z][j] = 0.5e0*(buf[z][j, 2]*ue[z][j, 2] + buf[z][j, 3]*ue[z][j, 3] +
-                                 buf[z][j, 4]*ue[z][j, 4])
+                   buf[z][j, 1] = cuf[z][j] + buf[z][j, 2] * buf[z][j, 2] + buf[z][j, 4] * buf[z][j, 4]
+                   q[z][j] = 0.5e0*(buf[z][j, 2]*ue[z][j, 2] + buf[z][j, 3]*ue[z][j, 3] + buf[z][j, 4]*ue[z][j, 4])
                 end
 
                 for j = cell_start[z][2, c]:cell_size[z][2, c]-cell_end[z][2, c]-1

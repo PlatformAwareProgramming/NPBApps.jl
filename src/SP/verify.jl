@@ -408,7 +408,7 @@ end
 
 # AT NODE WORKER
 function verify(dt, ss, sr, b_size, 
-                proc_num_zones,
+                proc_num_zones, proc_zone_id,
                 rho_i, us, vs, ws, speed, qs, square,
                 rhs, forcing, u, nx, ny, nz)
 
@@ -426,32 +426,34 @@ function verify(dt, ss, sr, b_size,
           xce[m] = 0.0e0
         end
 
-        for zone = 1:proc_num_zones          
+        for iz = 1:proc_num_zones          
 
-          error_norm(zone, xce_sub, [nx[zone], ny[zone], nz[zone]])
+          zone = proc_zone_id[iz]
+
+          error_norm(iz, xce_sub, [nx[zone], ny[zone], nz[zone]])
           
-          copy_faces(false, zone,
+          copy_faces(false, iz,
                   Val(no_nodes),
                   Val(ncells),
-                  successor[zone],
-                  predecessor[zone],
-                  cell_size[zone],
-                  cell_start[zone],
-                  cell_end[zone],
-                  cell_coord[zone],
-                  cell_low[zone],
-                  cell_high[zone],
-                  u[zone],
-                  rhs[zone],
-                  rho_i[zone],
-                  us[zone],
-                  vs[zone],
-                  ws[zone],
-                  square[zone],
-                  qs[zone],
-                  ainv[zone],
-                  speed[zone],
-                  forcing[zone],
+                  successor[iz],
+                  predecessor[iz],
+                  cell_size[iz],
+                  cell_start[iz],
+                  cell_end[iz],
+                  cell_coord[iz],
+                  cell_low[iz],
+                  cell_high[iz],
+                  u[iz],
+                  rhs[iz],
+                  rho_i[iz],
+                  us[iz],
+                  vs[iz],
+                  ws[iz],
+                  square[iz],
+                  qs[iz],
+                  ainv[iz],
+                  speed[iz],
+                  forcing[iz],
                   dt,
                   tx2,
                   ty2,
@@ -488,17 +490,17 @@ function verify(dt, ss, sr, b_size,
                   zzcon5,
                   dssp,
                   con43,
-                  in_buffer[zone],
-                  out_buffer[zone],
+                  in_buffer[iz],
+                  out_buffer[iz],
                   Array{MPI.Request}(undef,12),
                   timeron,
-                  comm_rhs[zone],
-                  ss,
-                  sr,
-                  b_size,
+                  comm_rhs[iz],
+                  ss[iz],
+                  sr[iz],
+                  b_size[iz],
                )
 
-          rhs_norm(zone, xcr_sub, [nx[zone], ny[zone], nz[zone]])
+          rhs_norm(iz, xcr_sub, [nx[zone], ny[zone], nz[zone]])
 
           for m = 1:5
             xcr[m] = xcr[m] + xcr_sub[m] / dt

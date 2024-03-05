@@ -409,9 +409,9 @@ end
 
 # AT NODE WORKER
 function verify(dt, ss, sr, b_size, 
-           proc_num_zones,
+           proc_num_zones, proc_zone_id,
            rho_i, us, vs, ws, qs, square,
-           rhs, forcing, u, nx, ny, nz)
+           rhs, forcing, u, nx, ny, nz, requests)
 
    xce = Array{Float64}(undef, 5)
    xcr = Array{Float64}(undef, 5)
@@ -427,31 +427,30 @@ function verify(dt, ss, sr, b_size,
      xce[m] = 0.0e0
    end
 
-   for zone = 1:proc_num_zones          
+   for iz = 1:proc_num_zones          
 
-       error_norm(zone, xce_sub, [nx[zone], ny[zone], nz[zone]])
+       zone = proc_zone_id[iz]
+
+       error_norm(iz, xce_sub, [nx[zone], ny[zone], nz[zone]])
      
-       copy_faces(false, zone, 
-                  ss, 
-                  sr, 
-                  b_size,
-                  cell_coord[zone],
-                  cell_size[zone],
-                  cell_start[zone],
-                  cell_end[zone],
-                  cell_low[zone],
-                  cell_high[zone],
-                  forcing[zone],        
-                  u[zone],
-                  rhs[zone],
-                  in_buffer[zone],
-                  out_buffer[zone],
-                  us[zone],
-                  vs[zone],
-                  ws[zone],
-                  qs[zone],
-                  rho_i[zone],
-                  square[zone],
+       copy_faces(ss[iz], 
+                  sr[iz], 
+                  b_size[iz],
+                  cell_coord[iz],
+                  cell_size[iz],
+                  cell_start[iz],
+                  cell_end[iz],
+                  forcing[iz],        
+                  u[iz],
+                  rhs[iz],
+                  in_buffer[iz],
+                  out_buffer[iz],
+                  us[iz],
+                  vs[iz],
+                  ws[iz],
+                  qs[iz],
+                  rho_i[iz],
+                  square[iz],
                   timeron,
                   dt,
                   Val(ncells),
@@ -486,12 +485,13 @@ function verify(dt, ss, sr, b_size,
                   zzcon4,
                   zzcon5,
                   Val(no_nodes), 
-                  comm_rhs[zone],
-                  predecessor[zone],
-                  successor[zone],
+                  comm_rhs[iz],
+                  predecessor[iz],
+                  successor[iz],
+                  requests[iz],
                )
 
-     rhs_norm(zone, xcr_sub, [nx[zone], ny[zone], nz[zone]]) 
+     rhs_norm(iz, xcr_sub, [nx[zone], ny[zone], nz[zone]]) 
 
      for m = 1:5
        xcr[m] = xcr[m] + xcr_sub[m] / dt

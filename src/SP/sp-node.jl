@@ -44,7 +44,7 @@
 
 
 
-function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, itimer_=false, npb_verbose_=0)
+function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, itimer_=false, npb_verbose_=0)
 
        global clusterid = clusterid_
        global num_clusters = length(clusters) 
@@ -62,14 +62,16 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        alloc_field_space_zones(proc_num_zones)
        
-       for zone = 1:proc_num_zones
+       for iz = 1:proc_num_zones
 
-          alloc_field_space(zone, [nx[zone], ny[zone], nz[zone]])
-          make_set(zone, [nx[zone], ny[zone], nz[zone]])
+          zone = proc_zone_id[iz]
+
+          alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]])
+          make_set(iz, [nx[zone], ny[zone], nz[zone]])
 
           for c = 1:ncells
-             if (cell_size[zone][1, c] > IMAX[zone]) ||(cell_size[zone][2, c] > JMAX[zone]) ||(cell_size[zone][3, c] > KMAX[zone])
-                println(stdout, node, c, view(cell_size[zone], 1:3, c)...)
+             if (cell_size[iz][1, c] > IMAX[iz]) ||(cell_size[iz][2, c] > JMAX[iz]) ||(cell_size[iz][3, c] > KMAX[iz])
+                println(stdout, node, c, view(cell_size[iz], 1:3, c)...)
                 println(stdout, " Problem size too big for compiled array sizes")
                 @goto L999
              end
@@ -80,23 +82,28 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
           timer_clear(i)
        end
 
-       for zone = 1:proc_num_zones         
-         set_constants(zone, dt, gx_size, gy_size, gz_size, x_zones, y_zones) 
-         initialize(zone) 
-         lhsinit(zone) 
-         exact_rhs(zone) 
-         compute_buffer_size(zone, 5)
-      end
+       ss = Array{SVector{6,Int}}(undef, proc_num_zones)
+       sr = Array{SVector{6,Int}}(undef, proc_num_zones)
+       b_size = Array{SVector{6,Int}}(undef, proc_num_zones)
 
+       compute_buffer_size_initial(proc_num_zones)
 
-      if (no_nodes > 1)
-         ss = SA[start_send_east::Int start_send_west::Int start_send_north::Int start_send_south::Int start_send_top::Int start_send_bottom::Int]
-         sr = SA[start_recv_east::Int start_recv_west::Int start_recv_north::Int start_recv_south::Int start_recv_top::Int start_recv_bottom::Int]
-         b_size = SA[east_size::Int west_size::Int north_size::Int south_size::Int top_size::Int bottom_size::Int]
-      else
-         ss = nothing
-         sr = nothing
-         b_size = nothing
+       for iz = 1:proc_num_zones         
+         set_constants(iz, dt, gx_size, gy_size, gz_size, x_zones, y_zones) 
+         initialize(iz) 
+         lhsinit(iz) 
+         exact_rhs(iz) 
+         compute_buffer_size(iz, 5)
+
+         if (no_nodes > 1)
+            ss[iz] = SA[start_send_east[iz]::Int start_send_west[iz]::Int start_send_north[iz]::Int start_send_south[iz]::Int start_send_top[iz]::Int start_send_bottom[iz]::Int]
+            sr[iz] = SA[start_recv_east[iz]::Int start_recv_west[iz]::Int start_recv_north[iz]::Int start_recv_south[iz]::Int start_recv_top[iz]::Int start_recv_bottom[iz]::Int]
+            b_size[iz] = SA[east_size[iz]::Int west_size[iz]::Int north_size[iz]::Int south_size[iz]::Int top_size[iz]::Int bottom_size[iz]::Int]
+         else
+            ss[iz] = nothing
+            sr[iz] = nothing
+            b_size[iz] = nothing
+         end
       end
 
        requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
@@ -109,7 +116,36 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
-       Threads.@threads for zone = 1:proc_num_zones
+
+       for iz = 1:proc_num_zones    
+            copy_faces_outer_1(Val(ncells),
+                               iz, 
+                               cell_coord[iz],
+                               cell_size[iz],
+                               cell_start[iz],
+                               cell_end[iz],
+                               cell_low[iz],
+                               cell_high[iz],
+                               u[iz],
+                               timeron,
+            )
+       end
+
+       for iz = 1:proc_num_zones    
+            copy_faces_outer_2(Val(ncells),
+                               iz, 
+                               cell_coord[iz],
+                               cell_size[iz],
+                               cell_start[iz],
+                               cell_end[iz],
+                               cell_low[iz],
+                               cell_high[iz],
+                               u[iz],
+                               timeron,                               
+            )
+       end
+
+       for zone = 1:proc_num_zones
          adi(zone, 
                Val(no_nodes),
                Val(ncells),
@@ -183,9 +219,9 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                out_buffer[zone],
                comm_solve[zone],
                comm_rhs[zone],
-               ss,
-               sr,
-               b_size,
+               ss[zone],
+               sr[zone],
+               b_size[zone],
                s[zone],
                requests[zone]
             )
@@ -209,12 +245,41 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        @label L997
 
-       Threads.@threads for STEP = 1:niter
+       for STEP = 1:niter
 
           if node == root
              if mod(STEP, 20) == 0 || STEP == 1
                 @printf(stdout, "%2i: Time step %4i\n", clusterid,   STEP)
               end
+          end
+
+          for iz = 1:proc_num_zones    
+               copy_faces_outer_1(Val(ncells),
+                                  iz,
+                                  cell_coord[iz],
+                                  cell_size[iz],
+                                  cell_start[iz],
+                                  cell_end[iz],
+                                  cell_low[iz],
+                                  cell_high[iz],
+                                  u[iz],
+                                  timeron,
+                                  
+               )
+          end
+
+          for iz = 1:proc_num_zones    
+               copy_faces_outer_2(Val(ncells),
+                                  iz,
+                                  cell_coord[iz],
+                                  cell_size[iz],
+                                  cell_start[iz],
+                                  cell_end[iz],
+                                  cell_low[iz],
+                                  cell_high[iz],
+                                  u[iz],
+                                  timeron
+               )
           end
 
           for zone = 1:proc_num_zones
@@ -292,13 +357,14 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                   out_buffer[zone],
                   comm_solve[zone],
                   comm_rhs[zone],
-                  ss,
-                  sr,
-                  b_size,
+                  ss[zone],
+                  sr[zone],
+                  b_size[zone],
                   s[zone],
                   requests[zone]
             )
          end
+
        end
 
        timer_stop(1)
@@ -308,7 +374,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 #      perform verification and print results
 #---------------------------------------------------------------------
 
-       verify(dt, ss, sr, b_size, proc_num_zones, rho_i, us, vs, ws, speed, qs, square, rhs, forcing, u, nx, ny, nz)
+       verify(dt, ss, sr, b_size, proc_num_zones, proc_zone_id, rho_i, us, vs, ws, speed, qs, square, rhs, forcing, u, nx, ny, nz)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
        if node == root

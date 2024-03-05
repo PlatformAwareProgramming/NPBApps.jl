@@ -8,7 +8,6 @@ function initialize(z)
    Pface1 = Array{Array{Float64}}(undef,2)
    Pface2 = Array{Array{Float64}}(undef,2)
    Pface3 = Array{Array{Float64}}(undef,2)
-   temp = Array{Float64}(undef, 5)
 
 #---------------------------------------------------------------------
 #  Later (in compute_rhs) we compute 1/u for every element. A few of 
@@ -62,6 +61,7 @@ function initialize(z)
                    Pzeta = zeta * Pface3[2][m] +(1.0e0-zeta) * Pface3[1][m]
 
                    u[z][m, ii, jj, kk, c] = Pxi + Peta + Pzeta - Pxi*Peta - Pxi*Pzeta - Peta*Pzeta + Pxi*Peta*Pzeta
+#                   @info "$node: u[$m, $i, $j, $k][$(proc_zone_id[z]))] = $(u[z][m, ii, jj, kk, c])"
                 end
                 ii = ii + 1
              end
@@ -201,6 +201,8 @@ function initialize(z)
        end
        jj = jj + 1
     end
+
+    #write_u(z)
 
     return nothing
 end

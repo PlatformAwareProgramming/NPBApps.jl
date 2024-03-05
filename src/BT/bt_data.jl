@@ -114,6 +114,7 @@ end
       KMAX[z] = MAX_CELL_DIM[z]
 
       BUF_SIZE[z] = MAX_CELL_DIM[z]*MAX_CELL_DIM[z]*(maxcells-1)*60+1
+ #     @info "$clusterid/$node: **** BUF_SIZE[$z]=$(BUF_SIZE[z])  --- MAX_CELL_DIM[$z] = $(MAX_CELL_DIM[z]) --- maxcells=$maxcells"
 
       cell_coord[z] = zeros(Int64, 3, maxcells)
       cell_low[z] = zeros(Int64, 3, maxcells)
@@ -256,5 +257,21 @@ function alloc_field_space_zones(proc_num_zones)
       global square = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
              
       return nothing
+
+end
+
+function print_u(z)
+
+      for c = 1:ncells
+            for kk = -1:KMAX[z]
+               for jj = -1:JMAX[z]
+                  for ii = -1:IMAX[z]
+                        for m = 1:5
+                            @info  "u[$z][$m, $ii, $jj, $kk, $c] = $(u[z][m, ii, jj, kk, c])"
+                        end
+                  end
+               end
+            end
+      end
 
 end

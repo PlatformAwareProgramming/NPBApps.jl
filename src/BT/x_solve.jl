@@ -39,7 +39,7 @@ function x_solve(
                tx2,
                comm_solve,
                predecessor,
-               successor,
+               successor
     ) where ncells
 
       #istart = 0
@@ -109,8 +109,10 @@ function x_solve(
 #---------------------------------------------------------------------
 #     wait for completion
 #---------------------------------------------------------------------
+
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
+
             if (timeron) timer_stop(t_xcomm) end
 #---------------------------------------------------------------------
 #     install C'(istart) and rhs'(istart) to be used in this cell
@@ -190,8 +192,10 @@ function x_solve(
                                              comm_solve,     
                                              successor
                                              )
+
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
+
             if (timeron) timer_stop(t_xcomm) end
             x_unpack_backsub_info(c,
                                    JMAX,

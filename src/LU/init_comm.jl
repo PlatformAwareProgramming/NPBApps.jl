@@ -12,7 +12,7 @@
 #---------------------------------------------------------------------
 #    initialize MPI communication
 #---------------------------------------------------------------------
-      MPI.Init()
+      MPI.Init_thread(MPI.THREAD_MULTIPLE)
 
 #---------------------------------------------------------------------
 #     get a process grid that requires a (nx*ny) number of procs.

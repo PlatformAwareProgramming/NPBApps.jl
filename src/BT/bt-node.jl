@@ -44,7 +44,7 @@
 
 
 
-function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, itimer_=false, npb_verbose_=0)
+function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id_, itimer_=false, npb_verbose_=0)
 
        global clusterid = clusterid_
        global num_clusters = length(clusters) 
@@ -52,6 +52,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        global timeron = itimer > 0
        global npb_verbose = npb_verbose_
        global max_zones = x_zones * y_zones
+       global proc_zone_id = proc_zone_id_
        num_zones = max_zones
        
        setup_mpi(proc_num_zones) 
@@ -62,14 +63,16 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        alloc_field_space_zones(proc_num_zones)
        
-       for zone = 1:proc_num_zones
+       for iz = 1:proc_num_zones
 
-          alloc_field_space(zone, [nx[zone], ny[zone], nz[zone]])
-          make_set(zone, [nx[zone], ny[zone], nz[zone]])
+          zone = proc_zone_id[iz]
+
+          alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]])
+          make_set(iz, [nx[zone], ny[zone], nz[zone]])
 
           for c = 1:ncells
-             if (cell_size[zone][1, c] > IMAX[zone]) ||(cell_size[zone][2, c] > JMAX[zone]) ||(cell_size[zone][3, c] > KMAX[zone])
-                println(stdout, node, c, view(cell_size[zone], 1:3, c)...)
+             if (cell_size[iz][1, c] > IMAX[iz]) ||(cell_size[iz][2, c] > JMAX[iz]) ||(cell_size[iz][3, c] > KMAX[iz])
+                println(stdout, node, c, view(cell_size[iz], 1:3, c)...)
                 println(stdout, " Problem size too big for compiled array sizes")
                 @goto L999
              end
@@ -80,23 +83,28 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
           timer_clear(i)
        end
 
-       for zone = 1:proc_num_zones         
-         set_constants(zone, dt, gx_size, gy_size, gz_size, x_zones, y_zones) 
-         initialize(zone) 
-         lhsinit(zone) 
-         exact_rhs(zone) 
-         compute_buffer_size(zone, 5)
-      end
+       ss = Array{SVector{6,Int}}(undef, proc_num_zones)
+       sr = Array{SVector{6,Int}}(undef, proc_num_zones)
+       b_size = Array{SVector{6,Int}}(undef, proc_num_zones)
 
+       compute_buffer_size_initial(proc_num_zones)
+       set_constants(dt, gx_size, gy_size, gz_size, x_zones, y_zones) 
 
-      if (no_nodes > 1)
-         ss = SA[start_send_east::Int start_send_west::Int start_send_north::Int start_send_south::Int start_send_top::Int start_send_bottom::Int]
-         sr = SA[start_recv_east::Int start_recv_west::Int start_recv_north::Int start_recv_south::Int start_recv_top::Int start_recv_bottom::Int]
-         b_size = SA[east_size::Int west_size::Int north_size::Int south_size::Int top_size::Int bottom_size::Int]
-      else
-         ss = nothing
-         sr = nothing
-         b_size = nothing
+       for iz = 1:proc_num_zones         
+         initialize(iz) 
+         lhsinit(iz) 
+         exact_rhs(iz) 
+         compute_buffer_size(iz, 5)
+
+         if (no_nodes > 1)
+            ss[iz] = SA[start_send_east[iz]::Int start_send_west[iz]::Int start_send_north[iz]::Int start_send_south[iz]::Int start_send_top[iz]::Int start_send_bottom[iz]::Int]
+            sr[iz] = SA[start_recv_east[iz]::Int start_recv_west[iz]::Int start_recv_north[iz]::Int start_recv_south[iz]::Int start_recv_top[iz]::Int start_recv_bottom[iz]::Int]
+            b_size[iz] = SA[east_size[iz]::Int west_size[iz]::Int north_size[iz]::Int south_size[iz]::Int top_size[iz]::Int bottom_size[iz]::Int]
+         else
+            ss[iz] = nothing
+            sr[iz] = nothing
+            b_size[iz] = nothing
+         end
       end
 
        requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
@@ -108,40 +116,70 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          utmp[iz] = OffsetArray(zeros(Float64, 6, JMAX[iz]+4), 1:6, -2:JMAX[iz]+1)
       end
 
-
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
-       Threads.@threads for zone = 1:proc_num_zones
-         adi(zone, ss, sr, b_size,
-            MAX_CELL_DIM[zone],
-            IMAX[zone],
-            JMAX[zone],
-            KMAX[zone],
-            cell_coord[zone],
-            cell_size[zone],
-            cell_start[zone],
-            cell_end[zone],
-            cell_low[zone],
-            cell_high[zone],
-            slice[zone],
-            forcing[zone],           
-            u[zone],
-            rhs[zone],
-            lhsc[zone],
-            backsub_info[zone],
-            in_buffer[zone],
-            out_buffer[zone],
-            fjac[zone],
-            njac[zone],
-            lhsa[zone],
-            lhsb[zone],
-            us[zone],
-            vs[zone],
-            ws[zone],
-            qs[zone],
-            rho_i[zone],
-            square[zone],
+
+      for iz = 1:proc_num_zones    
+            copy_faces_outer_1(iz, 
+                              cell_coord[iz],
+                              cell_size[iz],
+                              cell_start[iz],
+                              cell_end[iz],
+                              cell_low[iz],
+                              cell_high[iz],
+                              u[iz],
+                              timeron,
+                              Val(ncells)
+            )          
+      end
+
+      for iz = 1:proc_num_zones    
+            copy_faces_outer_2(iz, 
+                              cell_coord[iz],
+                              cell_size[iz],
+                              cell_start[iz],
+                              cell_end[iz],
+                              cell_low[iz],
+                              cell_high[iz],
+                              u[iz],
+                              timeron,
+                              Val(ncells)
+            )
+      end
+
+
+
+#=Threads.@threads=# for iz = 1:proc_num_zones
+      adi(ss[iz], 
+            sr[iz], 
+            b_size[iz],
+            MAX_CELL_DIM[iz],
+            IMAX[iz],
+            JMAX[iz],
+            KMAX[iz],
+            cell_coord[iz],
+            cell_size[iz],
+            cell_start[iz],
+            cell_end[iz],
+            slice[iz],
+            forcing[iz],           
+            u[iz],
+            rhs[iz],
+            lhsc[iz],
+            backsub_info[iz],
+            in_buffer[iz],
+            out_buffer[iz],
+            fjac[iz],
+            njac[iz],
+            lhsa[iz],
+            lhsb[iz],
+            us[iz],
+            vs[iz],
+            ws[iz],
+            qs[iz],
+            rho_i[iz],
+            square[iz],
             dt,
             timeron,
             Val(ncells),
@@ -179,17 +217,19 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
             zzcon4,
             zzcon5,
             Val(no_nodes), 
-            comm_solve[zone],
-            comm_rhs[zone],
-            predecessor[zone],
-            successor[zone],
-            utmp[zone],
+            comm_solve[iz],
+            comm_rhs[iz],
+            predecessor[iz],
+            successor[iz],
+            utmp[iz],
+            requests[iz],
          )
        end
 
-       for zone = 1:proc_num_zones
-           initialize(zone)
+       for iz = 1:proc_num_zones
+           initialize(iz)
        end
+
 
 #---------------------------------------------------------------------
 #      Synchronize before placing time stamp
@@ -205,7 +245,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        @label L997
 
-       Threads.@threads for STEP = 1:niter
+       for STEP = 1:niter
+          #@info "$clusterid/$node: STEP $STEP - A"
 
           if node == root
              if mod(STEP, 20) == 0 || STEP == 1
@@ -213,81 +254,117 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
               end
           end
 
-          for zone = 1:proc_num_zones                          
-            adi(zone, ss, sr, b_size,
-               MAX_CELL_DIM[zone],
-               IMAX[zone],
-               JMAX[zone],
-               KMAX[zone],
-               cell_coord[zone],
-               cell_size[zone],
-               cell_start[zone],
-               cell_end[zone],
-               cell_low[zone],
-               cell_high[zone],
-               slice[zone],
-               forcing[zone],           
-               u[zone],
-               rhs[zone],
-               lhsc[zone],
-               backsub_info[zone],
-               in_buffer[zone],
-               out_buffer[zone],
-               fjac[zone],
-               njac[zone],
-               lhsa[zone],
-               lhsb[zone],
-               us[zone],
-               vs[zone],
-               ws[zone],
-               qs[zone],
-               rho_i[zone],
-               square[zone],
-               dt,
-               timeron,
-               Val(ncells),
-               tx1,
-               tx2,
-               ty1,
-               ty2,
-               tz1,
-               tz2,
-               dx1tx1,
-               dx2tx1,
-               dx3tx1,
-               dx4tx1,
-               dx5tx1,
-               dy1ty1,
-               dy2ty1,
-               dy3ty1,
-               dy4ty1,
-               dy5ty1,
-               dz1tz1,
-               dz2tz1,
-               dz3tz1,
-               dz4tz1,
-               dz5tz1,
-               xxcon2,
-               xxcon3,
-               xxcon4,
-               xxcon5,
-               yycon2,
-               yycon3,
-               yycon4,
-               yycon5,
-               zzcon2,
-               zzcon3,
-               zzcon4,
-               zzcon5,
-               Val(no_nodes), 
-               comm_solve[zone],
-               comm_rhs[zone],
-               predecessor[zone],
-               successor[zone],
-               utmp[zone],
-            )
+          for iz = 1:proc_num_zones    
+                copy_faces_outer_1(iz, 
+                                   cell_coord[iz],
+                                   cell_size[iz],
+                                   cell_start[iz],
+                                   cell_end[iz],
+                                   cell_low[iz],
+                                   cell_high[iz],
+                                   u[iz],
+                                   timeron,
+                                   Val(ncells)
+                )          
          end
-       end
+
+         #@info "$clusterid/$node: STEP $STEP - B"
+
+         for iz = 1:proc_num_zones    
+                copy_faces_outer_2(iz, 
+                                   cell_coord[iz],
+                                   cell_size[iz],
+                                   cell_start[iz],
+                                   cell_end[iz],
+                                   cell_low[iz],
+                                   cell_high[iz],
+                                   u[iz],
+                                   timeron,
+                                   Val(ncells)
+                )
+          end
+ 
+          #@info "$clusterid/$node: STEP $STEP - C"
+          
+          @sync begin
+            Threads.@threads for iz = 1:proc_num_zones                          
+               adi(ss[iz], 
+                  sr[iz], 
+                  b_size[iz],
+                  MAX_CELL_DIM[iz],
+                  IMAX[iz],
+                  JMAX[iz],
+                  KMAX[iz],
+                  cell_coord[iz],
+                  cell_size[iz],
+                  cell_start[iz],
+                  cell_end[iz], 
+                   slice[iz],
+                  forcing[iz],           
+                  u[iz],
+                  rhs[iz],
+                  lhsc[iz],
+                  backsub_info[iz],
+                  in_buffer[iz],
+                  out_buffer[iz],
+                  fjac[iz],
+                  njac[iz],
+                  lhsa[iz],
+                  lhsb[iz],
+                  us[iz],
+                  vs[iz],
+                  ws[iz],
+                  qs[iz],
+                  rho_i[iz],
+                  square[iz],
+                  dt,
+                  timeron,
+                  Val(ncells),
+                  tx1,
+                  tx2,
+                  ty1,
+                  ty2,
+                  tz1,
+                  tz2,
+                  dx1tx1,
+                  dx2tx1,
+                  dx3tx1,
+                  dx4tx1,
+                  dx5tx1,
+                  dy1ty1,
+                  dy2ty1,
+                  dy3ty1,
+                  dy4ty1,
+                  dy5ty1,
+                  dz1tz1,
+                  dz2tz1,
+                  dz3tz1,
+                  dz4tz1,
+                  dz5tz1,
+                  xxcon2,
+                  xxcon3,
+                  xxcon4,
+                  xxcon5,
+                  yycon2,
+                  yycon3,
+                  yycon4,
+                  yycon5,
+                  zzcon2,
+                  zzcon3,
+                  zzcon4,
+                  zzcon5,
+                  Val(no_nodes), 
+                  comm_solve[iz],
+                  comm_rhs[iz],
+                  predecessor[iz], 
+                  successor[iz],
+                  utmp[iz],
+                  requests[iz],
+               )
+              end
+           end
+         #@info "$clusterid/$node: STEP $STEP - D"
+      end
 
        timer_stop(1)
        t = timer_read(1)
@@ -296,7 +373,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 #      perform verification and print results
 #---------------------------------------------------------------------
 
-       verify(dt, ss, sr, b_size, proc_num_zones, rho_i, us, vs, ws, qs, square, rhs, forcing, u, nx, ny, nz)
+       verify(dt, ss, sr, b_size, proc_num_zones, proc_zone_id, rho_i, us, vs, ws, qs, square, rhs, forcing, u, nx, ny, nz, requests)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
        if node == root

@@ -38,7 +38,7 @@ function y_solve(
      comm_solve,     
      predecessor,
      successor,
-     utmp,
+     utmp
 ) where ncells
 
       jstart = 0
@@ -108,8 +108,10 @@ function y_solve(
 #---------------------------------------------------------------------
 #     wait for completion
 #---------------------------------------------------------------------
+
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
+
             if (timeron) timer_stop(t_ycomm) end
 #---------------------------------------------------------------------
 #     install C'(jstart+1) and rhs'(jstart+1) to be used in this cell
@@ -189,8 +191,10 @@ function y_solve(
                                              comm_solve,     
                                              successor
                                    )
+
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
+
             if (timeron) timer_stop(t_ycomm) end
             y_unpack_backsub_info(c,
                                    IMAX,

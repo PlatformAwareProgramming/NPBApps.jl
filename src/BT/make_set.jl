@@ -23,7 +23,7 @@ function make_set(z, grid_points)
    #      determine the location of the cell at the bottom of the 3D 
    #      array of cells
    #---------------------------------------------------------------------
-          cell_coord[z][1, 1] = mod(node, p)
+          cell_coord[z][1, 1] = mod(node,p)
           cell_coord[z][2, 1] = div(node,p)
           cell_coord[z][3, 1] = 0
    

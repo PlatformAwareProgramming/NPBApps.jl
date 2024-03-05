@@ -36,7 +36,7 @@ function z_solve(
                comm_solve,
                predecessor,
                successor,
-               utmp,
+               utmp
           )  where ncells
 
       kstart = 0
@@ -107,6 +107,7 @@ function z_solve(
 #---------------------------------------------------------------------
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
+
             if (timeron) timer_stop(t_zcomm) end
 #---------------------------------------------------------------------
 #     install C'(kstart+1) and rhs'(kstart+1) to be used in this cell
@@ -185,8 +186,10 @@ function z_solve(
                                              comm_solve,
                                              successor
                                    )
+                                   
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
+
             if (timeron) timer_stop(t_zcomm) end
             z_unpack_backsub_info(c,
                                    IMAX,

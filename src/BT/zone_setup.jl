@@ -1,6 +1,6 @@
 function zone_setup(x_zones, y_zones, gx_size, gy_size, gz_size, nx, nxmax, ny, nz, ratio, npb_verbose)
 
-#=       if abs(ratio-1.0e0) > 1.0e-10
+      if abs(ratio-1.0e0) > 1.0e-10
 
 #        compute zone stretching only if the prescribed zone size ratio is substantially larger than unity       
 
@@ -21,7 +21,7 @@ function zone_setup(x_zones, y_zones, gx_size, gy_size, gz_size, nx, nxmax, ny, 
 
          @info "x_end=$x_end, y_end=$y_end"
 
-       else=#
+       else
 
 #        compute essentially equal sized zone dimensions
 
@@ -33,7 +33,7 @@ function zone_setup(x_zones, y_zones, gx_size, gy_size, gz_size, nx, nxmax, ny, 
            y_end[j]   = (j*gy_size)/y_zones
          end
 
-       #end
+       end
 
        x_start[1] = 1
        for i = 1:x_zones
