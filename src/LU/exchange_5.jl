@@ -2,11 +2,11 @@
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
- function exchange_5(g, ibeg, ifin1, isiz03)
+ function exchange_5(g, ibeg, ifin1, nz0, nx, nz, south, north, comm_solve)
 
       msgid1 = Ref{MPI.Request}()
 
-      dum = Array{Float64}(undef, isiz03)
+      dum = Array{Float64}(undef, nz0)
 
 #---------------------------------------------------------------------
 #   communicate in the south and north directions

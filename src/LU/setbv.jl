@@ -2,7 +2,7 @@
 #   set the boundary values of dependent variables
 #---------------------------------------------------------------------
 
- function setbv(nx0, ny0, nz0)
+ function setbv(u, nx0, ny0, nz0, nx, ny, nz, west, east, north, south, ipt, jpt)
 
 #---------------------------------------------------------------------
 #   set the dependent variable values along the top and bottom faces

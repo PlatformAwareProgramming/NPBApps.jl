@@ -27,12 +27,48 @@
         return class
 end
 
+# AT CLUSTER MASTER
+function putVerificationReport(xcr_node, xce_node, xci_node)
+   remotecall(putVerificationReport, 1, clusterid, xcr_node, xce_node, xci_node; role=:worker)
+end
+
+# AT DRIVER MASTER
+function putVerificationReport(clusterid, xcr_cluster, xce_cluster, xci_cluster)
+   lock(verified_signal[clusterid+1])
+   try
+      lock(lk_update_verify)
+      try
+         xcr .= xcr + xcr_cluster
+         xce .= xce + xce_cluster
+         xci[] = xci[] + xci_cluster
+      finally
+         unlock(lk_update_verify)
+      end
+      verified_signal_condition[clusterid+1] = true
+      notify(verified_signal[clusterid+1])
+   finally
+      unlock(verified_signal[clusterid+1])
+   end
+end
+
 
 #---------------------------------------------------------------------
 #  verification routine                         
 #---------------------------------------------------------------------
 
- function verify(xcr, xce, xci, class, dt)
+#---------------------------------------------------------------------
+#---------------------------------------------------------------------
+# AT DRIVER MASTER
+function verify(class::CLASS, dt, itmax)
+
+         global verified_signal_condition = Array{Bool}(undef, num_clusters)
+         global verified_signal = Array{Threads.Condition}(undef, num_clusters)
+         for i in 1:num_clusters
+            verified_signal_condition[i] = false
+            verified_signal[i] = Threads.Condition()             
+         end
+
+         global lk_update_verify = ReentrantLock()
 
          xcrref = Array{Float64}(undef, 5)
          xceref = Array{Float64}(undef, 5)
@@ -44,8 +80,6 @@ end
 #---------------------------------------------------------------------
         epsilon = 1.0e-08
 
-        verified = true
-
         for m = 1:5
            xcrref[m] = 1.0
            xceref[m] = 1.0
@@ -54,291 +88,297 @@ end
 
         if class == CLASS_S
 
-         dtref = 5.0e-1
+           dtref = 5.0e-1
+           itmaxref = 50
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of residual, for the (12X12X12) grid,
-#   after 50 time steps, with  DT = 5.0d-01
+#   Reference values of RMS-norms of residual
 #---------------------------------------------------------------------
-         xcrref[1] = 1.6196343210976702e-02
-         xcrref[2] = 2.1976745164821318e-03
-         xcrref[3] = 1.5179927653399185e-03
-         xcrref[4] = 1.5029584435994323e-03
-         xcrref[5] = 3.4264073155896461e-02
+           xcrref[1] = 0.3778579699366e+01
+           xcrref[2] = 0.3120418698065e+00
+           xcrref[3] = 0.8386213407018e+00
+           xcrref[4] = 0.4452165980488e+00
+           xcrref[5] = 0.7808656756434e+01
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of solution error, for the (12X12X12) grid,
-#   after 50 time steps, with  DT = 5.0d-01
+#   Reference values of RMS-norms of solution error
 #---------------------------------------------------------------------
-         xceref[1] = 6.4223319957960924e-04
-         xceref[2] = 8.4144342047347926e-05
-         xceref[3] = 5.8588269616485186e-05
-         xceref[4] = 5.8474222595157350e-05
-         xceref[5] = 1.3103347914111294e-03
+           xceref[1] = 0.2429480066305e+02
+           xceref[2] = 0.9072817470024e+01
+           xceref[3] = 0.1032621825644e+02
+           xceref[4] = 0.9256791727838e+01
+           xceref[5] = 0.1639045777714e+02
 
 #---------------------------------------------------------------------
-#   Reference value of surface integral, for the (12X12X12) grid,
-#   after 50 time steps, with DT = 5.0d-01
+#   Reference value of surface integral
 #---------------------------------------------------------------------
-         xciref = 7.8418928865937083e+00
+           xciref    = 0.4964435445706e+02
 
         elseif class == CLASS_W
 
            dtref = 1.5e-3
-#---------------------------------------------------------------------
-#   Reference values of RMS-norms of residual, for the (33x33x33) grid,
-#   after 300 time steps, with  DT = 1.5d-3
-#---------------------------------------------------------------------
-           xcrref[1] =   0.1236511638192e+02
-           xcrref[2] =   0.1317228477799e+01
-           xcrref[3] =   0.2550120713095e+01
-           xcrref[4] =   0.2326187750252e+01
-           xcrref[5] =   0.2826799444189e+02
-
+           itmaxref = 300
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of solution error, for the (33X33X33) grid,
+#   Reference values of RMS-norms of residual
 #---------------------------------------------------------------------
-           xceref[1] =   0.4867877144216e+00
-           xceref[2] =   0.5064652880982e-01
-           xceref[3] =   0.9281818101960e-01
-           xceref[4] =   0.8570126542733e-01
-           xceref[5] =   0.1084277417792e+01
+           xcrref[1] = 0.8285060230339e+03
+           xcrref[2] = 0.5753415004693e+02
+           xcrref[3] = 0.2023477570531e+03
+           xcrref[4] = 0.1586275182502e+03
+           xcrref[5] = 0.1733925947816e+04
 
+#---------------------------------------------------------------------
+#   Reference values of RMS-norms of solution error
+#---------------------------------------------------------------------
+           xceref[1] = 0.7514670702651e+02
+           xceref[2] = 0.9776687033238e+01
+           xceref[3] = 0.2141754291209e+02
+           xceref[4] = 0.1685405918675e+02
+           xceref[5] = 0.1856944519722e+03
 
 #---------------------------------------------------------------------
-#   Reference value of surface integral, for the (33X33X33) grid,
-#   after 300 time steps, with  DT = 1.5d-3
+#   Reference value of surface integral
 #---------------------------------------------------------------------
-           xciref    =   0.1161399311023e+02
+           xciref    = 0.3781055348911e+03
 
         elseif class == CLASS_A
 
            dtref = 2.0e+0
-#---------------------------------------------------------------------
-#   Reference values of RMS-norms of residual, for the (64X64X64) grid,
-#   after 250 time steps, with  DT = 2.0d+00
-#---------------------------------------------------------------------
-         xcrref[1] = 7.7902107606689367e+02
-         xcrref[2] = 6.3402765259692870e+01
-         xcrref[3] = 1.9499249727292479e+02
-         xcrref[4] = 1.7845301160418537e+02
-         xcrref[5] = 1.8384760349464247e+03
+           itmaxref = 250
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of solution error, for the (64X64X64) grid,
-#   after 250 time steps, with  DT = 2.0d+00
+#   Reference values of RMS-norms of residual
 #---------------------------------------------------------------------
-         xceref[1] = 2.9964085685471943e+01
-         xceref[2] = 2.8194576365003349e+00
-         xceref[3] = 7.3473412698774742e+00
-         xceref[4] = 6.7139225687777051e+00
-         xceref[5] = 7.0715315688392578e+01
+           xcrref[1] = 0.1131574877175e+04
+           xcrref[2] = 0.7965206944742e+02
+           xcrref[3] = 0.2705587159526e+03
+           xcrref[4] = 0.2129567530746e+03
+           xcrref[5] = 0.2260584655432e+04
 
 #---------------------------------------------------------------------
-#   Reference value of surface integral, for the (64X64X64) grid,
-#   after 250 time steps, with DT = 2.0d+00
+#   Reference values of RMS-norms of solution error
 #---------------------------------------------------------------------
-         xciref = 2.6030925604886277e+01
+           xceref[1] = 0.1115694885382e+03
+           xceref[2] = 0.1089257673798e+02
+           xceref[3] = 0.2905379922066e+02
+           xceref[4] = 0.2216126755530e+02
+           xceref[5] = 0.2501762341026e+03
+
+#---------------------------------------------------------------------
+#   Reference value of surface integral
+#---------------------------------------------------------------------
+           xciref    = 0.5904992211511e+03
 
         elseif class == CLASS_B
 
            dtref = 2.0e+0
+           itmaxref = 250
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of residual, for the (102X102X102) grid,
-#   after 250 time steps, with  DT = 2.0d+00
+#   Reference values of RMS-norms of residual
 #---------------------------------------------------------------------
-         xcrref[1] = 3.5532672969982736e+03
-         xcrref[2] = 2.6214750795310692e+02
-         xcrref[3] = 8.8333721850952190e+02
-         xcrref[4] = 7.7812774739425265e+02
-         xcrref[5] = 7.3087969592545314e+03
+           xcrref[1] = 0.1734656959567e+05
+           xcrref[2] = 0.1238977748533e+04
+           xcrref[3] = 0.4123885357100e+04
+           xcrref[4] = 0.3613705834056e+04
+           xcrref[5] = 0.3531187871586e+05
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of solution error, for the (102X102X102) 
-#   grid, after 250 time steps, with  DT = 2.0d+00
+#   Reference values of RMS-norms of solution error
 #---------------------------------------------------------------------
-         xceref[1] = 1.1401176380212709e+02
-         xceref[2] = 8.1098963655421574e+00
-         xceref[3] = 2.8480597317698308e+01
-         xceref[4] = 2.5905394567832939e+01
-         xceref[5] = 2.6054907504857413e+02
+           xceref[1] = 0.1781612313296e+04
+           xceref[2] = 0.1177971120769e+03
+           xceref[3] = 0.4233792871440e+03
+           xceref[4] = 0.3577260438230e+03
+           xceref[5] = 0.3659958544012e+04
 
 #---------------------------------------------------------------------
-#   Reference value of surface integral, for the (102X102X102) grid,
-#   after 250 time steps, with DT = 2.0d+00
+#   Reference value of surface integral
 #---------------------------------------------------------------------
-         xciref = 4.7887162703308227e+01
+           xciref    = 0.6107041476456e+04
 
         elseif class == CLASS_C
 
            dtref = 2.0e+0
+           itmaxref = 250
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of residual, for the (162X162X162) grid,
-#   after 250 time steps, with  DT = 2.0d+00
+#   Reference values of RMS-norms of residual
 #---------------------------------------------------------------------
-         xcrref[1] = 1.03766980323537846e+04
-         xcrref[2] = 8.92212458801008552e+02
-         xcrref[3] = 2.56238814582660871e+03
-         xcrref[4] = 2.19194343857831427e+03
-         xcrref[5] = 1.78078057261061185e+04
+           xcrref[1] = 0.4108743427233e+05
+           xcrref[2] = 0.3439004802235e+04
+           xcrref[3] = 0.9961331392486e+04
+           xcrref[4] = 0.8321426758084e+04
+           xcrref[5] = 0.7463792419218e+05
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of solution error, for the (162X162X162) 
-#   grid, after 250 time steps, with  DT = 2.0d+00
+#   Reference values of RMS-norms of solution error
 #---------------------------------------------------------------------
-         xceref[1] = 2.15986399716949279e+02
-         xceref[2] = 1.55789559239863600e+01
-         xceref[3] = 5.41318863077207766e+01
-         xceref[4] = 4.82262643154045421e+01
-         xceref[5] = 4.55902910043250358e+02
+           xceref[1] = 0.3429276307955e+04
+           xceref[2] = 0.2336680861825e+03
+           xceref[3] = 0.8216363109621e+03
+           xceref[4] = 0.7143809828225e+03
+           xceref[5] = 0.7057470798773e+04
 
 #---------------------------------------------------------------------
-#   Reference value of surface integral, for the (162X162X162) grid,
-#   after 250 time steps, with DT = 2.0d+00
+#   Reference value of surface integral
 #---------------------------------------------------------------------
-         xciref = 6.66404553572181300e+01
+           xciref    = 0.1125826349653e+05
 
         elseif class == CLASS_D
 
            dtref = 1.0e+0
+           itmaxref = 300
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of residual, for the (408X408X408) grid,
-#   after 300 time steps, with  DT = 1.0d+00
+#   Reference values of RMS-norms of residual
 #---------------------------------------------------------------------
-         xcrref[1] = 0.4868417937025e+05
-         xcrref[2] = 0.4696371050071e+04
-         xcrref[3] = 0.1218114549776e+05
-         xcrref[4] = 0.1033801493461e+05
-         xcrref[5] = 0.7142398413817e+05
+           xcrref[1] = 0.3282253166388e+06
+           xcrref[2] = 0.3490781637713e+05
+           xcrref[3] = 0.8610311978292e+05
+           xcrref[4] = 0.7004896022603e+05
+           xcrref[5] = 0.4546838584391e+06
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of solution error, for the (408X408X408) 
-#   grid, after 300 time steps, with  DT = 1.0d+00
+#   Reference values of RMS-norms of solution error
 #---------------------------------------------------------------------
-         xceref[1] = 0.3752393004482e+03
-         xceref[2] = 0.3084128893659e+02
-         xceref[3] = 0.9434276905469e+02
-         xceref[4] = 0.8230686681928e+02
-         xceref[5] = 0.7002620636210e+03
+           xceref[1] = 0.6620775619126e+04
+           xceref[2] = 0.5229798207352e+03
+           xceref[3] = 0.1620218261697e+04
+           xceref[4] = 0.1404783445006e+04
+           xceref[5] = 0.1222629805121e+05
 
 #---------------------------------------------------------------------
-#   Reference value of surface integral, for the (408X408X408) grid,
-#   after 300 time steps, with DT = 1.0d+00
+#   Reference value of surface integral
 #---------------------------------------------------------------------
-         xciref =    0.8334101392503e+02
+           xciref    = 0.2059421629621e+05
 
         elseif class == CLASS_E
 
            dtref = 0.5e+0
+           itmaxref = 300
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of residual, for the (1020X1020X1020) grid,
-#   after 300 time steps, with  DT = 0.5d+00
+#   Reference values of RMS-norms of residual
 #---------------------------------------------------------------------
-         xcrref[1] = 0.2099641687874e+06
-         xcrref[2] = 0.2130403143165e+05
-         xcrref[3] = 0.5319228789371e+05
-         xcrref[4] = 0.4509761639833e+05
-         xcrref[5] = 0.2932360006590e+06
+           xcrref[1] = 0.1539988626779e+07
+           xcrref[2] = 0.1742224758490e+06
+           xcrref[3] = 0.4153598861059e+06
+           xcrref[4] = 0.3468381400447e+06
+           xcrref[5] = 0.2054406022038e+07
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of solution error, for the (1020X1020X1020) 
-#   grid, after 300 time steps, with  DT = 0.5d+00
+#   Reference values of RMS-norms of solution error
 #---------------------------------------------------------------------
-         xceref[1] = 0.4800572578333e+03
-         xceref[2] = 0.4221993400184e+02
-         xceref[3] = 0.1210851906824e+03
-         xceref[4] = 0.1047888986770e+03
-         xceref[5] = 0.8363028257389e+03
+           xceref[1] = 0.8021145134635e+04
+           xceref[2] = 0.6932079823791e+03
+           xceref[3] = 0.1998959591111e+04
+           xceref[4] = 0.1725962639357e+04
+           xceref[5] = 0.1389447024442e+05
 
 #---------------------------------------------------------------------
-#   Reference value of surface integral, for the (1020X1020X1020) grid,
-#   after 300 time steps, with DT = 0.5d+00
+#   Reference value of surface integral
 #---------------------------------------------------------------------
-         xciref =    0.9512163272273e+02
+           xciref    = 0.2334131124791e+05
 
         elseif class == CLASS_F
 
-           dtref = 0.2e+0
+         dtref = 0.2e+0
+         itmaxref = 300
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of residual, for the (2560X2560X2560) grid,
-#   after 300 time steps, with  DT = 0.2d+00
+#   Reference values of RMS-norms of residual
 #---------------------------------------------------------------------
-         xcrref[1] = 0.8505125358152e+06
-         xcrref[2] = 0.8774655318044e+05
-         xcrref[3] = 0.2167258198851e+06
-         xcrref[4] = 0.1838245257371e+06
-         xcrref[5] = 0.1175556512415e+07
+         xcrref[1] = 0.7116424271317e+07
+         xcrref[2] = 0.8159357680842e+06
+         xcrref[3] = 0.1930561069782e+07
+         xcrref[4] = 0.1633447037519e+07
+         xcrref[5] = 0.9417323380798e+07
 
 #---------------------------------------------------------------------
-#   Reference values of RMS-norms of solution error, for the (2560X2560X2560)
-#   grid, after 300 time steps, with  DT = 0.2d+00
+#   Reference values of RMS-norms of solution error
 #---------------------------------------------------------------------
-         xceref[1] = 0.5293914132486e+03
-         xceref[2] = 0.4784861621068e+02
-         xceref[3] = 0.1337701281659e+03
-         xceref[4] = 0.1154215049655e+03
-         xceref[5] = 0.8956266851467e+03
+         xceref[1] = 0.8648720989200e+04
+         xceref[2] = 0.7774221260694e+03
+         xceref[3] = 0.2175462599498e+04
+         xceref[4] = 0.1875280641999e+04
+         xceref[5] = 0.1457903413233e+05
 
 #---------------------------------------------------------------------
-#   Reference value of surface integral, for the (2560X2560X2560) grid,
-#   after 300 time steps, with DT = 0.2d+00
+#   Reference value of surface integral
 #---------------------------------------------------------------------
-         xciref =    0.1002509436546e+03
+         xciref    = 0.2448986519022e+05
 
-        else
+         if itmax == 30
 
-           verified = false
+            itmaxref = 30
+            xcrref[1] = 0.3814950058736e+08
+            xcrref[2] = 0.4280439009977e+07
+            xcrref[3] = 0.1016353864923e+08
+            xcrref[4] = 0.8627208852987e+07
+            xcrref[5] = 0.5024448179760e+08
+ 
+            xceref[1] = 0.8903253221139e+04
+            xceref[2] = 0.8129462858441e+03
+            xceref[3] = 0.2248648703838e+04
+            xceref[4] = 0.1937258920446e+04
+            xceref[5] = 0.1485251162647e+05
+ 
+            xciref    = 0.2792087395236e+05
+ 
+         end
+      else
 
-        end
+            dtref = 0.0e+0
+            itmaxref = 0
+            verified = false
+ 
+      end
 
 #---------------------------------------------------------------------
 #    verification test for residuals if gridsize is one of 
 #    the defined grid sizes above (class .ne. 'U')
 #---------------------------------------------------------------------
 
+        for i = 1:num_clusters
+            lock(verified_signal[i])
+            try
+               while !verified_signal_condition[i]
+                  wait(verified_signal[i])
+               end
+            finally
+               unlock(verified_signal[i])
+            end
+        end
+     
+        verified = true
+
 #---------------------------------------------------------------------
 #    Compute the difference of solution values and the known reference values.
 #---------------------------------------------------------------------
-        for m = 1:5
-           xcrdif[m] = abs((xcr[m]-xcrref[m])/xcrref[m])
-           xcedif[m] = abs((xce[m]-xceref[m])/xceref[m])
-                
-        end
-        xcidif = abs((xci - xciref)/xciref)
-
+        xcrdif = abs.((xcr .- xcrref)./xcrref)
+        xcedif = abs.((xce .- xceref)./xceref)
+        xcidif = abs((xci[] - xciref)/xciref)
 
 #---------------------------------------------------------------------
 #    Output the comparison of computed results to known cases.
 #---------------------------------------------------------------------
 
-        if class != CLASS_UNDEFINED
-           @printf(stdout, "\n Verification being performed for class %s\n", class)
-           @printf(stdout, " Accuracy setting for epsilon = %20.13E\n", epsilon)
-           verified = (abs(dt-dtref) <= epsilon)
-           if !verified
-              class = CLASS_UNDEFINED
-              @printf(stdout, " DT does not match the reference value of %15.8E\n", dtref)
-           end
-        else
-           @printf(stdout, " Unknown class\n", )
-        end
+         @printf(stdout, "\n Verification being performed for class %s\n", class)
+         @printf(stdout, " Accuracy setting for epsilon = %20.13E\n", epsilon)
+         verified = (abs(dt-dtref) <= epsilon)
+         if !verified
+            class = CLASS_UNDEFINED
+            @printf(stdout, " DT does not match the reference value of %15.8E\n", dtref)
+         elseif itmax != itmaxref
+            verified = false
+            @printf(stdout, " ITMAX does not match the reference value of %5i\n", itmaxref)
+         end
 
-
-        if class != CLASS_UNDEFINED
-           @printf(stdout, " Comparison of RMS-norms of residual\n", )
-        else
-           @printf(stdout, " RMS-norms of residual\n", )
-        end
+         @printf(stdout, " Comparison of RMS-norms of residual\n", )
 
         for m = 1:5
-           if class == CLASS_UNDEFINED
-              @printf(stdout, "          %2i  %20.13E\n", m, xcr[m])
-           elseif xcrdif[m] != NaN && xcrdif[m] <= epsilon
+           if xcrdif[m] != NaN && xcrdif[m] <= epsilon
               @printf(stdout, "          %2i  %20.13E%20.13E%20.13E\n", m, xcr[m], xcrref[m], xcrdif[m])
            else
               verified = false
@@ -346,16 +386,10 @@ end
            end
         end
 
-        if class != CLASS_UNDEFINED
-           @printf(stdout, " Comparison of RMS-norms of solution error\n", )
-        else
-           @printf(stdout, " RMS-norms of solution error\n", )
-        end
+        @printf(stdout, " Comparison of RMS-norms of solution error\n", )
 
         for m = 1:5
-           if class == CLASS_UNDEFINED
-              @printf(stdout, "          %2i  %20.13E\n", m, xce[m])
-           elseif xcedif[m] != NaN && xcedif[m] <= epsilon
+           if xcedif[m] != NaN && xcedif[m] <= epsilon
               @printf(stdout, "          %2i  %20.13E%20.13E%20.13E\n", m, xce[m], xceref[m], xcedif[m])
            else
               verified = false
@@ -363,30 +397,29 @@ end
            end
         end
 
-        if class != CLASS_UNDEFINED
-           @printf(stdout, " Comparison of surface integral\n", )
-        else
-           @printf(stdout, " Surface integral\n", )
-        end
+        @printf(stdout, " Comparison of surface integral\n", )
 
-        if class == CLASS_UNDEFINED
-           @printf(stdout, "              %20.13E\n", xci)
-        elseif xcidif <= epsilon
-           @printf(stdout, "              %20.13E%20.13E%20.13E\n", xci, xciref, xcidif)
+        if xcidif <= epsilon
+           @printf(stdout, "              %20.13E%20.13E%20.13E\n", xci[], xciref, xcidif)
         else
            verified = false
-           @printf(stdout, " FAILURE:     %20.13E%20.13E%20.13E\n", xci, xciref, xcidif)
+           @printf(stdout, " FAILURE:     %20.13E%20.13E%20.13E\n", xci[], xciref, xcidif)
         end
 
-        if class == CLASS_UNDEFINED
-           @printf(stdout, " No reference values provided\n", )
-           @printf(stdout, " No verification performed\n", )
-        elseif verified
+        if verified
            @printf(stdout, " Verification Successful\n", )
         else
            @printf(stdout, " Verification failed\n", )
         end
 
         return verified
+end
+
+
+function verify(xcr, xce, xci)
+
+   if node == root
+      remotecall(putVerificationReport, 1, xcr, xce, xci; role = :worker)
+   end
 
 end

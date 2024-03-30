@@ -6,13 +6,7 @@
 #
 #---------------------------------------------------------------------
 
- function blts( ldmx, ldmy, ldmz,
-                        nx, ny, nz, j, k,
-                        omega,
-                        v,
-                        ldz, ldy, ldx, d,
-                        ist, iend, jst, jend,
-                        nx0, ny0, ipt, jpt, tmax)
+ function blts( j, k, omega, v, ldz, ldy, ldx, d, ist, iend)
 
 
 

@@ -11,7 +11,7 @@
 #---------------------------------------------------------------------
 
 
-function x_solve(
+function x_solve( 
                MAX_CELL_DIM,
                JMAX,
                KMAX,
@@ -210,7 +210,7 @@ function x_solve(
                               rhs,
                               lhsc,
                               backsub_info,     
-                              )
+                                 )
          end
          if (FIRST == 0) 
             send_id[] = x_send_backsub_info(c,

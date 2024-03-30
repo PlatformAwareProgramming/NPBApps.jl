@@ -2,9 +2,9 @@
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
- function exchange_6(g, jbeg, jfin1, isiz03)
+ function exchange_6(g, jbeg, jfin1, nz0, ny, nz, east, west, comm_solve)
 
-      dum = Array{Float64}(undef, isiz03)
+      dum = Array{Float64}(undef, nz0)
 
       msgid3 = Ref{MPI.Request}()
 

@@ -12,7 +12,7 @@ ue_ijnz = Array{Float64}(undef, 5)
 #
 #---------------------------------------------------------------------
 
-function setiv(nx0, ny0, nz0)
+function setiv(u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt)
 
      for k = 2:nz - 1
          zeta = ( float(k-1) ) / (nz-1)
@@ -36,12 +36,15 @@ function setiv(nx0, ny0, nz0)
                   pzeta = (1.0e+00 - zeta) * ue_ij1[m] + zeta * ue_ijnz[m]
 
                   u[ m, i, j, k ] = pxi + peta + pzeta - pxi * peta - peta * pzeta - pzeta * pxi + pxi * peta * pzeta
+                  # @info "$m, $k, $jglob, $iglob, $pxi, $peta, $pzeta, $(u[ m, i, j, k ])"
                end
               end
             end
           end
          end
       end
+
+
 
       return nothing
 end

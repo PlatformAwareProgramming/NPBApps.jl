@@ -1,7 +1,7 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
- function pintgr(isiz02, isiz03)
+ function pintgr(u, phi1, phi2, ny0, nz0, nx, ny, nz, ipt, jpt, west, east, south, north, comm_solve)
 
 #---------------------------------------------------------------------
 #   set up the sub-domains for integeration in each processor
@@ -30,8 +30,8 @@
 #---------------------------------------------------------------------
 #   initialize
 #---------------------------------------------------------------------
-      for k = 0:isiz3+1
-        for i = 0:isiz2+1
+      for k = 0:nz+1
+        for i = 0:ny+1
           phi1[i, k] = 0.
           phi2[i, k] = 0.
         end
@@ -62,7 +62,7 @@
 #---------------------------------------------------------------------
 #  communicate in i and j directions
 #---------------------------------------------------------------------
-      exchange_4(phi1, phi2, ibeg, ifin1, jbeg, jfin1, isiz02)
+      exchange_4(phi1, phi2, ibeg, ifin1, jbeg, jfin1, ny0, nx, ny, west, east, south, north, comm_solve)
 
       frc1 = 0.0e+00
 
@@ -92,8 +92,8 @@
 #---------------------------------------------------------------------
 #   initialize
 #---------------------------------------------------------------------
-      for k = 0:isiz3+1
-        for i = 0:isiz2+1
+      for k = 0:nz+1
+        for i = 0:ny+1
           phi1[i, k] = 0.
           phi2[i, k] = 0.
         end
@@ -134,10 +134,10 @@
 #  communicate in i direction
 #---------------------------------------------------------------------
       if ind1 == 1
-        exchange_5(phi1, ibeg, ifin1, isiz03)
+        exchange_5(phi1, ibeg, ifin1, nz0, nx, nz, south, north, comm_solve)
       end
       if ind2 == 1
-        exchange_5(phi2, ibeg, ifin1, isiz03)
+        exchange_5(phi2, ibeg, ifin1, nz0, nx, nz, south, north, comm_solve)
       end
 
       frc2 = 0.0e+00
@@ -167,8 +167,8 @@
 #---------------------------------------------------------------------
 #   initialize
 #---------------------------------------------------------------------
-      for k = 0:isiz3+1
-        for i = 0:isiz2+1
+      for k = 0:nz+1
+        for i = 0:ny+1
           phi1[i, k] = 0.
           phi2[i, k] = 0.
         end
@@ -209,10 +209,10 @@
 #  communicate in j direction
 #---------------------------------------------------------------------
       if ind1 == 1
-        exchange_6(phi1, jbeg, jfin1, isiz03)
+        exchange_6(phi1, jbeg, jfin1, nz0, ny, nz, east, west, comm_solve)
       end
       if ind2 == 1
-        exchange_6(phi2, jbeg, jfin1, isiz03)
+        exchange_6(phi2, jbeg, jfin1, nz0, ny, nz, east, west, comm_solve)
       end
 
       frc3 = 0.0e+00

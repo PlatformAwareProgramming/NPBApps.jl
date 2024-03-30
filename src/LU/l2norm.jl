@@ -4,10 +4,7 @@
 
 dummy = zeros(Float64, 5)
 
-function l2norm( ldx, ldy, ldz, nx0, ny0, nz0, ist, iend, jst, jend, v, SUM, 
-   comm_solve, 
-   timeron,
-   )
+function l2norm( nx0, ny0, nz0, ist, iend, jst, jend, v, SUM, comm_solve, timeron,)
 
       dummy .= 0
 

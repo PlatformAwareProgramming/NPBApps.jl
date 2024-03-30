@@ -357,7 +357,7 @@ function verify(class, dt, no_time_steps)
 #    Compute the difference of solution values and the known reference values.
 #---------------------------------------------------------------------
 
-   # VETORIZED
+   # VECTORIZED
    xcrdif = abs.((xcr .- xcrref)./xcrref)
    xcedif = abs.((xce .- xceref)./xceref)
 

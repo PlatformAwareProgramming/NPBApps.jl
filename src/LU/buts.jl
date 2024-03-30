@@ -6,13 +6,7 @@
 #
 #---------------------------------------------------------------------
 
- function buts( ldmx, ldmy, ldmz,
-                       nx, ny, nz, j, k,
-                       omega,
-                       v, tv,
-                       d, udx, udy, udz,
-                       ist, iend, jst, jend,
-                       nx0, ny0, ipt, jpt, tmax )
+ function buts( j, k, omega, v, tv, d, udx, udy, udz, ist, iend )
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------

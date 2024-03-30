@@ -4,7 +4,7 @@
 #
 #---------------------------------------------------------------------
 
- function ERROR(nx0, ny0, nz0)
+ function ERROR(u, nx, ny, nz, ipt, jpt, ist, jst, iend, jend, errnm, comm_solve)
 
       u000ijk = Array{Float64}(undef, 5)
       dummy = zeros(Float64, 5)
@@ -16,7 +16,7 @@
             jglob = jpt + j
             for i = ist:iend
                iglob = ipt + i
-               exact( iglob, jglob, k, u000ijk, nx0, ny0, nz0)
+               exact( iglob, jglob, k, u000ijk, nx, ny, nz)
                for m = 1:5
                   tmp = ( u000ijk[m] - u[m, i, j, k] )
                   dummy[m] = dummy[m] + tmp ^ 2
@@ -32,7 +32,7 @@
        MPI.Allreduce!(dummy, errnm, MPI.SUM, comm_solve)
 
       for m = 1:5
-         errnm[m] = sqrt( errnm[m] / ( float(nx0-2)*(ny0-2)*(nz0-2) ) )
+         errnm[m] = sqrt( errnm[m] / ( float(nx-2)*(ny-2)*(nz-2) ) )
       end
 
 #      if (id.eq.0) then
