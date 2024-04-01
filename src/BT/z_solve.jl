@@ -147,8 +147,8 @@ function z_solve(
                                              rhs,
                                              lhsc,
                                              in_buffer,
-                                             timeron,
                                              ncells_v,
+                                             timeron,
                                              comm_solve,     
                                              successor,
                          ) 
