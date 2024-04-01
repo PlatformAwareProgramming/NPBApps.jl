@@ -53,9 +53,7 @@ const t_recs = "total", "rhs", "blts", "buts", "#jacld", "#jacu",
             "exch", "lcomm", "ucomm", "rcomm",
             " totcomp", " totcomm"
 
-function go(class::CLASS)
-
-      init_comm()
+function go(class::CLASS; timers=false)
          
       itmax = bt_class[class].itmax
       inorm = bt_class[class].inorm
@@ -64,35 +62,20 @@ function go(class::CLASS)
       isiz02 = bt_class[class].isiz02
       isiz03 = bt_class[class].isiz03
    
-      go(isiz01, isiz02, isiz03, itmax, inorm, dt)
+      go(isiz01, isiz02, isiz03, itmax, inorm, dt; timers=timers)
    
-   end
+end
    
-function go(params_file::String)
+function go(isiz01, isiz02, isiz03, itmax, inorm, dt; timers=false)
 
-      init_comm()
+      xdim, ydim, no_nodes, total_nodes, node, comm_solve, active, id, num, ndim = init_comm()
 
-      isiz01, isiz02, isiz03, itmax, inorm, dt = read_input(params_file)
-
-      perform(isiz01, isiz02, isiz03, itmax, inorm, dt)
-end
-
-function go()
-      go("inputlu.data")
-end
-
-function go(isiz01, isiz02, isiz03, itmax, inorm, dt)
-
-      init_comm()
-
-      perform(isiz01, isiz02, isiz03, itmax, inorm, dt)
+      perform(xdim, ydim, no_nodes, total_nodes, node, comm_solve, active, id, num, ndim, isiz01, isiz02, isiz03, itmax, inorm, dt, timers)
 
 end
 
+function perform(xdim, ydim, no_nodes, total_nodes, node, comm_solve, active, id, num, ndim, isiz01, isiz02, isiz03, itmax, inorm, dt, timeron)   
 
-function perform(isiz01, isiz02, isiz03, itmax, inorm, dt)   
-
-      npbversion = "3.4.2"
 
       class = set_class(itmax, isiz01, isiz02, isiz03)
 
@@ -114,8 +97,6 @@ function perform(isiz01, isiz02, isiz03, itmax, inorm, dt)
       if id == root
 
          @printf(stdout, "\n\n NAS Parallel Benchmarks 3.4 -- LU Benchmark\n\n", )
-
-         timeron = check_timer_flag()
 
 #---------------------------------------------------------------------
 #   check problem size
@@ -141,8 +122,6 @@ function perform(isiz01, isiz02, isiz03, itmax, inorm, dt)
          if (total_nodes != no_nodes) @printf(stdout, " WARNING: Number of processes is not in a form of (n1*n2, n1/n2 <= 2).\n Number of active processes: %6i\n", no_nodes) end
          println(stdout, )
 
-      else
-         timeron = false
       end
 
       for i = 1:t_last
@@ -152,42 +131,44 @@ function perform(isiz01, isiz02, isiz03, itmax, inorm, dt)
 #---------------------------------------------------------------------
 #   set up processor grid
 #---------------------------------------------------------------------
-      proc_grid(nx0, ny0, nz0)
+      isiz1, isiz2, isiz3, row, col = proc_grid(id, nx0, ny0, nz0, no_nodes, num, ndim)
 
 #---------------------------------------------------------------------
 #   allocate space
 #---------------------------------------------------------------------
-      alloc_space()
+      rsdnm, errnm, u, rsd, frct, flux, a, b, c, d, phi1, phi2, buf, buf1 = alloc_space(isiz1, isiz2, isiz3)
 
 #---------------------------------------------------------------------
 #   determine the neighbors
 #---------------------------------------------------------------------
-      neighbors()
+     south, east, north, west = neighbors(row, col, xdim, ydim)
 
 #---------------------------------------------------------------------
 #   set up sub-domain sizes
 #---------------------------------------------------------------------
-      subdomain(nx0, ny0, nz0)
+      nx, ny, nz, ipt, jpt, ist, jst, iend, jend = subdomain(row, col, nx0, ny0, nz0, isiz1, isiz2, isiz3, north, south, west, east, xdim, ydim)
 
 #---------------------------------------------------------------------
 #   set up coefficients
 #---------------------------------------------------------------------
-      setcoeff(nx0, ny0, nz0)
+      dxi, deta, dzeta, tx1, tx2, tx3, ty1, ty2, ty3, tz1, tz2, tz3, ii2, ji2, ki2 = setcoeff(nx0, ny0, nz0)
 
 #---------------------------------------------------------------------
 #   set the boundary values for dependent variables
 #---------------------------------------------------------------------
-      setbv(nx0, ny0, nz0)
+      setbv(u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt, north, south, west, east)
 
 #---------------------------------------------------------------------
 #   set the initial values for dependent variables
 #---------------------------------------------------------------------
-      setiv(nx0, ny0, nz0)
+      setiv(u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt)
 
 #---------------------------------------------------------------------
 #   compute the forcing term based on prescribed exact solution
 #---------------------------------------------------------------------
-      erhs(nx0, ny0, nz0)
+      erhs(frct, rsd, flux, buf, buf1, nx0, ny0, nx, ny, nz, ipt, jpt, ist, jst, iend, jend, north, south, west, east, 
+           dssp, tx1, tx2, tx3, ty1, ty2, ty3, tz1, tz2, tz3, 
+           comm_solve)
 
 #---------------------------------------------------------------------
 #   perform one SSOR iteration to touch all data and program pages 
@@ -244,71 +225,72 @@ function perform(isiz01, isiz02, isiz03, itmax, inorm, dt)
 #---------------------------------------------------------------------
 #   reset the boundary and initial values
 #---------------------------------------------------------------------
-      setbv(nx0, ny0, nz0)
-      setiv(nx0, ny0, nz0)
+      setbv(u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt, north, south, west, east)
+      setiv(u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt)
 
 #---------------------------------------------------------------------
 #   perform the SSOR iterations
 #---------------------------------------------------------------------
-      ssor(itmax,
-            comm_solve, 
-            id,
-            rsdnm,
-            u,
-            rsd,
-            frct,
-            flux,
-            a,
-            b,
-            c,
-            d,
-            buf,
-            buf1,
-            south,
-            east,
-            north,
-            west,
-            isiz1,
-            isiz2,
-            isiz3,
-            inorm,
-            itmax,
-            dt,
-            omega,
-            tolrsd,
-            nx0,
-            ny0,
-            nz0,
-            timeron,
-            tx1,
-            tx2,
-            tx3,
-            ty1,
-            ty2,
-            ty3,
-            tz1,
-            tz2,
-            tz3,
-            nx,
-            ipt,
-            ny,
-            jpt,
-            nz,
-            ist,
-            iend,
-            jst,
-            jend,
-           )
+      maxtime = ssor(
+                  itmax,
+                  comm_solve, 
+                  id,
+                  rsdnm,
+                  u,
+                  rsd,
+                  frct,
+                  flux,
+                  a,
+                  b,
+                  c,
+                  d,
+                  buf,
+                  buf1,
+                  south,
+                  east,
+                  north,
+                  west,
+                  isiz1,
+                  isiz2,
+                  isiz3,
+                  inorm,
+                  itmax,
+                  dt,
+                  omega,
+                  tolrsd,
+                  nx0,
+                  ny0,
+                  nz0,
+                  timeron,
+                  tx1,
+                  tx2,
+                  tx3,
+                  ty1,
+                  ty2,
+                  ty3,
+                  tz1,
+                  tz2,
+                  tz3,
+                  nx,
+                  ipt,
+                  ny,
+                  jpt,
+                  nz,
+                  ist,
+                  iend,
+                  jst,
+                  jend,
+            )
 
 #---------------------------------------------------------------------
 #   compute the solution error
 #---------------------------------------------------------------------
-      ERROR(nx0, ny0, nz0)
+      ERROR(u, errnm, nx0, ny0, nz0, nz, jst, jpt, ist, ipt, iend, jend, comm_solve)
 
 #---------------------------------------------------------------------
 #   compute the surface integral
 #---------------------------------------------------------------------
-      frc = pintgr(ny0, nz0)
+      frc = pintgr(u, nx, ny, nz, isiz02, isiz03, isiz2, isiz3, ipt, jpt, north, south, west, east, phi1, phi2,  dxi, deta, dzeta, ii2, ji2, ki2, comm_solve)
       
 #---------------------------------------------------------------------
 #   verification test
@@ -330,31 +312,29 @@ function perform(isiz01, isiz02, isiz03, itmax, inorm, dt)
 
       end
 
-      if (!timeron) @goto L999 end
-
-      t1 = Array{Float64}(undef, t_last+2)
-
-      for i = 1:t_last
-         t1[i] = timer_read(i)
-      end
-      t1[t_rhs] = t1[t_rhs] - t1[t_exch]
-      t1[t_last+2] = t1[t_lcomm]+t1[t_ucomm]+t1[t_rcomm]+t1[t_exch]
-      t1[t_last+1] = t1[t_total] - t1[t_last+2]
-
-      tsum = MPI.Reduce(t1, MPI.SUM, 0, comm_solve)
-      tming = MPI.Reduce(t1, MPI.MIN, 0, comm_solve)
-      tmaxg = MPI.Reduce(t1, MPI.MAX, 0, comm_solve)
-
-      if id == 0
-         @printf(stdout, " nprocs =%6i           minimum     maximum     average\n", no_nodes)
-         for i = 1:t_last+2
-            if t_recs[i][1:1] != "#"
-               tsum[i] = tsum[i] / no_nodes
-               @printf(stdout, " timer %2i(%8s) :  %10.4F  %10.4F  %10.4F\n", i, t_recs[i], tming[i], tmaxg[i], tsum[i])
-            end
+      if timeron
+         t1 = Array{Float64}(undef, t_last+2)
+         for i = 1:t_last
+             t1[i] = timer_read(i)
          end
-      end
+         t1[t_rhs] = t1[t_rhs] - t1[t_exch]
+         t1[t_last+2] = t1[t_lcomm]+t1[t_ucomm]+t1[t_rcomm]+t1[t_exch]
+         t1[t_last+1] = t1[t_total] - t1[t_last+2]
 
+         tsum = MPI.Reduce(t1, MPI.SUM, 0, comm_solve)
+         tming = MPI.Reduce(t1, MPI.MIN, 0, comm_solve)
+         tmaxg = MPI.Reduce(t1, MPI.MAX, 0, comm_solve)
+
+         if id == 0
+            @printf(stdout, " nprocs =%6i           minimum     maximum     average\n", no_nodes)
+            for i = 1:t_last+2
+                  if t_recs[i][1:1] != "#"
+                  tsum[i] = tsum[i] / no_nodes
+                  @printf(stdout, " timer %2i(%8s) :  %10.4F  %10.4F  %10.4F\n", i, t_recs[i], tming[i], tmaxg[i], tsum[i])
+                  end
+            end
+      end
+      end
       @label L999
       MPI.Finalize()
 

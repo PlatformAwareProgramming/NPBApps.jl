@@ -43,7 +43,7 @@ function y_solve(
 
       jstart = 0
 
-      if (timeron) timer_start(t_ysolve) end
+     if timeron timer_start(t_ysolve) end
 #---------------------------------------------------------------------
 #     in our terminology stage is the number of the cell in the y-direction
 #     i.e. stage = 1 means the start of the line stage=ncells means end
@@ -92,7 +92,7 @@ function y_solve(
 #     processor working on preceeding cell
 #---------------------------------------------------------------------
             FIRST = 0
-            if (timeron) timer_start(t_ycomm) end
+           if timeron timer_start(t_ycomm) end
             recv_id[] = y_receive_solve_info(c,
                                              MAX_CELL_DIM,
                                              cell_coord,
@@ -110,7 +110,7 @@ function y_solve(
 #---------------------------------------------------------------------
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
-            if (timeron) timer_stop(t_ycomm) end
+           if timeron timer_stop(t_ycomm) end
 #---------------------------------------------------------------------
 #     install C'(jstart+1) and rhs'(jstart+1) to be used in this cell
 #---------------------------------------------------------------------
@@ -180,7 +180,7 @@ function y_solve(
                               backsub_info,
                               )
          else
-            if (timeron) timer_start(t_ycomm) end
+           if timeron timer_start(t_ycomm) end
             recv_id[] = y_receive_backsub_info(c,
                                              MAX_CELL_DIM, 
                                              cell_coord,
@@ -191,7 +191,7 @@ function y_solve(
                                    )
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
-            if (timeron) timer_stop(t_ycomm) end
+           if timeron timer_stop(t_ycomm) end
             y_unpack_backsub_info(c,
                                    IMAX,
                                    KMAX,
@@ -223,7 +223,7 @@ function y_solve(
          end
       end
 
-      if (timeron) timer_stop(t_ysolve) end
+     if timeron timer_stop(t_ysolve) end
 
       return nothing
 end
@@ -310,9 +310,9 @@ function y_send_solve_info(c,
 #---------------------------------------------------------------------
 #     send buffer 
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_ycomm) end
+     if timeron timer_start(t_ycomm) end
       send_id = MPI.Isend(view(in_buffer,1:buffer_size),successor[2],SOUTH+ip+kp*ncells, comm_solve)
-      if (timeron) timer_stop(t_ycomm) end
+     if timeron timer_stop(t_ycomm) end
 
       return send_id
 end
@@ -351,9 +351,9 @@ function y_send_backsub_info(c,
             ptr = ptr+BLOCK_SIZE
          end
       end
-      if (timeron) timer_start(t_ycomm) end
+     if timeron timer_start(t_ycomm) end
       send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[2], NORTH+ip+kp*ncells, comm_solve)
-      if (timeron) timer_stop(t_ycomm) end
+     if timeron timer_stop(t_ycomm) end
 
       return send_id
 end

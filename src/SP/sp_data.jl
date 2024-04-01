@@ -52,93 +52,97 @@ const t_last = 10
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
-function alloc_space(problem_size)
+function alloc_space(maxcells, problem_size)
 
-      global MAX_CELL_DIM = div(problem_size,maxcells)+1
+      MAX_CELL_DIM = div(problem_size,maxcells)+1
 
-      global IMAX = MAX_CELL_DIM
-      global JMAX = MAX_CELL_DIM
-      global KMAX = MAX_CELL_DIM
+      IMAX = MAX_CELL_DIM
+      JMAX = MAX_CELL_DIM
+      KMAX = MAX_CELL_DIM
 
-      global IMAXP = div(IMAX,2)*2+1
-      global JMAXP = div(JMAX,2)*2+1
+      IMAXP = div(IMAX,2)*2+1
+      JMAXP = div(JMAX,2)*2+1
 
 #---------------------------------------------------------------------
 # +1 at end to avoid zero length arrays for 1 node
 #---------------------------------------------------------------------
-      global BUF_SIZE = MAX_CELL_DIM*MAX_CELL_DIM*(maxcells-1)*60*2+1
+      BUF_SIZE = MAX_CELL_DIM*MAX_CELL_DIM*(maxcells-1)*60*2+1
 
-      global cell_coord = zeros(Int64, 3, maxcells)
-      global cell_low = zeros(Int64, 3, maxcells)
-      global cell_high = zeros(Int64, 3, maxcells)
-      global cell_size = zeros(Int64, 3, maxcells)
-      global cell_start = zeros(Int64, 3, maxcells)
-      global cell_end = zeros(Int64, 3, maxcells)
-      global slice = zeros(Int64, 3, maxcells)
+      cell_coord = zeros(Int64, 3, maxcells)
+      cell_low = zeros(Int64, 3, maxcells)
+      cell_high = zeros(Int64, 3, maxcells)
+      cell_size = zeros(Int64, 3, maxcells)
+      cell_start = zeros(Int64, 3, maxcells)
+      cell_end = zeros(Int64, 3, maxcells)
+      slice = zeros(Int64, 3, maxcells)
 
       u0 = zeros(Float64, IMAXP+4, JMAXP+4, KMAX + 4, 5, maxcells)
-      global u = OffsetArray(u0, -2:IMAXP+1, -2:JMAXP+1, -2:KMAX+1, 1:5, 1:maxcells)
+      u = OffsetArray(u0, -2:IMAXP+1, -2:JMAXP+1, -2:KMAX+1, 1:5, 1:maxcells)
 
       us0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global us = OffsetArray(us0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      us = OffsetArray(us0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
       
       vs0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global vs = OffsetArray(vs0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      vs = OffsetArray(vs0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
 
       ws0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global ws = OffsetArray(ws0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      ws = OffsetArray(ws0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
 
       qs0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global qs = OffsetArray(qs0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      qs = OffsetArray(qs0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
      
       ainv0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global ainv = OffsetArray(ainv0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      ainv = OffsetArray(ainv0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
      
       rho_i0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global rho_i = OffsetArray(rho_i0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      rho_i = OffsetArray(rho_i0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
 
       speed0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global speed = OffsetArray(speed0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      speed = OffsetArray(speed0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
       
       square0 = zeros(Float64, IMAX+2, JMAX+2, KMAX+2, maxcells)
-      global square = OffsetArray(square0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
+      square = OffsetArray(square0, -1:IMAX, -1:JMAX, -1:KMAX, 1:maxcells)
 
       rhs0 = zeros(Float64, IMAXP, JMAXP, KMAX, 5, maxcells)
-      global rhs = OffsetArray(rhs0, 0:IMAXP-1, 0:JMAXP-1, 0:KMAX-1, 1:5, 1:maxcells)
+      rhs = OffsetArray(rhs0, 0:IMAXP-1, 0:JMAXP-1, 0:KMAX-1, 1:5, 1:maxcells)
 
       forcing0 = zeros(Float64, IMAXP, JMAXP, KMAX, 5, maxcells)
-      global forcing = OffsetArray(forcing0, 0:IMAXP-1, 0:JMAXP-1, 0:KMAX-1, 1:5, 1:maxcells)
+      forcing = OffsetArray(forcing0, 0:IMAXP-1, 0:JMAXP-1, 0:KMAX-1, 1:5, 1:maxcells)
       
       lhs0 = zeros(Float64, IMAXP, JMAXP, KMAX, 15, maxcells)
-      global lhs = OffsetArray(lhs0, 0:IMAXP-1, 0:JMAXP-1, 0:KMAX-1, 1:15, 1:maxcells)
+      lhs = OffsetArray(lhs0, 0:IMAXP-1, 0:JMAXP-1, 0:KMAX-1, 1:15, 1:maxcells)
 
-      global in_buffer = Array{Float64}(undef, BUF_SIZE)
-      global out_buffer = Array{Float64}(undef, BUF_SIZE)
+      in_buffer = Array{Float64}(undef, BUF_SIZE)
+      out_buffer = Array{Float64}(undef, BUF_SIZE)
 
       cv0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global cv = OffsetArray(cv0, -2:MAX_CELL_DIM+1)
+      cv = OffsetArray(cv0, -2:MAX_CELL_DIM+1)
 
       rhon0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global rhon = OffsetArray(rhon0, -2:MAX_CELL_DIM+1)
+      rhon = OffsetArray(rhon0, -2:MAX_CELL_DIM+1)
 
       rhos0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global rhos = OffsetArray(rhos0, -2:MAX_CELL_DIM+1)
+      rhos = OffsetArray(rhos0, -2:MAX_CELL_DIM+1)
       
       rhoq0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global rhoq = OffsetArray(rhoq0, -2:MAX_CELL_DIM+1)
+      rhoq = OffsetArray(rhoq0, -2:MAX_CELL_DIM+1)
 
       cuf0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global cuf = OffsetArray(cuf0, -2:MAX_CELL_DIM+1)
+      cuf = OffsetArray(cuf0, -2:MAX_CELL_DIM+1)
 
       q0 = zeros(Float64, MAX_CELL_DIM + 4)
-      global q = OffsetArray(q0, -2:MAX_CELL_DIM+1)
+      q = OffsetArray(q0, -2:MAX_CELL_DIM+1)
       
       ue0 = zeros(Float64, MAX_CELL_DIM + 4, 5)
-      global ue = OffsetArray(ue0, -2:MAX_CELL_DIM+1, 1:5)
+      ue = OffsetArray(ue0, -2:MAX_CELL_DIM+1, 1:5)
 
       buf0 = zeros(Float64, MAX_CELL_DIM + 4, 5)
-      global buf = OffsetArray(buf0, -2:MAX_CELL_DIM+1, 1:5)
+      buf = OffsetArray(buf0, -2:MAX_CELL_DIM+1, 1:5)
                
-      return nothing
+      return MAX_CELL_DIM, IMAX, JMAX, KMAX, IMAXP, JMAXP, BUF_SIZE, 
+             cell_coord, cell_low, cell_high, cell_size, cell_start, cell_end, slice, 
+             u, us, vs, ws, qs, ainv, rho_i, speed, square, rhs, forcing, lhs, in_buffer, out_buffer,
+             cv, rhon, rhos, rhoq, cuf, q, ue, buf
+
 end
 

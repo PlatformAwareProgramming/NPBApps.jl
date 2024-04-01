@@ -124,7 +124,7 @@ module LU
     include("LU/exchange_4.jl")
     include("LU/exchange_5.jl")
     include("LU/exchange_6.jl")
-    include("LU/jacld_vec.jl")
+#    include("LU/jacld_vec.jl")
     include("LU/jacld.jl")
 #    include("LU/jacu_vec.jl")
     include("LU/jacu.jl")

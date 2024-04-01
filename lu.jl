@@ -1,5 +1,5 @@
-using Pkg
-Pkg.activate(".")
+#using Pkg
+#Pkg.activate(".")
 using NPBApps
-#LU.go(LU.CLASS_S)
-LU.go(12, 12, 12, 50, 50, 0.5)
+LU.go(LU.CLASS_A; timers=true)
+#LU.go(6, 6, 6, 50, 50, 0.5)

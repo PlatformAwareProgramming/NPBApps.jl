@@ -4,7 +4,9 @@
 #
 #---------------------------------------------------------------------
 
- function erhs(nx0, ny0, nz0)
+ function erhs(frct, rsd, flux, buf, buf1, nx0, ny0, nx, ny, nz, ipt, jpt, ist, jst, iend, jend, north, south, west, east, 
+               dssp, tx1, tx2, tx3, ty1, ty2, ty3, tz1, tz2, tz3, 
+               comm_solve)
 
       dsspm = dssp
 

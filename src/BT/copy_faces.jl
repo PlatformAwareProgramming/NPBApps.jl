@@ -186,7 +186,7 @@ function copy_faces(ss,
 #     but can send all face information simultaneously to the neighboring 
 #     cells in all directions          
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_bpack) end
+      if timeron timer_start(t_bpack) end
       p0 = 0
       p1 = 0
       p2 = 0
@@ -297,9 +297,9 @@ function copy_faces(ss,
 #     cell loop
 #---------------------------------------------------------------------
       end
-      if (timeron) timer_stop(t_bpack) end
+      if timeron timer_stop(t_bpack) end
 
-      if (timeron) timer_start(t_exch) end
+      if timeron timer_start(t_exch) end
 
       requests[1] = MPI.Irecv!(view(in_buffer,sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = successor[1], tag = WEST)
       requests[2] = MPI.Irecv!(view(in_buffer,sr[2]:sr[2]+b_size[2]-1), comm_rhs; source = predecessor[1], tag = EAST)
@@ -317,12 +317,12 @@ function copy_faces(ss,
 
       MPI.Waitall(requests)
 
-      if (timeron) timer_stop(t_exch) end
+      if timeron timer_stop(t_exch) end
 
 #---------------------------------------------------------------------
 #     unpack the data that has just been received;             
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_bpack) end
+      if timeron timer_start(t_bpack) end
       p0 = 0
       p1 = 0
       p2 = 0
@@ -415,7 +415,7 @@ function copy_faces(ss,
 #     cells loop
 #---------------------------------------------------------------------
       end
-      if (timeron) timer_stop(t_bpack) end
+      if timeron timer_stop(t_bpack) end
 
 #---------------------------------------------------------------------
 #     do the rest of the rhs that uses the copied face values          

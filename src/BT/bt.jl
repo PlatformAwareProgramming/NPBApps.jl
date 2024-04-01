@@ -42,9 +42,7 @@
 #---------------------------------------------------------------------
 
 
-function go(class::CLASS)
-
-   setup_mpi()
+function go(class::CLASS; timers = false)
 
    problem_size = bt_class[class].problem_size
    
@@ -56,67 +54,20 @@ function go(class::CLASS)
    grid_points[2] = problem_size
    grid_points[3] = problem_size
 
-   go(grid_points, niter, dt)
+   go(grid_points, niter, dt; timers = timers)
 
 end
 
-function go(params_file::String)
 
-   setup_mpi()
+function go(grid_points, niter, dt; timers = false)
 
-   if node == root
+   maxcells, no_nodes, total_nodes, node, comm_setup, active, comm_solve, comm_rhs = setup_mpi()
 
-      fstatus = isfile(params_file) ? 0 : 1
-   #
-      grid_points = zeros(Integer, 3)
-      if fstatus == 0
-         @printf(stdout, " Reading from input file params_file\n", )
-         f = open(params_file,"r")
-         niter = parse(Int, readline(f))
-         dt = parse(Int, readline(f))
-         grid_points[1] = parse(Int, readline(f))
-         grid_points[2] = parse(Int, readline(f))
-         grid_points[3] = parse(Int, readline(f))
-         close(f)
-      else
-         @printf(stdout, " No input file params_file. Using defaults (class S) \n", )
-         problem_size =  class[S].problem_size
-         niter = class[S].niter
-         dt    = class[S].dt
-         grid_points[1] = problem_size
-         grid_points[2] = problem_size
-         grid_points[3] = problem_size
-      end
-   else
-      niter = -1
-      dt = -1
-      class = CLASS_UNDEFINED
-   end
-
-   niter = MPI.bcast(niter, comm_setup; root=root)
-   dt = MPI.bcast(dt, comm_setup; root=root)
-
-   grid_points_0 = MPI.bcast(grid_points, comm_setup; root=root)
-   grid_points[1] = grid_points_0[1]
-   grid_points[2] = grid_points_0[2]
-   grid_points[3] = grid_points_0[3]
-
-   perform(grid_points, niter, dt)
-end
-
-function go()
-   go("inputbt.data")
-end
-
-function go(grid_points, niter, dt)
-
-   setup_mpi()
-
-   perform(grid_points, niter, dt)
+   perform(maxcells, no_nodes, total_nodes, node, comm_setup, active, comm_solve, comm_rhs, grid_points, niter, dt; timeron = timers)
 
 end
 
-function perform(grid_points, niter, dt)
+function perform(maxcells, no_nodes, total_nodes, node, comm_setup, active, comm_solve, comm_rhs, grid_points, niter, dt; timeron = 0)
 
        npbversion="3.4.2"
 
@@ -141,8 +92,6 @@ function perform(grid_points, niter, dt)
 
           @printf(stdout, "\n\n NAS Parallel Benchmarks 3.4 -- BT Benchmark\n\n", )
 
-          global timeron = check_timer_flag()
-
           @printf(stdout, " Size: %4ix%4ix%4i  (class %s)\n", grid_points[1], grid_points[2], grid_points[3], class)
           @printf(stdout, " Iterations: %4i    dt: %11.7F\n", niter, dt)
           @printf(stdout, " Total number of processes: %6i\n", total_nodes)
@@ -150,15 +99,15 @@ function perform(grid_points, niter, dt)
              @printf(stdout, " WARNING: Number of processes is not a square number (%0i active)\n", no_nodes) 
           end
           println(stdout)
-       else
-            global timeron = -1
        end
 
-       timeron = MPI.bcast(timeron, comm_setup; root=root)
+       MAX_CELL_DIM, IMAX, JMAX, KMAX, BUF_SIZE, 
+              cell_coord, cell_low, cell_high, cell_size, cell_start, cell_end, slice,
+              forcing, u, rhs, lhsc, backsub_info, in_buffer, out_buffer, 
+              #cv, rhon, rhos, rhoq, 
+              cuf, q, ue, buf, fjac, njac, lhsa, lhsb, us, vs, ws, qs, rho_i, square = alloc_space(maxcells, grid_points[1])
 
-       alloc_space(grid_points[1])
-
-       make_set(grid_points)
+       ncells = make_set(node, no_nodes, grid_points, cell_coord, cell_low, cell_high, cell_size, slice)
 
        for c = 1:maxcells
           if (cell_size[1, c] > IMAX) || (cell_size[2, c] > JMAX) ||(cell_size[3, c] > KMAX)
@@ -172,28 +121,40 @@ function perform(grid_points, niter, dt)
           timer_clear(i)
        end
 
-       set_constants(dt, grid_points)
+       dnxm1, dnym1, dnzm1 , 
+             tx1, tx2, tx3, 
+             ty1, ty2, ty3, 
+             tz1, tz2, tz3, 
+             dttx1 , dttx2, 
+             dtty1, dtty2, 
+             dttz1, dttz2, 
+             c2dttx1, c2dtty1, c2dttz1, dtdssp, 
+             comz1, comz4, comz5, comz6, 
+             c3c4tx3, c3c4ty3, c3c4tz3, 
+             dx1tx1, dx2tx1, dx3tx1, dx4tx1, dx5tx1,
+             dy1ty1, dy2ty1, dy3ty1, dy4ty1, dy5ty1, 
+             dz1tz1, dz2tz1, dz3tz1, dz4tz1, dz5tz1 , 
+             xxcon1, xxcon2, xxcon3, xxcon4, xxcon5,
+             yycon1, yycon2, yycon3, yycon4, yycon5,
+             zzcon1, zzcon2, zzcon3, zzcon4, zzcon5 = set_constants(dt, grid_points)
 
-       initialize()
+       initialize(IMAX, JMAX, KMAX, ncells, u, cell_low, cell_high, cell_size, slice, dnxm1, dnym1, dnzm1)
 
        setup_btio()
-       idump = 0
 
-       lhsinit()
+       lhsinit(ncells, lhsc, cell_coord, cell_start, cell_end, cell_size)
 
-       exact_rhs()
+       exact_rhs(ncells, forcing, ue, buf, cuf, q, cell_low, cell_start, cell_end, cell_size, dssp, 
+                   tx2, ty2, tz2, 
+                   dnxm1, dnym1, dnzm1, 
+                   xxcon1, xxcon2, xxcon3, xxcon4, xxcon5, 
+                   yycon1, yycon2, yycon3, yycon4, yycon5, 
+                   zzcon1, zzcon2, zzcon3, zzcon4, zzcon5, 
+                   dx1tx1, dx2tx1, dx3tx1, dx4tx1, dx5tx1,
+                   dy1ty1, dy2ty1, dy3ty1, dy4ty1, dy5ty1,
+                   dz1tz1, dz2tz1, dz3tz1, dz4tz1, dz5tz1)
 
-       compute_buffer_size(5)
-
-       if (no_nodes > 1)
-         ss = SA[start_send_east::Int start_send_west::Int start_send_north::Int start_send_south::Int start_send_top::Int start_send_bottom::Int]
-         sr = SA[start_recv_east::Int start_recv_west::Int start_recv_north::Int start_recv_south::Int start_recv_top::Int start_recv_bottom::Int]
-         b_size = SA[east_size::Int west_size::Int north_size::Int south_size::Int top_size::Int bottom_size::Int]
-       else
-         ss = nothing
-         sr = nothing
-         b_size = nothing
-       end
+       ss, sr, b_size = compute_buffer_size(no_nodes, ncells, cell_coord, cell_size, 5)
 
        utmp = OffsetArray(zeros(Float64, 6, JMAX+4), 1:6, -2:JMAX+1)
 
@@ -270,7 +231,7 @@ function perform(grid_points, niter, dt)
             successor,
             utmp,
        )
-       initialize()
+       initialize(IMAX, JMAX, KMAX, ncells, u, cell_low, cell_high, cell_size, slice, dnxm1, dnym1, dnzm1)
 
 #---------------------------------------------------------------------
 #      Synchronize before placing time stamp
@@ -375,7 +336,37 @@ function perform(grid_points, niter, dt)
        t1[1] = timer_read(t_enorm)
 
        timer_clear(t_enorm)
-       verified = verify(class, grid_points, dt, ss, sr, b_size)
+       verified = verify(no_nodes, node, 
+                         ncells, 
+                         class, 
+                         grid_points,
+                         cell_coord, cell_low, cell_high, cell_start, cell_end, cell_size,
+                         forcing,        
+                         u,
+                         rhs,
+                         in_buffer,
+                         out_buffer,
+                         us,
+                         vs,
+                         ws,
+                         qs,
+                         rho_i,
+                         square,
+                         dt,
+                         ss,
+                         sr,
+                         b_size,
+                         tx2, ty2, tz2,
+                         dx1tx1, dx2tx1, dx3tx1, dx4tx1, dx5tx1,
+                         dy1ty1, dy2ty1, dy3ty1, dy4ty1, dy5ty1,
+                         dz1tz1, dz2tz1, dz3tz1, dz4tz1, dz5tz1,
+                         dnxm1, dnym1, dnzm1,
+                         xxcon2, xxcon3, xxcon4, xxcon5,
+                         yycon2, yycon3, yycon4, yycon5,
+                         zzcon2, zzcon3, zzcon4, zzcon5,
+                         timeron,
+                         comm_setup,
+                         comm_rhs)
 
        tmax = MPI.Reduce(t, MPI.MAX, root, comm_setup)
 
@@ -397,27 +388,27 @@ function perform(grid_points, niter, dt)
        ttt = timer_read(64)
        @printf(stdout, " Time x_solve_cell =             %12.2F\n", ttt)
 
-       if (!timeron) @goto L999 end
+       if timeron
+         for i = 1:t_zcomm
+            t1[i] = timer_read(i)
+         end
+         t1[t_xsolve] = t1[t_xsolve] - t1[t_xcomm]
+         t1[t_ysolve] = t1[t_ysolve] - t1[t_ycomm]
+         t1[t_zsolve] = t1[t_zsolve] - t1[t_zcomm]
+         t1[t_comm] = t1[t_xcomm]+t1[t_ycomm]+t1[t_zcomm]+t1[t_exch]
+         t1[t_comp] = t1[t_total] - t1[t_comm]
 
-       for i = 1:t_zcomm
-          t1[i] = timer_read(i)
-       end
-       t1[t_xsolve] = t1[t_xsolve] - t1[t_xcomm]
-       t1[t_ysolve] = t1[t_ysolve] - t1[t_ycomm]
-       t1[t_zsolve] = t1[t_zsolve] - t1[t_zcomm]
-       t1[t_comm] = t1[t_xcomm]+t1[t_ycomm]+t1[t_zcomm]+t1[t_exch]
-       t1[t_comp] = t1[t_total] - t1[t_comm]
+         tsum = MPI.Reduce(t1, MPI.SUM, 0, comm_setup)
+         tming = MPI.Reduce(t1, MPI.MIN, 0, comm_setup)
+         tmaxg = MPI.Reduce(t1, MPI.MAX, 0, comm_setup)
 
-       tsum = MPI.Reduce(t1, MPI.SUM, 0, comm_setup)
-       tming = MPI.Reduce(t1, MPI.MIN, 0, comm_setup)
-       tmaxg = MPI.Reduce(t1, MPI.MAX, 0, comm_setup)
-
-       if node == 0
-          @printf(stdout, " nprocs =%6i           minimum     maximum     average\n", no_nodes)
-          for i = 1:t_last
-             tsum[i] = tsum[i] / no_nodes
-             @printf(stdout, " timer %2i(%8s) :  %10.4F  %10.4F  %10.4F\n", i, t_recs[i], tming[i], tmaxg[i], tsum[i])
-          end
+         if node == 0
+            @printf(stdout, " nprocs =%6i           minimum     maximum     average\n", no_nodes)
+            for i = 1:t_last
+               tsum[i] = tsum[i] / no_nodes
+               @printf(stdout, " timer %2i(%8s) :  %10.4F  %10.4F  %10.4F\n", i, t_recs[i], tming[i], tmaxg[i], tsum[i])
+            end
+         end
        end
 
        @label L999

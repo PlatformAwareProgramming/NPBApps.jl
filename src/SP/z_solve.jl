@@ -56,7 +56,7 @@ function z_solve(_::Val{ncells}, # ::Int64,
 # and after that reversing the direction for the backsubstitution  
 #---------------------------------------------------------------------
 
-       if (timeron) timer_start(t_zsolve) end
+      if timeron timer_start(t_zsolve) end
 #---------------------------------------------------------------------
 #                          FORWARD ELIMINATION  
 #---------------------------------------------------------------------
@@ -81,9 +81,9 @@ function z_solve(_::Val{ncells}, # ::Int64,
 #            sides and the upper diagonal elements of the previous two rows
 #---------------------------------------------------------------------
 
-             if (timeron) timer_start(t_zcomm) end
+            if timeron timer_start(t_zcomm) end
              requests[1] = MPI.Irecv!(in_buffer, predecessor[3], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_zcomm) end
+            if timeron timer_stop(t_zcomm) end
 
 #---------------------------------------------------------------------
 #            communication has already been started. 
@@ -105,9 +105,9 @@ function z_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_zcomm) end
+            if timeron timer_start(t_zcomm) end
              MPI.Waitall(requests)
-              if (timeron) timer_stop(t_zcomm) end
+             if timeron timer_stop(t_zcomm) end
 
 #---------------------------------------------------------------------
 #            unpack the buffer                                 
@@ -343,9 +343,9 @@ function z_solve(_::Val{ncells}, # ::Int64,
              end
 
 
-             if (timeron) timer_start(t_zcomm) end
+            if timeron timer_start(t_zcomm) end
              requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[3], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_zcomm) end
+            if timeron timer_stop(t_zcomm) end
 
           end
        end
@@ -378,9 +378,9 @@ function z_solve(_::Val{ncells}, # ::Int64,
 #            solution of the previous two stations     
 #---------------------------------------------------------------------
 
-             if (timeron) timer_start(t_zcomm) end
+            if timeron timer_start(t_zcomm) end
              requests[1] = MPI.Irecv!(in_buffer, successor[3], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_zcomm) end
+            if timeron timer_stop(t_zcomm) end
 
 
 #---------------------------------------------------------------------
@@ -407,9 +407,9 @@ function z_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_zcomm) end
+            if timeron timer_start(t_zcomm) end
              MPI.Waitall(requests)
-             if (timeron) timer_stop(t_zcomm) end
+            if timeron timer_stop(t_zcomm) end
 
 #---------------------------------------------------------------------
 #            unpack the buffer for the first three factors         
@@ -528,9 +528,9 @@ function z_solve(_::Val{ncells}, # ::Int64,
                 end
              end
 
-             if (timeron) timer_start(t_zcomm) end
+            if timeron timer_start(t_zcomm) end
              requests[2] = MPI.Isend(view(out_buffer,1:10*buffer_size), predecessor[3], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_zcomm) end
+            if timeron timer_stop(t_zcomm) end
 
           end
 
@@ -556,7 +556,7 @@ function z_solve(_::Val{ncells}, # ::Int64,
 
        end
 
-       if (timeron) timer_stop(t_zsolve) end
+      if timeron timer_stop(t_zsolve) end
 
        return nothing
 end

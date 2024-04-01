@@ -41,7 +41,7 @@ function z_solve(
 
       kstart = 0
 
-      if (timeron) timer_start(t_zsolve) end
+     if timeron timer_start(t_zsolve) end
 #---------------------------------------------------------------------
 #     in our terminology stage is the number of the cell in the y-direction
 #     i.e. stage = 1 means the start of the line stage=ncells means end
@@ -89,7 +89,7 @@ function z_solve(
 #     processor working on preceeding cell
 #---------------------------------------------------------------------
             FIRST = 0
-            if (timeron) timer_start(t_zcomm) end
+           if timeron timer_start(t_zcomm) end
             recv_id[] = z_receive_solve_info(c,
                                              MAX_CELL_DIM,
                                              cell_coord,
@@ -107,7 +107,7 @@ function z_solve(
 #---------------------------------------------------------------------
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
-            if (timeron) timer_stop(t_zcomm) end
+           if timeron timer_stop(t_zcomm) end
 #---------------------------------------------------------------------
 #     install C'(kstart+1) and rhs'(kstart+1) to be used in this cell
 #---------------------------------------------------------------------
@@ -176,7 +176,7 @@ function z_solve(
                               backsub_info,
                     )
          else
-            if (timeron) timer_start(t_zcomm) end
+           if timeron timer_start(t_zcomm) end
             recv_id[] = z_receive_backsub_info(c, 
                                              MAX_CELL_DIM,
                                              cell_coord,
@@ -187,7 +187,7 @@ function z_solve(
                                    )
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
-            if (timeron) timer_stop(t_zcomm) end
+           if timeron timer_stop(t_zcomm) end
             z_unpack_backsub_info(c,
                                    IMAX,
                                    JMAX,
@@ -218,7 +218,7 @@ function z_solve(
          end
       end
 
-      if (timeron) timer_stop(t_zsolve) end
+     if timeron timer_stop(t_zsolve) end
 
       return nothing
 end
@@ -304,9 +304,9 @@ end
 #---------------------------------------------------------------------
 #     send buffer 
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_zcomm) end
+     if timeron timer_start(t_zcomm) end
       send_id = MPI.Isend(view(in_buffer,1:buffer_size), successor[3], BOTTOM+ip+jp*ncells, comm_solve)
-      if (timeron) timer_stop(t_zcomm) end
+     if timeron timer_stop(t_zcomm) end
 
       return send_id
 end
@@ -346,9 +346,9 @@ end
          end
       end
 
-      if (timeron) timer_start(t_zcomm) end
+     if timeron timer_start(t_zcomm) end
       send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[3],TOP+ip+jp*ncells, comm_solve)
-      if (timeron) timer_stop(t_zcomm) end
+     if timeron timer_stop(t_zcomm) end
 
       return send_id
 end

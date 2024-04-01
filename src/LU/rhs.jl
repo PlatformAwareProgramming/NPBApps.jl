@@ -33,7 +33,7 @@
                jend,
       )
 
-      if (timeron) timer_start(t_rhs) end
+     if timeron timer_start(t_rhs) end
 
       for k = 1:nz
          for j = 1:ny
@@ -58,7 +58,7 @@
 #---------------------------------------------------------------------
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_exch) end
+     if timeron timer_start(t_exch) end
       exchange_3(u, iex,
                   comm_solve, 
                   buf,
@@ -71,7 +71,7 @@
                   ny,
                   nz,
                  )
-      if (timeron) timer_stop(t_exch) end
+     if timeron timer_stop(t_exch) end
 
       L1 = 0
       if (north == -1) L1 = 1 end
@@ -217,7 +217,7 @@
 #---------------------------------------------------------------------
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_exch) end
+     if timeron timer_start(t_exch) end
       exchange_3(u, iex,
                   comm_solve, 
                   buf,
@@ -230,7 +230,7 @@
                   ny,
                   nz,
                 )
-      if (timeron) timer_stop(t_exch) end
+     if timeron timer_stop(t_exch) end
 
       L1 = 0
       if (west == -1) L1 = 1 end
@@ -524,7 +524,7 @@
          end
       end
 
-      if (timeron) timer_stop(t_rhs) end
+     if timeron timer_stop(t_rhs) end
 
       return nothing
 end

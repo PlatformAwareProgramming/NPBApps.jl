@@ -4,18 +4,18 @@
 #
 #---------------------------------------------------------------------
 
- function subdomain(nx0, ny0, nz0)
+ function subdomain(row, col, nx0, ny0, nz0, isiz1, isiz2, isiz3, north, south, west, east, xdim, ydim)
 
 #---------------------------------------------------------------------
 #   x dimension
 #---------------------------------------------------------------------
       mm   = mod(nx0, xdim)
       if row <= mm
-        global nx = div(nx0,xdim) + 1
-        global ipt = (row-1)*nx
+        nx = div(nx0,xdim) + 1
+        ipt = (row-1)*nx
       else
-        global nx = div(nx0,xdim)
-        global ipt = (row-1)*nx + mm
+        nx = div(nx0,xdim)
+        ipt = (row-1)*nx + mm
       end
 
 #---------------------------------------------------------------------
@@ -23,17 +23,17 @@
 #---------------------------------------------------------------------
       mm   = mod(ny0, ydim)
       if col <= mm
-        global ny = div(ny0,ydim) + 1
-        global jpt = (col-1)*ny
+        ny = div(ny0,ydim) + 1
+        jpt = (col-1)*ny
       else
-        global ny = div(ny0,ydim)
-        global jpt = (col-1)*ny + mm
+        ny = div(ny0,ydim)
+        jpt = (col-1)*ny + mm
       end
 
 #---------------------------------------------------------------------
 #   z dimension
 #---------------------------------------------------------------------
-      global nz = nz0
+      nz = nz0
 
 #---------------------------------------------------------------------
 #   check the sub-domain size
@@ -54,17 +54,17 @@
 #---------------------------------------------------------------------
 #   set up the start and end in i and j extents for all processors
 #---------------------------------------------------------------------
-      global ist = 1
-      global iend = nx
+      ist = 1
+      iend = nx
       if (north == -1) ist = 2 end
       if (south == -1) iend = nx - 1 end
 
-      global jst = 1
-      global jend = ny
+      jst = 1
+      jend = ny
       if (west == -1) jst = 2 end
       if (east == -1) jend = ny - 1 end
 
-      return nothing
+      return nx, ny, nz, ipt, jpt, ist, jst, iend, jend
 end
 
 

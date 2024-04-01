@@ -2,7 +2,7 @@
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
- function exchange_6(g, jbeg, jfin1, isiz03)
+ function exchange_6(g, jbeg, jfin1, isiz03, ny, nz, west, east, comm_solve)
 
       dum = Array{Float64}(undef, isiz03)
 

@@ -52,7 +52,7 @@ function y_solve(_::Val{ncells}, # ::Int64,
 # and after that reversing the direction for the backsubstitution  
 #---------------------------------------------------------------------
 
-       if (timeron) timer_start(t_ysolve) end
+      if timeron timer_start(t_ysolve) end
 #---------------------------------------------------------------------
 #                          FORWARD ELIMINATION  
 #---------------------------------------------------------------------
@@ -78,9 +78,9 @@ function y_solve(_::Val{ncells}, # ::Int64,
 #            sides and the upper diagonal elements of the previous two rows
 #---------------------------------------------------------------------
 
-             if (timeron) timer_start(t_ycomm) end
+            if timeron timer_start(t_ycomm) end
              requests[1] = MPI.Irecv!(in_buffer, predecessor[2], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_ycomm) end
+            if timeron timer_stop(t_ycomm) end
 
 #---------------------------------------------------------------------
 #            communication has already been started. 
@@ -105,9 +105,9 @@ function y_solve(_::Val{ncells}, # ::Int64,
 #            This waits on the current receive and on the send
 #            from the previous stage. They always come in pairs. 
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_ycomm) end
+            if timeron timer_start(t_ycomm) end
              MPI.Waitall(requests)
-             if (timeron) timer_stop(t_ycomm) end
+            if timeron timer_stop(t_ycomm) end
 
 #---------------------------------------------------------------------
 #            unpack the buffer                                 
@@ -347,9 +347,9 @@ function y_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
 #            pack and send the buffer
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_ycomm) end
+            if timeron timer_start(t_ycomm) end
              requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[2], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_ycomm) end
+            if timeron timer_stop(t_ycomm) end
 
           end
        end
@@ -383,9 +383,9 @@ function y_solve(_::Val{ncells}, # ::Int64,
 #            solution of the previous two stations     
 #---------------------------------------------------------------------
 
-             if (timeron) timer_start(t_ycomm) end
+            if timeron timer_start(t_ycomm) end
              requests[1] = MPI.Irecv!(in_buffer, successor[2], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_ycomm) end
+            if timeron timer_stop(t_ycomm) end
 
 
 #---------------------------------------------------------------------
@@ -404,10 +404,10 @@ function y_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_ycomm) end
+            if timeron timer_start(t_ycomm) end
              #MPI.Waitall(2, requests, statuses, ERROR)
              MPI.Waitall(requests)
-             if (timeron) timer_stop(t_ycomm) end
+            if timeron timer_stop(t_ycomm) end
 
 #---------------------------------------------------------------------
 #            unpack the buffer for the first three factors         
@@ -529,9 +529,9 @@ function y_solve(_::Val{ncells}, # ::Int64,
 #            pack and send the buffer
 #---------------------------------------------------------------------
 
-             if (timeron) timer_start(t_ycomm) end
+            if timeron timer_start(t_ycomm) end
              requests[2] = MPI.Isend(view(out_buffer,1:10*buffer_size), predecessor[2], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_ycomm) end
+            if timeron timer_stop(t_ycomm) end
 
           end
 
@@ -549,7 +549,7 @@ function y_solve(_::Val{ncells}, # ::Int64,
 
        end
 
-       if (timeron) timer_stop(t_ysolve) end
+      if timeron timer_stop(t_ysolve) end
 
        return nothing
 end

@@ -8,7 +8,7 @@ function exact(i, j, k, u000ijk, nx0, ny0, nz0)
 
       xi  = ( float( i - 1 ) ) / ( nx0 - 1 )
       eta  = ( float( j - 1 ) ) / ( ny0 - 1 )
-      zeta = ( float( k - 1 ) ) / ( nz - 1 )
+      zeta = ( float( k - 1 ) ) / ( nz0 - 1 )
 
       for m = 1:5
          u000ijk[m] =  ce[m, 1] +

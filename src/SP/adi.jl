@@ -63,7 +63,9 @@ function adi(no_nodes,
        zzcon5,
        dssp,
        con43,
-       dx2, dx5, c3c4, c1c5,  c2dtty1, dxmax, dx1, dttx1, dttx2,
+       dttx1, dttx2, 
+       c2dttx1, c2dtty1, c2dttz1, 
+       dx2, dx5, c3c4, c1c5,  dxmax, dx1,
        comz5, comz4, comz1, comz6,
        dy3, dy5, dy1, dymax, dtty1, dtty2, 
        dz4, dz5, dz1, dttz2, dttz1, dzmax,
@@ -77,6 +79,7 @@ function adi(no_nodes,
        ss,
        sr,
        b_size,
+       timeron
 ) 
 
          copy_faces(no_nodes,

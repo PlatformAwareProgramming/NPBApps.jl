@@ -43,38 +43,38 @@ const t_last = 10
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
- function alloc_space()
+ function alloc_space(isiz1, isiz2, isiz3)
 
-      global rsdnm = Array{Float64}(undef,5)
-      global errnm = Array{Float64}(undef,5)
+      rsdnm = Array{Float64}(undef,5)
+      errnm = Array{Float64}(undef,5)
 
       u0 = zeros(Float64, 5, isiz1 + 4, isiz2 + 4, isiz3)
-      global u = OffsetArray(u0, 1:5, -1:isiz1+2, -1:isiz2+2, 1:isiz3)
+      u = OffsetArray(u0, 1:5, -1:isiz1+2, -1:isiz2+2, 1:isiz3)
 
       rsd0 = zeros(Float64, 5, isiz1 + 4, isiz2 + 4, isiz3)
-      global rsd = OffsetArray(rsd0, 1:5, -1:isiz1+2, -1:isiz2+2, 1:isiz3)
+      rsd = OffsetArray(rsd0, 1:5, -1:isiz1+2, -1:isiz2+2, 1:isiz3)
 
       frct0 = zeros(Float64, 5, isiz1 + 4, isiz2 + 4, isiz3)
-      global frct = OffsetArray(frct0, 1:5, -1:isiz1+2, -1:isiz2+2, 1:isiz3)
+      frct = OffsetArray(frct0, 1:5, -1:isiz1+2, -1:isiz2+2, 1:isiz3)
 
       flux0 = zeros(Float64, 5, isiz1 + 2, isiz2 + 2, isiz3)
-      global flux = OffsetArray(flux0, 1:5, 0:isiz1+1,  0:isiz2+1, 1:isiz3)
+      flux = OffsetArray(flux0, 1:5, 0:isiz1+1,  0:isiz2+1, 1:isiz3)
 
-      global a = zeros(Float64, 5, 5, isiz1)
-      global b = zeros(Float64, 5, 5, isiz1)
-      global c = zeros(Float64, 5, 5, isiz1)
-      global d = zeros(Float64, 5, 5, isiz1)
+      a = zeros(Float64, 5, 5, isiz1)
+      b = zeros(Float64, 5, 5, isiz1)
+      c = zeros(Float64, 5, 5, isiz1)
+      d = zeros(Float64, 5, 5, isiz1)
 
       phi10 = zeros(Float64, isiz2 + 2, isiz3 + 2)
-      global phi1 = OffsetArray(phi10, 0:isiz2+1, 0:isiz3+1)
+      phi1 = OffsetArray(phi10, 0:isiz2+1, 0:isiz3+1)
 
       phi20 = zeros(Float64, isiz2 + 2, isiz3 + 2)
-      global phi2 = OffsetArray(phi20, 0:isiz2+1, 0:isiz3+1)
+      phi2 = OffsetArray(phi20, 0:isiz2+1, 0:isiz3+1)
 
-      global buf = zeros(Float64, 5, 2*isiz2*isiz3)
-      global buf1 = zeros(Float64, 5, 2*isiz2*isiz3)
+      buf = zeros(Float64, 5, 2*isiz2*isiz3)
+      buf1 = zeros(Float64, 5, 2*isiz2*isiz3)
 
-      return nothing
+      return rsdnm, errnm, u, rsd, frct, flux, a, b, c, d, phi1, phi2, buf, buf1
       
 end
 

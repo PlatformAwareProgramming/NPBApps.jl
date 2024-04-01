@@ -2,7 +2,15 @@
 #     compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
-function exact_rhs()
+function exact_rhs(ncells, forcing, ue, buf, cuf, q, cell_low, cell_start, cell_end, cell_size, dssp, 
+                   tx2, ty2, tz2, 
+                   dnxm1, dnym1, dnzm1, 
+                   xxcon1, xxcon2, xxcon3, xxcon4, xxcon5, 
+                   yycon1, yycon2, yycon3, yycon4, yycon5, 
+                   zzcon1, zzcon2, zzcon3, zzcon4, zzcon5, 
+                   dx1tx1, dx2tx1, dx3tx1, dx4tx1, dx5tx1,
+                   dy1ty1, dy2ty1, dy3ty1, dy4ty1, dy5ty1,
+                   dz1tz1, dz2tz1, dz3tz1, dz4tz1, dz5tz1)
 
 #---------------------------------------------------------------------
 #     loop over all cells owned by this node                   

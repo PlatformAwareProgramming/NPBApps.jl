@@ -19,13 +19,13 @@
 #---------------------------------------------------------------------
 #   receive data from north and west
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_lcomm) end
+     if timeron timer_start(t_lcomm) end
       iex = 0
       exchange_1( v, k, iex )
-      if (timeron) timer_stop(t_lcomm) end
+     if timeron timer_stop(t_lcomm) end
 
 
-      if (timeron) timer_start(t_blts) end
+     if timeron timer_start(t_blts) end
       for j = jst:jend
          for i = ist:iend
             for m = 1:5
@@ -229,15 +229,15 @@
 
         end
       end
-      if (timeron) timer_stop(t_blts) end
+     if timeron timer_stop(t_blts) end
 
 #---------------------------------------------------------------------
 #   send data to east and south
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_lcomm) end
+     if timeron timer_start(t_lcomm) end
       iex = 2
       exchange_1( v, k, iex )
-      if (timeron) timer_stop(t_lcomm) end
+     if timeron timer_stop(t_lcomm) end
 
       return nothing
 end

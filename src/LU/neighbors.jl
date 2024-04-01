@@ -4,16 +4,16 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
- function neighbors()
+ function neighbors(row, col, xdim, ydim)
 
 #---------------------------------------------------------------------
 #     figure out the neighbors and their wrap numbers for each processor
 #---------------------------------------------------------------------
 
-      global south = -1
-      global east  = -1
-      global north = -1
-      global west  = -1
+      south = -1
+      east  = -1
+      north = -1
+      west  = -1
 
       if row > 1
           north = id -1
@@ -39,5 +39,5 @@
           east = -1
       end
 
-      return nothing
+      return south, east, north, west
 end

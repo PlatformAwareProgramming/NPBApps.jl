@@ -14,7 +14,7 @@ function x_solve()
 
       istart = 0
 
-      if (timeron) timer_start(t_xsolve) end
+      if timeron timer_start(t_xsolve) end
 #---------------------------------------------------------------------
 #     in our terminology stage is the number of the cell in the x-direct
 #     i.e. stage = 1 means the start of the line stage=ncells means end
@@ -47,7 +47,7 @@ function x_solve()
 #     processor working on preceeding cell
 #---------------------------------------------------------------------
             FIRST = 0
-            if (timeron) timer_start(t_xcomm) end
+           if timeron timer_start(t_xcomm) end
             recv_id[] = x_receive_solve_info(c)
 #---------------------------------------------------------------------
 #     overlap computations and communications
@@ -58,7 +58,7 @@ function x_solve()
 #---------------------------------------------------------------------
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
-            if (timeron) timer_stop(t_xcomm) end
+           if timeron timer_stop(t_xcomm) end
 #---------------------------------------------------------------------
 #     install C'(istart) and rhs'(istart) to be used in this cell
 #---------------------------------------------------------------------
@@ -86,11 +86,11 @@ function x_solve()
 #---------------------------------------------------------------------
             x_backsubstitute(FIRST, LAST, c)
          else
-            if (timeron) timer_start(t_xcomm) end
+           if timeron timer_start(t_xcomm) end
             recv_id[] = x_receive_backsub_info(c)
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
-            if (timeron) timer_stop(t_xcomm) end
+           if timeron timer_stop(t_xcomm) end
             x_unpack_backsub_info(c)
             x_backsubstitute(FIRST, LAST, c)
          end
@@ -99,7 +99,7 @@ function x_solve()
          end
       end
 
-      if (timeron) timer_stop(t_xsolve) end
+     if timeron timer_stop(t_xsolve) end
 
       return nothing
 end
@@ -168,9 +168,9 @@ end
 #---------------------------------------------------------------------
 #     send buffer 
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_xcomm) end
+     if timeron timer_start(t_xcomm) end
       send_id = MPI.Isend(view(in_buffer,1:buffer_size), successor[1],WEST+jp+kp*ncells, comm_solve)
-      if (timeron) timer_stop(t_xcomm) end
+     if timeron timer_stop(t_xcomm) end
 
       return send_id
 end
@@ -198,9 +198,9 @@ end
             ptr = ptr+BLOCK_SIZE
          end
       end
-      if (timeron) timer_start(t_xcomm) end
+     if timeron timer_start(t_xcomm) end
       send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[1], EAST+jp+kp*ncells, comm_solve)
-      if (timeron) timer_stop(t_xcomm) end
+     if timeron timer_stop(t_xcomm) end
 
       return send_id
 end

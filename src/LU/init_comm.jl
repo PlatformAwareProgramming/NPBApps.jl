@@ -6,6 +6,7 @@
 # pseudo application from the NAS Parallel Benchmarks. 
 #
 #---------------------------------------------------------------------
+ const root = 0
 
  function init_comm()
 
@@ -19,18 +20,17 @@
 #     excess ranks are marked as inactive.
 #---------------------------------------------------------------------
 
-      global xdim, ydim, no_nodes, total_nodes, node, comm_solve, active = get_active_nprocs(MPI.COMM_WORLD, 2)
+      xdim, ydim, no_nodes, total_nodes, node, comm_solve, active = get_active_nprocs(MPI.COMM_WORLD, 2)
 
       if (!active) return end
 
 #---------------------------------------------------------------------
 #   establish the global rank of this process and the group size
 #---------------------------------------------------------------------
-      global id = node
-      global num = no_nodes
-      global root = 0
+      id = node
+      num = no_nodes
 
-      global ndim   = nodedim(num)
+      ndim   = nodedim(num)
 
  #=     if !convertdouble
          dp_type = MPI_DOUBLE_PRECISION
@@ -39,5 +39,5 @@
       end
 =#
 
-      return nothing
+      return xdim, ydim, no_nodes, total_nodes, node, comm_solve, active, id, num, ndim
 end

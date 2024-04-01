@@ -161,7 +161,7 @@ const tmat = Array{Float64}(undef, 5, 5)
 #---------------------------------------------------------------------
 #   receive data from north and west
 #---------------------------------------------------------------------
-            if (timeron) timer_start(t_lcomm) end
+           if timeron timer_start(t_lcomm) end
             iex = 0
             exchange_1( rsd, k, iex,
                         comm_solve, 
@@ -178,10 +178,10 @@ const tmat = Array{Float64}(undef, 5, 5)
                         jst,
                         jend, 
                      )
-            if (timeron) timer_stop(t_lcomm) end
+           if timeron timer_stop(t_lcomm) end
 
 
-            if (timeron) timer_start(t_blts) end
+           if timeron timer_start(t_blts) end
             for j = jst:jend
 
 #---------------------------------------------------------------------
@@ -215,12 +215,12 @@ const tmat = Array{Float64}(undef, 5, 5)
                           ist, iend, jst, jend,
                           nx0, ny0, ipt, jpt, tmat)
             end
-            if (timeron) timer_stop(t_blts) end
+           if timeron timer_stop(t_blts) end
 
 #---------------------------------------------------------------------
 #   send data to east and south
 #---------------------------------------------------------------------
-            if (timeron) timer_start(t_lcomm) end
+           if timeron timer_start(t_lcomm) end
             iex = 2
             exchange_1( rsd, k, iex,
                         comm_solve, 
@@ -237,14 +237,14 @@ const tmat = Array{Float64}(undef, 5, 5)
                         jst,
                         jend,
                      )
-            if (timeron) timer_stop(t_lcomm) end
+           if timeron timer_stop(t_lcomm) end
          end
 
          for k = nz - 1:-1:2
 #---------------------------------------------------------------------
 #   receive data from south and east
 #---------------------------------------------------------------------
-            if (timeron) timer_start(t_ucomm) end
+           if timeron timer_start(t_ucomm) end
             iex = 1
             exchange_1( rsd, k, iex,
                         comm_solve, 
@@ -261,9 +261,9 @@ const tmat = Array{Float64}(undef, 5, 5)
                         jst,
                         jend,
                        )
-            if (timeron) timer_stop(t_ucomm) end
+           if timeron timer_stop(t_ucomm) end
 
-            if (timeron) timer_start(t_buts) end
+           if timeron timer_start(t_buts) end
             for j = jend:-1:jst
 
 #---------------------------------------------------------------------
@@ -297,12 +297,12 @@ const tmat = Array{Float64}(undef, 5, 5)
                           ist, iend, jst, jend,
                           nx0, ny0, ipt, jpt, tmat)
             end
-            if (timeron) timer_stop(t_buts) end
+           if timeron timer_stop(t_buts) end
 
 #---------------------------------------------------------------------
 #   send data to north and west
 #---------------------------------------------------------------------
-            if (timeron) timer_start(t_ucomm) end
+           if timeron timer_start(t_ucomm) end
             iex = 3
             exchange_1( rsd, k, iex,
                         comm_solve, 
@@ -319,7 +319,7 @@ const tmat = Array{Float64}(undef, 5, 5)
                         jst,
                         jend, 
                      )
-            if (timeron) timer_stop(t_ucomm) end
+           if timeron timer_stop(t_ucomm) end
          end
 
 #---------------------------------------------------------------------
@@ -421,12 +421,12 @@ const tmat = Array{Float64}(undef, 5, 5)
 
       #MPI_ALLREDUCE( wtime, maxtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, comm_solve, IERROR )
       
-      global maxtime = MPI.Allreduce(wtime, MPI.MAX, comm_solve)
+      maxtime = MPI.Allreduce(wtime, MPI.MAX, comm_solve)
 
 # 1001 format(1x/5x,'pseudo-time SSOR iteration no.=',i4/)
 # 1004 format(1x/1x,'convergence was achieved after ',i4,  		         ' pseudo-time steps' )
 # 1006 format(1x/1x,'RMS-norm of SSOR-iteration correction ',  		       'for first pde  = ',1pe12.5/,  		       1x,'RMS-norm of SSOR-iteration correction ',  		       'for second pde = ',1pe12.5/,  		       1x,'RMS-norm of SSOR-iteration correction ',  		       'for third pde  = ',1pe12.5/,  		       1x,'RMS-norm of SSOR-iteration correction ',  		       'for fourth pde = ',1pe12.5/,  		       1x,'RMS-norm of SSOR-iteration correction ',  		       'for fifth pde  = ',1pe12.5)
 # 1007 format(1x/1x,'RMS-norm of steady-state residual for ',  		       'first pde  = ',1pe12.5/,  		       1x,'RMS-norm of steady-state residual for ',  		       'second pde = ',1pe12.5/,  		       1x,'RMS-norm of steady-state residual for ',  		       'third pde  = ',1pe12.5/,  		       1x,'RMS-norm of steady-state residual for ',  		       'fourth pde = ',1pe12.5/,  		       1x,'RMS-norm of steady-state residual for ',  		       'fifth pde  = ',1pe12.5)
 
-      return nothing
+      return maxtime
 end

@@ -49,7 +49,7 @@
                      zzcon5,
                   )
 
-      if (timeron) timer_start(t_rhs) end
+      if timeron timer_start(t_rhs) end
 #---------------------------------------------------------------------
 #     loop over all cells owned by this node                           
 #---------------------------------------------------------------------
@@ -454,7 +454,7 @@
 
       end
 
-      if (timeron) timer_stop(t_rhs) end
+      if timeron timer_stop(t_rhs) end
 
       return nothing
 end

@@ -74,18 +74,37 @@ end
 #  verification routine                         
 #---------------------------------------------------------------------
 
-function verify(class, grid_points, dt, sr, ss, b_size)
-
-#        use bt_data
-#        use mpinpb
-
-#        implicit none
-
-#        DOUBLEPRECISION xcrref[5],xceref[5],xcrdif[5],xcedif[5],  
-#                         epsilon, xce[5], xcr[5], dtref
-#        integer m
-#        character class
-#        logical verified
+function verify(no_nodes, node, 
+                ncells, 
+                class, 
+                grid_points,
+                cell_coord, cell_low, cell_high, cell_start, cell_end, cell_size,
+                forcing,        
+                u,
+                rhs,
+                in_buffer,
+                out_buffer,
+                us,
+                vs,
+                ws,
+                qs,
+                rho_i,
+                square,
+                dt,
+                ss,
+                sr,
+                b_size,
+                tx2, ty2, tz2,
+                dx1tx1, dx2tx1, dx3tx1, dx4tx1, dx5tx1,
+                dy1ty1, dy2ty1, dy3ty1, dy4ty1, dy5ty1,
+                dz1tz1, dz2tz1, dz3tz1, dz4tz1, dz5tz1,
+                dnxm1, dnym1, dnzm1,
+                xxcon2, xxcon3, xxcon4, xxcon5,
+                yycon2, yycon3, yycon4, yycon5,
+                zzcon2, zzcon3, zzcon4, zzcon5,
+                timeron,
+                comm_setup,
+                comm_rhs)
 
         xcrref = Array{Float64}(undef, 5)
         xceref = Array{Float64}(undef, 5)
@@ -104,7 +123,7 @@ function verify(class, grid_points, dt, sr, ss, b_size)
 #   compute the error norm and the residual norm, and exit if not printing
 #---------------------------------------------------------------------
 
-        error_norm(xce, grid_points)
+        error_norm(ncells, u, xce, grid_points, cell_low, cell_high, dnxm1, dnym1, dnzm1, comm_setup)
 
         copy_faces(ss, 
                   sr, 
@@ -163,7 +182,7 @@ function verify(class, grid_points, dt, sr, ss, b_size)
                   successor,
                )
 
-        rhs_norm(xcr, grid_points)
+        rhs_norm(ncells, rhs, xcr, grid_points, cell_start, cell_end, cell_size, comm_setup)
 
         #for m = 1:5
         #   xcr[m] = xcr[m] / dt

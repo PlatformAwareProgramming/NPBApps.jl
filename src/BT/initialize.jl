@@ -3,7 +3,7 @@
 #     tri-linear transfinite interpolation of the boundary values     
 #---------------------------------------------------------------------
 
-function initialize()
+function initialize(IMAX, JMAX, KMAX, ncells, u, cell_low, cell_high, cell_size, slice, dnxm1, dnym1, dnzm1)
 
       Pface1 = Array{Array{Float64}}(undef,2)
       Pface2 = Array{Array{Float64}}(undef,2)
@@ -213,7 +213,7 @@ end
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-@inline function lhsinit()
+function lhsinit(ncells, lhsc, cell_coord, cell_start, cell_end, cell_size)
 
 #---------------------------------------------------------------------
 #     loop over all cells                                       

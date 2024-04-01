@@ -4,7 +4,7 @@
 #
 #---------------------------------------------------------------------
 
- function ERROR(nx0, ny0, nz0)
+ function ERROR(u, errnm, nx0, ny0, nz0, nz, jst, jpt, ist, ipt, iend, jend, comm_solve)
 
       u000ijk = Array{Float64}(undef, 5)
       dummy = zeros(Float64, 5)

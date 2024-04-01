@@ -55,7 +55,7 @@ function x_solve(_::Val{ncells}, # ::Int64,
 # and after that reversing the direction for the backsubstitution.
 #---------------------------------------------------------------------
 
-       if (timeron) timer_start(t_xsolve) end
+      if timeron timer_start(t_xsolve) end
 #---------------------------------------------------------------------
 #                          FORWARD ELIMINATION  
 #---------------------------------------------------------------------
@@ -80,11 +80,11 @@ function x_solve(_::Val{ncells}, # ::Int64,
 #            receive data from predecessor containing the right hand
 #            sides and the upper diagonal elements of the previous two rows
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_xcomm) end
+            if timeron timer_start(t_xcomm) end
 
              requests[1] = MPI.Irecv!(in_buffer, predecessor[1], DEFAULT_TAG, comm_solve)
 
-             if (timeron) timer_stop(t_xcomm) end
+            if timeron timer_stop(t_xcomm) end
 
 
 #---------------------------------------------------------------------
@@ -111,9 +111,9 @@ function x_solve(_::Val{ncells}, # ::Int64,
 #            from the previous stage. They always come in pairs. 
 #---------------------------------------------------------------------
 
-             if (timeron) timer_start(t_xcomm) end
+            if timeron timer_start(t_xcomm) end
              MPI.Waitall!(requests)
-             if (timeron) timer_stop(t_xcomm) end
+            if timeron timer_stop(t_xcomm) end
 
 #---------------------------------------------------------------------
 #            unpack the buffer                                 
@@ -354,9 +354,9 @@ function x_solve(_::Val{ncells}, # ::Int64,
 # send data to next phase
 # can't receive data yet because buffer size will be wrong 
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_xcomm) end
+            if timeron timer_start(t_xcomm) end
              requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[1], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_xcomm) end
+            if timeron timer_stop(t_xcomm) end
 
           end
        end
@@ -388,9 +388,9 @@ function x_solve(_::Val{ncells}, # ::Int64,
 #            wait for a message to be received, containing the 
 #            solution of the previous two stations     
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_xcomm) end
+            if timeron timer_start(t_xcomm) end
              requests[1] = MPI.Irecv!(in_buffer, successor[1], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_xcomm) end
+            if timeron timer_stop(t_xcomm) end
 
 #---------------------------------------------------------------------
 #            communication has already been started
@@ -408,9 +408,9 @@ function x_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
 #            wait for pending communication to complete
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_xcomm) end
+            if timeron timer_start(t_xcomm) end
              MPI.Waitall(requests)
-             if (timeron) timer_stop(t_xcomm) end
+            if timeron timer_stop(t_xcomm) end
 
 #---------------------------------------------------------------------
 #            unpack the buffer for the first three factors         
@@ -531,9 +531,9 @@ function x_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
 #            pack and send the buffer
 #---------------------------------------------------------------------
-             if (timeron) timer_start(t_xcomm) end
+            if timeron timer_start(t_xcomm) end
              requests[2] = MPI.Isend(view(out_buffer,1:10*buffer_size), predecessor[1], DEFAULT_TAG, comm_solve)
-             if (timeron) timer_stop(t_xcomm) end
+            if timeron timer_stop(t_xcomm) end
 
           end
 
@@ -551,7 +551,7 @@ function x_solve(_::Val{ncells}, # ::Int64,
 
        end
 
-       if (timeron) timer_stop(t_xsolve) end
+      if timeron timer_stop(t_xsolve) end
 
        return nothing
 end

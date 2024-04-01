@@ -13,7 +13,7 @@ function y_solve()
 
       jstart = 0
 
-      if (timeron) timer_start(t_ysolve) end
+     if timeron timer_start(t_ysolve) end
 #---------------------------------------------------------------------
 #     in our terminology stage is the number of the cell in the y-direct
 #     i.e. stage = 1 means the start of the line stage=ncells means end
@@ -46,7 +46,7 @@ function y_solve()
 #     processor working on preceeding cell
 #---------------------------------------------------------------------
             FIRST = 0
-            if (timeron) timer_start(t_ycomm) end
+           if timeron timer_start(t_ycomm) end
             recv_id[] = y_receive_solve_info(c)
 #---------------------------------------------------------------------
 #     overlap computations and communications
@@ -57,7 +57,7 @@ function y_solve()
 #---------------------------------------------------------------------
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
-            if (timeron) timer_stop(t_ycomm) end
+           if timeron timer_stop(t_ycomm) end
 #---------------------------------------------------------------------
 #     install C'(jstart+1) and rhs'(jstart+1) to be used in this cell
 #---------------------------------------------------------------------
@@ -85,11 +85,11 @@ function y_solve()
 #---------------------------------------------------------------------
             y_backsubstitute(FIRST, LAST, c)
          else
-            if (timeron) timer_start(t_ycomm) end
+           if timeron timer_start(t_ycomm) end
             recv_id[] = y_receive_backsub_info(c)
             MPI.Wait(send_id[])
             MPI.Wait(recv_id[])
-            if (timeron) timer_stop(t_ycomm) end
+           if timeron timer_stop(t_ycomm) end
             y_unpack_backsub_info(c)
             y_backsubstitute(FIRST, LAST, c)
          end
@@ -98,7 +98,7 @@ function y_solve()
          end
       end
 
-      if (timeron) timer_stop(t_ysolve) end
+     if timeron timer_stop(t_ysolve) end
 
       return nothing
 end
@@ -167,9 +167,9 @@ end
 #---------------------------------------------------------------------
 #     send buffer 
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_ycomm) end
+     if timeron timer_start(t_ycomm) end
       send_id = MPI.Isend(view(in_buffer,1:buffer_size), successor[2], SOUTH+ip+kp*ncells, comm_solve)
-      if (timeron) timer_stop(t_ycomm) end
+     if timeron timer_stop(t_ycomm) end
 
       return send_id
 end
@@ -197,9 +197,9 @@ end
             ptr = ptr+BLOCK_SIZE
          end
       end
-      if (timeron) timer_start(t_ycomm) end
+     if timeron timer_start(t_ycomm) end
       send_id = MPI.Isend(view(in_buffer,1:buffer_size), predecessor[2],NORTH+ip+kp*ncells, comm_solve)
-      if (timeron) timer_stop(t_ycomm) end
+     if timeron timer_stop(t_ycomm) end
 
       return send_id
 end

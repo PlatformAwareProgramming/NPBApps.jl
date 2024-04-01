@@ -24,12 +24,12 @@ function l2norm( ldx, ldy, ldz, nx0, ny0, nz0, ist, iend, jst, jend, v, SUM,
 #---------------------------------------------------------------------
 #   compute the global sum of individual contributions to dot product.
 #---------------------------------------------------------------------
-      if (timeron) timer_start(t_rcomm) end
+     if timeron timer_start(t_rcomm) end
 
       MPI.Allreduce!(dummy, SUM, MPI.SUM, comm_solve)
 
 #      MPI_ALLREDUCE( dummy, SUM, 5, dp_type, MPI_SUM, comm_solve, IERROR )
-      if (timeron) timer_stop(t_rcomm) end
+     if timeron timer_stop(t_rcomm) end
 
       for m = 1:5
          SUM[m] = sqrt(SUM[m] / (float(nx0-2)*(ny0-2)*(nz0-2)))

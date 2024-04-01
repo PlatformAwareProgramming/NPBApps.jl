@@ -4,7 +4,7 @@
 
  function jacu(k)
 
-      if (timeron) timer_start(t_jacu) end
+     if timeron timer_start(t_jacu) end
 
       r43 = ( 4.0e+00 / 3.0e+00 )
       c1345 = c1 * c3 * c4 * c5
@@ -354,7 +354,7 @@
             end
          end
 
-      if (timeron) timer_stop(t_jacu) end
+     if timeron timer_stop(t_jacu) end
 
       return nothing
 end

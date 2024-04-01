@@ -40,7 +40,7 @@ end
 #  calculate sub-domain array size
 #---------------------------------------------------------------------
 
-function proc_grid(isiz01, isiz02, isiz03)
+function proc_grid(id, isiz01, isiz02, isiz03, no_nodes, num, ndim)
 
       xdiv = isqrt2(no_nodes)
 
@@ -53,12 +53,12 @@ function proc_grid(isiz01, isiz02, isiz03)
       end
 
       ydiv = div(no_nodes,xdiv)
-      global isiz1 = div(isiz01,xdiv)
+      isiz1 = div(isiz01,xdiv)
       if (isiz1*xdiv < isiz01) isiz1 = isiz1 + 1 end
-      global isiz2 = div(isiz02,ydiv)
+      isiz2 = div(isiz02,ydiv)
       if (isiz2*ydiv < isiz02) isiz2 = isiz2 + 1 end
       nnodes_xdim = xdiv
-      global isiz3 = isiz03
+      isiz3 = isiz03
 
 #---------------------------------------------------------------------
 #
@@ -88,10 +88,10 @@ function proc_grid(isiz01, isiz02, isiz03)
       end
       @label L2100
 
-      global row = mod(id,xdim) + 1
-      global col = div(id,xdim) + 1
+      row = mod(id,xdim) + 1
+      col = div(id,xdim) + 1
 
-      return nothing
+      return isiz1, isiz2, isiz3, row, col
 end
 
 

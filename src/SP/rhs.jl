@@ -53,6 +53,7 @@ function compute_rhs(ncells,
                      zzcon5,
                      dssp,
                      con43,
+                     timeron
                      )
 
        if (timeron) timer_start(t_rhs) end

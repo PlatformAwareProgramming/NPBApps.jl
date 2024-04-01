@@ -5,14 +5,14 @@
 # nearest neighbor                                                   
 #---------------------------------------------------------------------
 
-function make_set(grid_points)
+function make_set(node, no_nodes, grid_points, cell_coord, cell_low, cell_high, cell_size, slice)
 
 #---------------------------------------------------------------------
 #     compute square root; add small number to allow for roundoff
 #     (note: this is computed in setup_mpi.f also, but prefer to do
 #     it twice because of some include file problems).
 #---------------------------------------------------------------------
-       global ncells = Int(sqrt(no_nodes))
+       ncells = Int(sqrt(no_nodes))
 
 #---------------------------------------------------------------------
 #      this makes coding easier
@@ -103,6 +103,6 @@ function make_set(grid_points)
           end
        end
 
-       return nothing
+       return ncells
 end
 

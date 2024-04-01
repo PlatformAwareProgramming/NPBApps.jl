@@ -74,12 +74,42 @@ end
 #  verification routine                         
 #---------------------------------------------------------------------
 
-function verify(class, 
+function verify(no_nodes, node,
+                ncells, 
+                class, 
                 grid_points,
+                cell_coord, cell_low, cell_high, cell_start, cell_end, cell_size,
+                u,
+                rhs,
+                rho_i,
+                us,
+                vs,
+                ws,
+                square,
+                qs,
+                ainv,
+                speed,
+                forcing,
+                in_buffer,
+                out_buffer,
                 dt,
                 ss,
                 sr,
                 b_size,
+                tx2, ty2, tz2,
+                c1, c2, c1c2,
+                dx1tx1, dx2tx1, dx3tx1, dx4tx1, dx5tx1,
+                dy1ty1, dy2ty1, dy3ty1, dy4ty1, dy5ty1,
+                dz1tz1, dz2tz1, dz3tz1, dz4tz1, dz5tz1,
+                dnxm1, dnym1, dnzm1,
+                xxcon2, xxcon3, xxcon4, xxcon5,
+                yycon2, yycon3, yycon4, yycon5,
+                zzcon2, zzcon3, zzcon4, zzcon5,
+                dssp,
+                con43,
+                timeron,
+                comm_setup,
+                comm_rhs
 )
 
         xcrref = Array{Float64}(undef, 5)
@@ -97,7 +127,7 @@ function verify(class,
 #---------------------------------------------------------------------
 #   compute the error norm and the residual norm, and exit if not printing
 #---------------------------------------------------------------------
-        error_norm(xce, grid_points)
+        error_norm(ncells, u, xce, grid_points, cell_low, cell_high, dnxm1, dnym1, dnzm1, comm_setup)
         
         copy_faces(Val(no_nodes),
                   Val(ncells),
@@ -164,7 +194,7 @@ function verify(class,
                   b_size,
                )
 
-        rhs_norm(xcr, grid_points)
+        rhs_norm(ncells, rhs, xcr, grid_points, cell_start, cell_end, cell_size, comm_setup)
 
         # VECTORIZED
         xcr .= xcr ./ dt
