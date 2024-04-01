@@ -36,7 +36,13 @@ const t_exch = 7
 const t_lcomm = 8 
 const t_ucomm = 9 
 const t_rcomm = 10
-const t_last = 10
+const t_rdis1 = 11
+const t_rdis2 = 12
+const t_last = 12
+
+const t_names = "total", "rhs", "blts", "buts", "#jacld", "#jacu",
+               "exch", "lcomm", "ucomm", "rcomm", "qbc_send", "qbc_recv",
+               " totcomp", " totcomm"
 
 function alloc_zone_vectors(x_zones, y_zones)
 

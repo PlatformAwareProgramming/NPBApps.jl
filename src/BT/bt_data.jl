@@ -73,7 +73,7 @@ const t_last = 19
 const t_names = ["total", "i/o", "rhs", "xsolve", "ysolve", "zsolve",
                 "bpack", "exch", "xcomm", "ycomm", "zcomm",
                 " totcomp", " totcomm", "rhsx", "rhsy", "rhsz",  
-                "add", "qbc_copy", "qbc_comm", "last"]
+                "add", "qbc_send", "qbc_recv", "last"]
 
 t_recs = "total"
 

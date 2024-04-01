@@ -41,9 +41,6 @@
 #
 #---------------------------------------------------------------------
 
-const t_names = "total", "rhs", "blts", "buts", "#jacld", "#jacu",
-               "exch", "lcomm", "ucomm", "rcomm",
-               " totcomp", " totcomm"
 
 
 const tsum = Array{Float64}(undef, t_last+2)
@@ -171,6 +168,10 @@ function go(class::CLASS; itimer=0, npb_verbose=0)
          @printf(stdout, "\n clusterid =%6i num_processes =%4i\n  SECTION   Time (secs)\n", ip, clusters[ip + 1][2])
          for i = 1:t_last
             @printf(stdout, "  %8s:%9.3F  (%6.2F)\n", t_names[i], trecs[i], trecs[i]*100.0/tmax)
+            if i == t_rdis2
+               t = trecs[t_rdis1] + trecs[t_rdis2]
+               @printf(stdout, "    --> total %8s:%9.3F  (%6.2F)\n", "exch_qbc", t, t*100.0/tmax)
+            end
          end
       end
    end

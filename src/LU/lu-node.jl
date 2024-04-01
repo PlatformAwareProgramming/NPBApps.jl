@@ -200,7 +200,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
      exch_qbc(proc_num_zones, u, row, col, west, east, north, south, nx, ny, nz, timeron, proc_zone_id, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north)
 
-      for iz = 1:proc_num_zones
+     #= for iz = 1:proc_num_zones
             zone = proc_zone_id[iz]
             for m = 1:5
                   for k = 2:nz[iz]-1
@@ -218,10 +218,8 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
                         end
                   end
             end
-      end
+      end=#
       
-      
-
 
      #@goto L999
 

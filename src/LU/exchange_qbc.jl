@@ -39,7 +39,7 @@ function copy_faces_send(z, u, row, col, west, east, north, south, nx, ny, nz, t
 #     but can send all face information simultaneously to the neighboring 
 #     cells in all directions          
 #---------------------------------------------------------------------
-#      if (timeron) timer_start(t_rdis1) end
+      if (timeron) timer_start(t_rdis1) end
 
 
 #---------------------------------------------------------------------
@@ -114,7 +114,7 @@ function copy_faces_send(z, u, row, col, west, east, north, south, nx, ny, nz, t
 
       #@info "$clusterid/$node --- COPY FACES SEND - END - z=$z zone=$zone"
 
- #     if (timeron) timer_stop(t_rdis1) end
+      if (timeron) timer_stop(t_rdis1) end
 
    end
 
@@ -122,7 +122,7 @@ function copy_faces_send(z, u, row, col, west, east, north, south, nx, ny, nz, t
 
       #@info "$clusterid/$node --- COPY FACES RECV - BEGIN - z=$z zone=$zone "
 
-#      if (timeron) timer_start(t_rdis2) end
+      if (timeron) timer_start(t_rdis2) end
 
 #---------------------------------------------------------------------
 #     unpack the data that has just been received;             
@@ -190,7 +190,7 @@ function copy_faces_send(z, u, row, col, west, east, north, south, nx, ny, nz, t
 
       #@info "$clusterid/$node --- COPY FACES RECV - END - z=$z zone=$zone"
 
-#      if (timeron) timer_stop(t_rdis2) end
+      if (timeron) timer_stop(t_rdis2) end
 
       return nothing
 end

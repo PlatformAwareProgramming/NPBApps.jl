@@ -49,7 +49,7 @@ const npbversion="3.4.2"
 
 const t_names = ["total", "rhsx", "rhsy", "rhsz", "rhs", "xsolve", "ysolve", 
                  "zsolve", "txinvr", "pinvr", "ninvr", "tzetar", "add", 
-                 "qbc_copy", "qbc_comm", "bpack" , "exch" , "xcomm", "ycomm", 
+                 "qbc_send", "qbc_recv", "bpack" , "exch" , "xcomm", "ycomm", 
                  "zcomm", "last"]
                  
 # "go" is called "everywhere" in a distributed environment, where each worker is deployed in the master node of a cluster
