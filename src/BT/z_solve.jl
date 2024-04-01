@@ -148,6 +148,7 @@ function z_solve(
                                              lhsc,
                                              in_buffer,
                                              timeron,
+                                             ncells_v,
                                              comm_solve,     
                                              successor,
                          ) 
@@ -230,12 +231,12 @@ end
 #---------------------------------------------------------------------
 
  function z_unpack_solve_info(c,
-                                        IMAX,
-                                        JMAX,
-                                        rhs,
-                                        lhsc,
-                                        out_buffer,
-                                    )
+                              IMAX,
+                              JMAX,
+                              rhs,
+                              lhsc,
+                              out_buffer,
+                             )
 
       kstart = 0
       ptr = 0
@@ -264,18 +265,19 @@ end
 #---------------------------------------------------------------------
 
  function z_send_solve_info(c,
-                                   MAX_CELL_DIM,
-                                   IMAX,
-                                   JMAX,
-                                   cell_coord,
-                                   cell_size,
-                                   rhs,
-                                   lhsc,
-                                   in_buffer,
-                                   timeron,
-                                   comm_solve,     
-                                   successor,
-                        )
+                              MAX_CELL_DIM,
+                              IMAX,
+                              JMAX,
+                              cell_coord,
+                              cell_size,
+                              rhs,
+                              lhsc,
+                              in_buffer,
+                              ::Val{ncells}, 
+                              timeron,
+                              comm_solve,     
+                              successor,
+                        ) where ncells
 
       ksize = cell_size[3, c]-1
       ip = cell_coord[1, c] - 1
