@@ -339,7 +339,8 @@ function perform(maxcells, no_nodes, total_nodes, node, comm_setup, active, comm
        timer_stop(1)
        t = timer_read(1)
 
-       verified = verify(no_nodes, node, 
+       verified = verify(no_nodes, 
+                         node, 
                          ncells, 
                          class, 
                          grid_points,
