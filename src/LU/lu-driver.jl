@@ -52,7 +52,7 @@ const npbversion="3.4.2"
 
 # "go" is called "everywhere" in a distributed environment, where each worker is deployed in the master node of a cluster
 
-function go(class::CLASS; itimer=0, npb_verbose=0)
+function go(class::CLASS; itimer=0, npb_verbose=0, zone_mapping = nothing)
    
    itmax = lu_class[class].itmax
    inorm = lu_class[class].inorm
@@ -94,15 +94,20 @@ function go(class::CLASS; itimer=0, npb_verbose=0)
 
    num_processes .= map(c -> c[2], clusters)
    total_processes = reduce(+, num_processes)
-   proc_num_zones = map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, 1, total_processes, npb_verbose)    
+
+   if isnothing(zone_mapping)
+      proc_num_zones, proc_zone_id, zone_proc_id = map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, 1, total_processes, npb_verbose)   
+   else
+      proc_num_zones, proc_zone_id, zone_proc_id = map_zones(num_clusters, num_zones, zone_mapping)  
+   end
 
    @printf(stdout, "\n\n NAS Parallel Benchmarks 3.4 -- LU Benchmark\n\n", )
    @printf(stdout, " Class %s\n", class)
    @printf(stdout, " Number of clusters: %4i\n", num_clusters)
-   for clusterid = 0:num_clusters-1
-      @printf(stdout, "  Cluster %4i with %4i processes\n", clusterid, num_processes[clusterid + 1])
-      for iz in 1:proc_num_zones[clusterid+1]
-         zone_no = proc_zone_id[clusterid+1][iz]
+   for clusterid = 1:num_clusters
+      @printf(stdout, "  Cluster %4i with %4i processes\n", clusterid, num_processes[clusterid])
+      for iz in 1:proc_num_zones[clusterid]
+         zone_no = proc_zone_id[clusterid][iz]
          @printf(stdout, "  Zone %4i - Size: %4ix%4ix%4i \n", zone_no, nx[zone_no], ny[zone_no], nz[zone_no])
       end
    end

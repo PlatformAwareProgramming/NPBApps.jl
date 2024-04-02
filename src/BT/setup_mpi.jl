@@ -96,6 +96,25 @@ function get_comm_index(zone, iproc)
       #
             return comm_index
 end
+
+
+function map_zones(num_clusters, num_zones, zone_mapping)
+   proc_num_zones = Array{Int64}(undef, num_clusters)
+   zone_proc_id = zeros(Int64, num_zones)
+   proc_zone_id = Array{Array{Int64}}(undef, num_clusters)  # [zeros(Int64, num_zones) for _ = 1:num_clusters]
+
+   for (c, zs) in zone_mapping
+       proc_zone_id[c-1] = zs
+       proc_num_zones[c-1] = length(zs)
+       for z in zs
+           zone_proc_id[z] = c-2
+       end
+   end
+
+   return proc_num_zones, proc_zone_id, zone_proc_id
+end
+
+
       #
       #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>c
       #
@@ -103,26 +122,11 @@ function map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, mz_blo
       #
       #  Perform zone-process mapping for load balance
       #
-      #      use sp_data
-      #      use mpinpb
-      #
-      #      implicit none
-      #
-      #      integer num_zones, nx[*], ny[*], nz[*], tot_threads
-      #
-      #     local variables
-      #      integer z_order[max_zones]
-      #      integer zone, iz2, mz, np, ip, zone_comm, comm_index
-      #      integer n1, n2, work1, work2, np1, np2
-      #      integer imx, imn, inc, icur_size
-      #      DOUBLEPRECISION tot_size, cur_size, max_size, ave_size
-      #      DOUBLEPRECISION zone_size[max_zones]
-      #      DOUBLEPRECISION diff_ratio, tot_group_size
-      #
-      #      integer group, ipg, tot_group_threads
-      #      integer proc_group_flag[num_clusters]
-      #
       # ... sort the zones in decending order
+
+            proc_num_zones = Array{Int64}(undef, num_clusters)
+            zone_proc_id = zeros(Int64, max_zones)
+            proc_zone_id = [zeros(Int64, max_zones) for _ = 1:num_clusters]
 
             z_order = Array{Int64}(undef, max_zones)
             zone_size = Array{Float64}(undef, max_zones)
@@ -390,41 +394,40 @@ function map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, mz_blo
             end
             @printf(stdout, "\n Calculated speedup = %9.2F\n\n", tot_size / max_size)
 
-            proc_num_zones = Array{Int64}(undef, num_clusters)
             for clusterid = 0:num_clusters-1
          #
          # ... reorganize list of zones for this process
-               zone = 0
-               for iz = 1:num_zones
-                  if zone_proc_id[iz] == clusterid
-                     zone = zone + 1
-                     proc_zone_id[clusterid+1][zone] = iz
-                  end
+            zone = 0
+            for iz = 1:num_zones
+               if zone_proc_id[iz] == clusterid
+                  zone = zone + 1
+                  proc_zone_id[clusterid+1][zone] = iz
                end
-               proc_num_zones[clusterid+1] = zone
-               if zone != proc_zone_count[clusterid+1]
-                  println(stdout, "Warning: ", clusterid, ": mis-matched zone counts -", zone, proc_zone_count[clusterid+1])
-               end
-         #
-         # ... set number of threads for this process
-               group = proc_group[clusterid+1]
-               np = 0
-               for ip = 1:num_clusters
-                  if proc_group[ip] == group
-                     proc_group[ip] = np
-                     np = np + 1
-                     num_processes[np] = num_processes[ip]
-                  end
-               end
-               ipg = proc_group[clusterid+1]
-               if npb_verbose > 1 #&& node == root
-                  @printf(stdout, " cluster id%6i group%5i group_size%5i group_pid%5i threads%4i\n", clusterid, group, np, ipg, num_processes[ipg+1])
-               end 
+            end
+            proc_num_zones[clusterid+1] = zone
+            if zone != proc_zone_count[clusterid+1]
+               println(stdout, "Warning: ", clusterid, ": mis-matched zone counts -", zone, proc_zone_count[clusterid+1])
             end
       #
+         # ... set number of threads for this process
+            group = proc_group[clusterid+1]
+            np = 0
+            for ip = 1:num_clusters
+               if proc_group[ip] == group
+                  proc_group[ip] = np
+                  np = np + 1
+                  num_processes[np] = num_processes[ip]
+               end
+            end
+            ipg = proc_group[clusterid+1]
+            if npb_verbose > 1 #&& node == root
+               @printf(stdout, " cluster id%6i group%5i group_size%5i group_pid%5i threads%4i\n", clusterid, group, np, ipg, num_processes[ipg+1])
+            end 
+         end
+   #
       # ... pin-to-node within one process group
       #      call smp_pinit_thread(np, ipg, num_processes)
       #
-            return proc_num_zones
+         return proc_num_zones, proc_zone_id, zone_proc_id
 end
       

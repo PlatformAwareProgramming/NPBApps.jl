@@ -41,7 +41,7 @@ function copy_faces_outer_1( z,
       for c = 1:ncells
          # @info "$clusterid/$node: copy faces 1 BEGIN - c=$c" 
 
-         @info "$clusterid/$node: copy faces 1.0 - z=$z c=$c ncells=$ncells --- cell_coord[1, $c] == $(cell_coord[1,c]) / cell_coord[2, $c] == $(cell_coord[2,c])"  
+         #@info "$clusterid/$node: copy faces 1.0 - z=$z c=$c ncells=$ncells --- cell_coord[1, $c] == $(cell_coord[1,c]) / cell_coord[2, $c] == $(cell_coord[2,c])"  
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to eastern neighbors (i-dir)

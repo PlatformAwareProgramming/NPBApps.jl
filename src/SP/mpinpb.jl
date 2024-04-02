@@ -50,9 +50,7 @@ function alloc_proc_space(num_clusters, max_zones)
          num_clusters2 = num_clusters2 * 2
       end
 
-      global zone_proc_id = zeros(Int64, max_zones)
-      global proc_zone_id = [zeros(Int64, max_zones) for _ = 1:num_clusters]
-
+ 
       global proc_zone_count = zeros(Int64, num_clusters)
       global num_processes = zeros(Int64, num_clusters)
       global proc_group = zeros(Int64, num_clusters)
