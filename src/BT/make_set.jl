@@ -22,7 +22,7 @@ function make_set(node, no_nodes, grid_points, cell_coord, cell_low, cell_high, 
 #     determine the location of the cell at the bottom of the 3D 
 #     array of cells
 #---------------------------------------------------------------------
-      cell_coord[1, 1] = mod(node, p)
+      cell_coord[1, 1] = mod(node,p)
       cell_coord[2, 1] = div(node,p)
       cell_coord[3, 1] = 0
 
@@ -81,7 +81,7 @@ function make_set(node, no_nodes, grid_points, cell_coord, cell_low, cell_high, 
 #---------------------------------------------------------------------
 #     set cell_coord range for each direction                            
 #---------------------------------------------------------------------
-         SIZE   = grid_points[dir]/p
+         SIZE   = div(grid_points[dir],p)
          excess = mod(grid_points[dir], p)
          for c = 1:ncells
             if cell_coord[dir, c] <= excess

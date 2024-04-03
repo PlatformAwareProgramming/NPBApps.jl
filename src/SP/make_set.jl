@@ -82,7 +82,7 @@ function make_set(node, no_nodes, grid_points, cell_coord, cell_low, cell_high, 
 #---------------------------------------------------------------------
 #         set cell_coord range for each direction                            
 #---------------------------------------------------------------------
-          SIZE   = grid_points[dir]/p
+          SIZE   = div(grid_points[dir], p)
           excess = mod(grid_points[dir], p)
           for c = 1:ncells
              if cell_coord[dir, c] <= excess
