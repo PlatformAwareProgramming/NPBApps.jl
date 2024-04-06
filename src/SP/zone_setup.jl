@@ -6,6 +6,8 @@ function zone_setup(x_zones, y_zones, gx_size, gy_size, gz_size, nx, nxmax, ny, 
 
          x_r   = exp(log(ratio)/(x_zones-1))
          y_r   = exp(log(ratio)/(y_zones-1))
+@info "xr=$x_r y_r=$y_r"
+
          x_smallest = float(gx_size)*(x_r-1.0e0)/(x_r^x_zones-1.0e0)
          y_smallest = float(gy_size)*(y_r-1.0e0)/(y_r^y_zones-1.0e0)
 

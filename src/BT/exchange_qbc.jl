@@ -14,8 +14,50 @@
 #     exit immediately if there are no faces to be copied           
 #---------------------------------------------------------------------
 
+function exchange_qbc(::Val{ncells},
+                  proc_num_zones,
+                  cell_coord,
+                  cell_size,
+                  cell_start,
+                  cell_end,
+                  cell_low,
+                  cell_high,
+                  u,
+                  timeron,                  
+                  ) where {ncells}  
 
-function copy_faces_outer_1( z, 
+    for iz = 1:proc_num_zones
+      exchange_qbc_send(iz,
+                       Val(ncells),                        
+                       cell_coord[iz],
+                       cell_size[iz],
+                       cell_start[iz],
+                       cell_end[iz],
+                       cell_low[iz],
+                       cell_high[iz],
+                       u[iz],
+                       timeron,
+                       )
+    end
+ 
+    for iz = 1:proc_num_zones
+      exchange_qbc_recv(iz, 
+                       Val(ncells), 
+                       cell_coord[iz],
+                       cell_size[iz],
+                       cell_start[iz],
+                       cell_end[iz],
+                       cell_low[iz],
+                       cell_high[iz],
+                       u[iz],
+                       timeron,)
+    end
+ 
+ end
+
+
+function exchange_qbc_send(z,
+                     ::Val{ncells},
                      cell_coord,
                      cell_size,
                      cell_start,
@@ -24,7 +66,6 @@ function copy_faces_outer_1( z,
                      cell_high,
                      u,
                      timeron,
-                     ::Val{ncells}
                      ) where {ncells}
 
 
@@ -108,7 +149,8 @@ function copy_faces_outer_1( z,
 
    end
 
-   function copy_faces_outer_2(z, 
+   function exchange_qbc_recv(z, 
+                       ::Val{ncells},
                        cell_coord,
                        cell_size,
                        cell_start,
@@ -117,7 +159,6 @@ function copy_faces_outer_1( z,
                        cell_high,
                        u,
                        timeron,
-                       ::Val{ncells},
                      ) where {ncells}
 
 

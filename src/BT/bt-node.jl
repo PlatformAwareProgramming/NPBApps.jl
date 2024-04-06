@@ -120,34 +120,19 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
 
-      for iz = 1:proc_num_zones    
-            copy_faces_outer_1(iz, 
-                              cell_coord[iz],
-                              cell_size[iz],
-                              cell_start[iz],
-                              cell_end[iz],
-                              cell_low[iz],
-                              cell_high[iz],
-                              u[iz],
-                              timeron,
-                              Val(ncells)
-            )          
+      if num_clusters > 1 || proc_num_zones > 1
+          exchange_qbc(Val(ncells),
+                       proc_num_zones,
+                       cell_coord,
+                       cell_size,
+                       cell_start,
+                       cell_end,
+                       cell_low,
+                       cell_high,
+                       u,
+                       timeron,
+          )          
       end
-
-      for iz = 1:proc_num_zones    
-            copy_faces_outer_2(iz, 
-                              cell_coord[iz],
-                              cell_size[iz],
-                              cell_start[iz],
-                              cell_end[iz],
-                              cell_low[iz],
-                              cell_high[iz],
-                              u[iz],
-                              timeron,
-                              Val(ncells)
-            )
-      end
-
 
 
 #=Threads.@threads=# for iz = 1:proc_num_zones
@@ -245,49 +230,40 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        @label L997
 
-       for STEP = 1:niter
-          #@info "$clusterid/$node: STEP $STEP - A"
+       Q = 1
 
+       timer_clear(64); t_64 = 0.0; t_64s = 0.0
+       timer_clear(63); t_63 = 0.0; t_63s = 0.0
+
+       for STEP = 1:niter
           if node == root
-             if mod(STEP, 20) == 0 || STEP == 1
-                @printf(stdout, "%2i: Time step %4i\n", clusterid,   STEP)
-              end
+            Q = STEP > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
+
+            if mod(STEP, Q) == 0 || STEP == 1
+               @printf(stdout, "%2i: Time step %4i  -- %12.2F  -- %12.2F --- %4i \n", clusterid, STEP, t_63s/(STEP-1), t_64s/(STEP-1), Q)
+            end
           end
 
-          for iz = 1:proc_num_zones    
-                copy_faces_outer_1(iz, 
-                                   cell_coord[iz],
-                                   cell_size[iz],
-                                   cell_start[iz],
-                                   cell_end[iz],
-                                   cell_low[iz],
-                                   cell_high[iz],
-                                   u[iz],
-                                   timeron,
-                                   Val(ncells)
-                )          
-         end
-
-         #@info "$clusterid/$node: STEP $STEP - B"
-
-         for iz = 1:proc_num_zones    
-                copy_faces_outer_2(iz, 
-                                   cell_coord[iz],
-                                   cell_size[iz],
-                                   cell_start[iz],
-                                   cell_end[iz],
-                                   cell_low[iz],
-                                   cell_high[iz],
-                                   u[iz],
-                                   timeron,
-                                   Val(ncells)
-                )
+          timer_start(64)
+          timer_start(63)
+ 
+           if num_clusters > 1 || proc_num_zones > 1
+            exchange_qbc(Val(ncells),
+                       proc_num_zones,
+                       cell_coord,
+                       cell_size,
+                       cell_start,
+                       cell_end,
+                       cell_low,
+                       cell_high,
+                       u,
+                       timeron, 
+            )          
           end
  
-          #@info "$clusterid/$node: STEP $STEP - C"
-          
-          @sync begin
-            Threads.@threads for iz = 1:proc_num_zones                          
+          t_63 = timer_stop(63); t_63s += t_63
+
+          for iz = 1:proc_num_zones                          
                adi(ss[iz], 
                   sr[iz], 
                   b_size[iz],
@@ -361,10 +337,11 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                   utmp[iz],
                   requests[iz],
                )
-              end
            end
-         #@info "$clusterid/$node: STEP $STEP - D"
-      end
+
+           t_64 = timer_stop(64); t_64s += t_64
+
+       end
 
        timer_stop(1)
        t = timer_read(1)

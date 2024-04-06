@@ -42,7 +42,7 @@ end
 
 function matmul_sub(ablock, ia, bblock, b1, b2, b3, b4, cblock, ic)
 
-      timer_start(64)
+    #  timer_start(64)
 
      #= for j = 1:5, i = 1:5
                   sum = 0
@@ -181,7 +181,7 @@ function matmul_sub(ablock, ia, bblock, b1, b2, b3, b4, cblock, ic)
                         ablock[5,5,ia]*bblock[5,5,b1,b2,b3,b4]
 
 
-      timer_stop(64)
+    #  timer_stop(64)
 
       return nothing
 end 
@@ -193,7 +193,7 @@ end
 function matmul_sub2(ablock, bblock, cblock)
 
 
-      timer_start(64)
+    #  timer_start(64)
 
 #=     for j = 1:5, i = 1:5
                   sum = 0
@@ -455,7 +455,7 @@ function matmul_sub2(ablock, bblock, cblock)
                                      ablock[5,3]*bblock[3,5]-
                                      ablock[5,4]*bblock[4,5]-
                                      ablock[5,5]*bblock[5,5]                        
-      timer_stop(64)
+     # timer_stop(64)
 
       return nothing
 end

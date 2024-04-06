@@ -34,7 +34,7 @@ function timer_stop(n)
       t = now - start[n]
       elapsed[n] = elapsed[n] + t
 
-      return nothing
+      return t
 end
 
 

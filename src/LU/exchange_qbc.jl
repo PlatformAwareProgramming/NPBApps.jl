@@ -18,18 +18,18 @@ function exch_qbc(proc_num_zones, u, row, col, west, east, north, south, nx, ny,
 
    for iz = 1:proc_num_zones
       zone = proc_zone_id[iz]
-      copy_faces_send(iz, u[iz], row[iz], col[iz], west[iz], east[iz], north[iz], south[iz], nx[iz], ny[iz], nz[iz], timeron, zone, ist[iz], iend[iz], jst[iz], jend[iz], iz_west[zone], iz_east[zone], iz_south[zone], iz_north[zone])
+      exchange_qbc_send(iz, u[iz], row[iz], col[iz], west[iz], east[iz], north[iz], south[iz], nx[iz], ny[iz], nz[iz], timeron, zone, ist[iz], iend[iz], jst[iz], jend[iz], iz_west[zone], iz_east[zone], iz_south[zone], iz_north[zone])
    end
 
    for iz = 1:proc_num_zones
       zone = proc_zone_id[iz]
-      copy_faces_recv(iz, u[iz], row[iz], col[iz], west[iz], east[iz], north[iz], south[iz], nx[iz], ny[iz], nz[iz], timeron, zone, ist[iz], iend[iz], jst[iz], jend[iz], iz_west[zone], iz_east[zone], iz_south[zone], iz_north[zone])
+      exchange_qbc_recv(iz, u[iz], row[iz], col[iz], west[iz], east[iz], north[iz], south[iz], nx[iz], ny[iz], nz[iz], timeron, zone, ist[iz], iend[iz], jst[iz], jend[iz], iz_west[zone], iz_east[zone], iz_south[zone], iz_north[zone])
    end
 
 end
 
 
-function copy_faces_send(z, u, row, col, west, east, north, south, nx, ny, nz, timeron, zone, ist, iend, jst, jend, west_zone, east_zone, south_zone, north_zone)
+function exchange_qbc_send(z, u, row, col, west, east, north, south, nx, ny, nz, timeron, zone, ist, iend, jst, jend, west_zone, east_zone, south_zone, north_zone)
 
    #@info "$clusterid/$node --- COPY FACES SEND - BEGIN - z=$z zone=$zone"
                      
@@ -118,7 +118,7 @@ function copy_faces_send(z, u, row, col, west, east, north, south, nx, ny, nz, t
 
    end
 
-   function copy_faces_recv(z, u, row, col, west, east, north, south, nx, ny, nz, timeron, zone, ist, iend, jst, jend, west_zone, east_zone, south_zone, north_zone)
+   function exchange_qbc_recv(z, u, row, col, west, east, north, south, nx, ny, nz, timeron, zone, ist, iend, jst, jend, west_zone, east_zone, south_zone, north_zone)
 
       #@info "$clusterid/$node --- COPY FACES RECV - BEGIN - z=$z zone=$zone "
 

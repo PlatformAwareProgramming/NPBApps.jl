@@ -1,3 +1,44 @@
+function exch_qbc(_::Val{ncells},
+                    proc_num_zones,
+                    cell_coord,
+                    cell_size,
+                    cell_start,
+                    cell_end,
+                    cell_low,
+                    cell_high,
+                    u,
+                    timeron,
+                    ) where {ncells}  
+
+    for iz = 1:proc_num_zones
+        exch_qbc_send(Val(ncells),
+                        iz,
+                        cell_coord[iz],
+                        cell_size[iz],
+                        cell_start[iz],
+                        cell_end[iz],
+                        cell_low[iz],
+                        cell_high[iz],
+                        u[iz],
+                        timeron,)
+    end
+ 
+    for iz = 1:proc_num_zones
+        exch_qbc_recv(Val(ncells),
+                        iz,
+                        cell_coord[iz],
+                        cell_size[iz],
+                        cell_start[iz],
+                        cell_end[iz],
+                        cell_low[iz],
+                        cell_high[iz],
+                        u[iz],
+                        timeron,)
+    end
+ 
+ end
+ 
+
 #---------------------------------------------------------------------
 # this function copies the face values of a variable defined on a set 
 # of cells to the overlap locations of the adjacent sets of cells. 
@@ -9,7 +50,7 @@
 #---------------------------------------------------------------------
 
 
-function copy_faces_outer_1(_::Val{ncells},
+function exch_qbc_send(_::Val{ncells},
                             z,
                             cell_coord,
                             cell_size,
@@ -88,7 +129,7 @@ function copy_faces_outer_1(_::Val{ncells},
 end
 
 
-function copy_faces_outer_2(_::Val{ncells},
+function exch_qbc_recv(_::Val{ncells},
                             z,
                             cell_coord,
                             cell_size,
@@ -146,5 +187,5 @@ function copy_faces_outer_2(_::Val{ncells},
        if (timeron) timer_stop(t_rdis2) end
 
 
-return nothing
+        return nothing
 end

@@ -6,7 +6,7 @@ module SP
     using OffsetArrays
     using Parameters
     using Printf
-    using MPI
+    using MPI   
     using StaticArrays
     using LoopVectorization
     using MPIClusterManagers
@@ -31,8 +31,8 @@ module SP
     include("SP/initialize.jl") 
     include("SP/set_constants.jl") 
     include("SP/add.jl") 
-    include("SP/copy_faces_inner.jl")  
-    include("SP/copy_faces_outer.jl")  
+    include("SP/copy_faces.jl")  
+    include("SP/exchange_qbc.jl")  
     include("SP/error.jl") 
     include("SP/exact_rhs.jl") 
     include("SP/exact_solution.jl") 
@@ -79,8 +79,8 @@ module BT
     include("BT/initialize.jl")
     include("BT/add.jl")
     include("BT/btio.jl")
-    include("BT/copy_faces_inner.jl")
-    include("BT/copy_faces_outer.jl")
+    include("BT/copy_faces.jl")
+    include("BT/exchange_qbc.jl") 
     include("BT/error.jl")
     include("BT/exact_rhs.jl")
     include("BT/exact_solution.jl")

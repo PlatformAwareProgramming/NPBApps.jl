@@ -229,13 +229,6 @@ function copy_faces(flag, z,
                       end
                    end
                 end
-             elseif flag
-                # outer face (inter-zone)
-               u_face = view(u, cell_size[1, c]-2, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
-                                cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
-               remotecall(deposit_face, 1, z, m, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
-                                                 cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                           u_face, Val(1); role=:worker)
             end
 
 #---------------------------------------------------------------------
@@ -251,13 +244,6 @@ function copy_faces(flag, z,
                       end
                    end
                 end
-             elseif flag
-                # outer face (inter-zone)
-               u_face = view(u, 1, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
-                                   cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
-               remotecall(deposit_face, 1, z, m, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
-                                                 cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                           u_face, Val(2); role=:worker)
              end
 
 #---------------------------------------------------------------------
@@ -273,13 +259,6 @@ function copy_faces(flag, z,
                       end
                    end
                 end
-             elseif flag
-                # outer face (inter-zone)
-                u_face = view(u, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, #=1=# cell_size[2, c]-2, 
-                                 cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
-                remotecall(deposit_face, 1, z, m, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
-                                                  cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                            u_face, Val(3); role=:worker)
              end
 
 #---------------------------------------------------------------------
@@ -295,12 +274,6 @@ function copy_faces(flag, z,
                       end
                    end
                 end
-             elseif flag
-                u_face = view(u, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 1 #=cell_size[2, c]-2=#, 
-                                 cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c)
-                remotecall(deposit_face, 1, z, m, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
-                                                  cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                            u_face, Val(4); role=:worker)
             end
 
 #---------------------------------------------------------------------
@@ -389,12 +362,6 @@ function copy_faces(flag, z,
                       end
                    end
                 end
-             elseif flag
-                u_face = remotecall(collect_face, 1, z, m, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2, c] + 1, 
-                                                           cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3, c] + 1, 
-                                                     Val(2); role=:worker)
-                view(u, 0, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
-                              cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c) .= fetch(u_face; role=:worker)
              end
 
              if cell_coord[1, c] != ncells
@@ -407,12 +374,6 @@ function copy_faces(flag, z,
                       end
                    end
                 end
-             elseif flag
-                u_face = remotecall(collect_face, 1, z, m, cell_low[2, c] + cell_start[2, c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
-                                                           cell_low[3, c] + cell_start[3, c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                                     Val(1); role=:worker)
-                view(u, cell_size[1, c]-1, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
-                                                 cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c) .= fetch(u_face; role=:worker)
              end
 
              if cell_coord[2, c] != 1
@@ -425,12 +386,6 @@ function copy_faces(flag, z,
                       end
                    end
                 end
-             elseif flag
-               u_face = remotecall(collect_face, 1, z, m, cell_low[1, c] + cell_start[1, c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
-                                                          cell_low[3, c] + cell_start[3, c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                                    Val(4); role=:worker)
-               view(u, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 0, 
-                          cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, m, c) .= fetch(u_face; role=:worker)  
             end
 
              if cell_coord[2, c] != ncells
@@ -443,12 +398,6 @@ function copy_faces(flag, z,
                       end
                    end
                 end
-             elseif flag
-                u_face = remotecall(collect_face, 1, z, m, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
-                                                           cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                                     Val(3); role=:worker)
-                view(u, cell_start[1,c]:cell_size[1,c]-cell_end[1,c]-1, cell_size[2, c]-1, 
-                           cell_start[3,c]:cell_size[3,c]-cell_end[3,c]-1, m, c) .= fetch(u_face; role=:worker)
               end
 
              if cell_coord[3, c] != 1

@@ -198,7 +198,9 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
       end
 
-     exch_qbc(proc_num_zones, u, row, col, west, east, north, south, nx, ny, nz, timeron, proc_zone_id, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north)
+      if num_clusters > 1 || proc_num_zones > 1
+         exch_qbc(proc_num_zones, u, row, col, west, east, north, south, nx, ny, nz, timeron, proc_zone_id, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north)
+      end
 
      #= for iz = 1:proc_num_zones
             zone = proc_zone_id[iz]
@@ -211,7 +213,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
                                           iglob = ipt[iz] + i
                               #            if iglob != 1 && iglob != nx0[zone]
                                                 #@info "$clusterid/$node: zone $zone --- u[$m, $iglob, $jglob, $k]=$(u[iz][ m, i, j, k ])"
-                                                @info "$zone, $m, $k, $jglob, $iglob, $(u[iz][ m, i, j, k ]), $clusterid, $node"
+                                                #@info "$zone, $m, $k, $jglob, $iglob, $(u[iz][ m, i, j, k ]), $clusterid, $node"
                               #            end
                                     end
                               #end
@@ -337,25 +339,38 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
        timer_clear(1)
        timer_start(1)
    
+       Q = 1
+
+       timer_clear(64); t_64 = 0.0; t_64s = 0.0
+       timer_clear(63); t_63 = 0.0; t_63s = 0.0
+
        #@info "$clusterid/$node: STEP 7 --- niter=$niter"       
 
       #---------------------------------------------------------------------
       #   perform the SSOR iterations
       #---------------------------------------------------------------------
-       #=@showprogress=# for istep = 1:niter
-            
+      for istep = 1:niter
             #@info "$clusterid/$node: STEP 81 --- istep=$istep"       
 
             if node == root
-                  if mod(istep, 20) == 0 || istep == itmax || istep == 1
-                     if (niter > 1) 
-                        @printf(stdout, " Time step %4i\n", istep) 
-                     end
+               Q = istep > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
+
+               if mod(istep, Q) == 0 || istep == itmax || istep == 1
+                  if (niter > 1) 
+                     @printf(stdout, "%2i: Time step %4i  -- %12.2F  -- %12.2F --- %4i \n", clusterid, istep, t_63s/(istep-1), t_64s/(istep-1), Q)
+                  end
                end
             end
             #@info "$clusterid/$node: STEP 82 --- istep=$istep"       
 
-            exch_qbc(proc_num_zones, u, row, col, west, east, north, south, nx, ny, nz, timeron, proc_zone_id, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north)
+            timer_start(64)
+            timer_start(63)
+         
+            if num_clusters > 1 || proc_num_zones > 1
+               exch_qbc(proc_num_zones, u, row, col, west, east, north, south, nx, ny, nz, timeron, proc_zone_id, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north)
+            end
+
+            t_63 = timer_stop(63); t_63s += t_63
 
             for iz = 1:proc_num_zones
                   #@info "$clusterid/$node: STEP 83 --- istep=$istep zone=$iz"       
@@ -401,7 +416,9 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
                         jend[iz],
                         )
             end
-      end
+
+            t_64 = timer_stop(64); t_64s += t_64
+     end
 
       #@info "$clusterid/$node: STEP 9"
 

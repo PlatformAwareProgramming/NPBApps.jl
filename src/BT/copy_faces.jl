@@ -14,17 +14,12 @@
 #     exit immediately if there are no faces to be copied           
 #---------------------------------------------------------------------
 
-function copy_faces(flag, 
-                     z,
-                     proc_num_zones, 
-                     sr, 
+function copy_faces(sr, 
                      b_size,
                      cell_coord,
                      cell_size,
                      cell_start,
                      cell_end,
-                     cell_low,
-                     cell_high,
                      forcing,        
                      u,
                      rhs,
@@ -74,7 +69,6 @@ function copy_faces(flag,
                      predecessor,
                      successor,
                      requests,
-                     lk
                      ) where ncells
 
          compute_rhs(cell_size,
@@ -128,18 +122,13 @@ end
 
 
 
-function copy_faces(flag, 
-                     z, 
-                     proc_num_zones, 
-                     ss, 
+function copy_faces( ss, 
                      sr, 
                      b_size,
                      cell_coord,
                      cell_size,
                      cell_start,
                      cell_end,
-                     cell_low,
-                     cell_high,
                      forcing,        
                      u,
                      rhs,
@@ -189,11 +178,10 @@ function copy_faces(flag,
                      predecessor,
                      successor,
                      requests,
-                     lk
                      ) where {no_nodes, ncells}
 
 
-@info "$clusterid/$node: copy faces 0 - z=$z" 
+# @info "$clusterid/$node: copy faces 0 - z=$z" 
                      
 #---------------------------------------------------------------------
 #     because the difference stencil for the diagonalized scheme is 
@@ -210,13 +198,13 @@ function copy_faces(flag,
       p5 = 0
 
       for c = 1:ncells
-         @info "$clusterid/$node: copy faces 1 BEGIN - c=$c" 
+         # @info "$clusterid/$node: copy faces 1 BEGIN - c=$c" 
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to eastern neighbors (i-dir)
 #---------------------------------------------------------------------
          if cell_coord[1, c] != ncells
-            @info "$clusterid/$node: copy faces inner 2.1 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 2.1 - z=$z c=$c" 
             for k = 0:cell_size[3, c]-1
                for j = 0:cell_size[2, c]-1
                   for i = cell_size[1, c]-2:cell_size[1, c]-1
@@ -227,28 +215,14 @@ function copy_faces(flag,
                   end
                end
             end
-            @info "$clusterid/$node: copy faces inner 2.2 - z=$z c=$c" 
-         elseif flag
-               @info "$clusterid/$node: copy faces outer 2.1 - z=$z c=$c" 
-                # outer face (inter-zone)
-               u_face = view(u, 1:5, cell_size[1, c]-2, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
-                                                        cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c)
-               lock(lk)
-               try
-                  remotecall(deposit_face, 1, z, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
-                                                 cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                           u_face, Val(1); role=:worker)
-               finally
-                  unlock(lk)
-               end
-               @info "$clusterid/$node: copy faces outer 2.2 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 2.2 - z=$z c=$c" 
          end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to western neighbors 
 #---------------------------------------------------------------------
          if cell_coord[1, c] != 1
-            @info "$clusterid/$node: copy faces inner 3.1 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 3.1 - z=$z c=$c" 
             for k = 0:cell_size[3, c]-1
                for j = 0:cell_size[2, c]-1
                   for i = 0:1
@@ -259,28 +233,14 @@ function copy_faces(flag,
                   end
                end
             end
-            @info "$clusterid/$node: copy faces inner 3.2 - z=$z c=$c" 
-         elseif flag
-            @info "$clusterid/$node: copy faces outer 3.1 - z=$z c=$c" 
-            # outer face (inter-zone)
-           u_face = view(u, 1:5, 1, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
-                                    cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c)
-           lock(lk)
-           try
-               remotecall(deposit_face, 1, z, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
-                                              cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                        u_face, Val(2); role=:worker)
-               @info "$clusterid/$node: copy faces outer 3.2 - z=$z c=$c" 
-           finally
-               unlock(lk)
-           end
-      end
+            # @info "$clusterid/$node: copy faces inner 3.2 - z=$z c=$c" 
+         end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to northern neighbors (j_dir)
 #---------------------------------------------------------------------
          if cell_coord[2, c] != ncells
-            @info "$clusterid/$node: copy faces inner 4.1 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 4.1 - z=$z c=$c" 
             for k = 0:cell_size[3, c]-1
                for j = cell_size[2, c]-2:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
@@ -291,28 +251,14 @@ function copy_faces(flag,
                   end
                end
             end
-            @info "$clusterid/$node: copy faces inner 4.2 - z=$z c=$c" 
-         elseif flag
-            @info "$clusterid/$node: copy faces outer 4.1 - z=$z c=$c" 
-            # outer face (inter-zone)
-            u_face = view(u, 1:5, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, cell_size[2, c]-2, 
-                                  cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c)
-            lock(lk)
-            try
-               remotecall(deposit_face, 1, z, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
-                                              cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                        u_face, Val(3); role=:worker)
-            finally
-               unlock(lk)
-            end
-            @info "$clusterid/$node: copy faces outer 4.2 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 4.2 - z=$z c=$c" 
          end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to southern neighbors 
 #---------------------------------------------------------------------
          if cell_coord[2, c] != 1
-            @info "$clusterid/$node: copy faces inner 5.1 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 5.1 - z=$z c=$c" 
             for k = 0:cell_size[3, c]-1
                for j = 0:1
                   for i = 0:cell_size[1, c]-1
@@ -323,47 +269,34 @@ function copy_faces(flag,
                   end
                end
             end
-            @info "$clusterid/$node: copy faces inner 5.2 - z=$z c=$c" 
-         elseif flag
-            @info "$clusterid/$node: copy faces outer 5.1 - z=$z c=$c" 
-            u_face = view(u, 1:5, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 1, 
-                                  cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c)
-            lock(lk)
-            try
-               remotecall(deposit_face, 1, z, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
-                                              cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                        u_face, Val(4); role=:worker)                                       
-            finally
-               unlock(lk)
-            end
-            @info "$clusterid/$node: copy faces outer 5.2 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 5.2 - z=$z c=$c" 
          end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to top neighbors (k-dir)
 #---------------------------------------------------------------------
          if cell_coord[3, c] != ncells
-            @info "$clusterid/$node: copy faces inner 101.1 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 101.1 - z=$z c=$c" 
             for k = cell_size[3, c]-2:cell_size[3, c]-1
                for j = 0:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        # @info "$clusterid/$node: zone=$z length(out_buffer)=$(length(out_buffer)) out_buffer[$(ss[5]+p4)] --- m=$m i=$i j=$j k=$k ss[5]=$(ss[5]) p4=$p4 - BEGIN"
+                        # # @info "$clusterid/$node: zone=$z length(out_buffer)=$(length(out_buffer)) out_buffer[$(ss[5]+p4)] --- m=$m i=$i j=$j k=$k ss[5]=$(ss[5]) p4=$p4 - BEGIN"
                         out_buffer[ss[5]+p4] = u[m, i, j, k, c]
-                        # @info "$clusterid/$node: zone=$z length(out_buffer)=$(length(out_buffer)) out_buffer[$(ss[5]+p4)] --- m=$m i=$i j=$j k=$k ss[5]=$(ss[5]) p4=$p4 - END"
+                        # # @info "$clusterid/$node: zone=$z length(out_buffer)=$(length(out_buffer)) out_buffer[$(ss[5]+p4)] --- m=$m i=$i j=$j k=$k ss[5]=$(ss[5]) p4=$p4 - END"
                         p4 = p4 + 1
                      end
                   end
                end
             end
-            @info "$clusterid/$node: copy faces inner 101.2 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 101.2 - z=$z c=$c" 
          end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to bottom neighbors
 #---------------------------------------------------------------------
          if cell_coord[3, c] != 1
-            @info "$clusterid/$node: copy faces inner 102.1 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 102.1 - z=$z c=$c" 
             for k = 0:1
                for j = 0:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
@@ -374,9 +307,9 @@ function copy_faces(flag,
                   end
                end
             end
-            @info "$clusterid/$node: copy faces inner 102.2 - z=$z c=$c" 
+            # @info "$clusterid/$node: copy faces inner 102.2 - z=$z c=$c" 
          end
-         @info "$clusterid/$node: copy faces 1 END - c=$c" 
+         # @info "$clusterid/$node: copy faces 1 END - c=$c" 
 #---------------------------------------------------------------------
 #     cell loop
 #---------------------------------------------------------------------
@@ -385,7 +318,7 @@ function copy_faces(flag,
 
       if (timeron) timer_start(t_exch) end
 
-      @info "$clusterid/$node: copy faces 6 - z=$z" 
+      # @info "$clusterid/$node: copy faces 6 - z=$z" 
 
       requests[1] = MPI.Irecv!(view(in_buffer, sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = successor[1], tag = WEST)
       requests[2] = MPI.Irecv!(view(in_buffer, sr[2]:sr[2]+b_size[2]-1), comm_rhs; source = predecessor[1], tag = EAST)
@@ -401,11 +334,11 @@ function copy_faces(flag,
       requests[11] = MPI.Isend(view(out_buffer, ss[5]:ss[5]+b_size[5]-1), comm_rhs; dest = successor[3], tag = TOP)
       requests[12] = MPI.Isend(view(out_buffer, ss[6]:ss[6]+b_size[6]-1), comm_rhs; dest = predecessor[3], tag = BOTTOM)
 
-      @info "$clusterid/$node: copy faces 7 - z=$z" 
+      # @info "$clusterid/$node: copy faces 7 - z=$z" 
 
       MPI.Waitall(requests)
 
-      @info "$clusterid/$node: copy faces 8 - z=$z" 
+      # @info "$clusterid/$node: copy faces 8 - z=$z" 
 
       if (timeron) timer_stop(t_exch) end
 
@@ -433,24 +366,6 @@ function copy_faces(flag,
                   end
                end
             end
-         elseif flag
-            @info "$clusterid/$node: copy faces 9.1 - z=$z c=$c" 
-            lock(lk)
-            u_face = try
-                        remotecall(collect_face, 1, z, cell_low[2, c] + cell_start[2,c] + 1, cell_high[2, c] - cell_end[2, c] + 1, 
-                                                                        cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3, c] + 1, 
-                                                               Val(2); role=:worker)
-                     finally
-                        unlock(lk)
-                     end
-            #lock(lk)
-            view(u, 1:5, 0, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
-                            cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c) .= #try 
-                                                                                       fetch(u_face)
-                                                                                   #finally
-                                                                                   #    unlock(lk)
-                                                                                   #end
-            @info "$clusterid/$node: copy faces 9.2 - z=$z c=$c" 
          end
 
          if cell_coord[1, c] != ncells
@@ -464,24 +379,6 @@ function copy_faces(flag,
                   end
                end
             end
-         elseif flag
-            @info "$clusterid/$node: copy faces 10.1 - z=$z c=$c" 
-            lock(lk)
-            u_face = try
-                        remotecall(collect_face, 1, z, cell_low[2, c] + cell_start[2, c] + 1, cell_high[2, c] - cell_end[2,c] + 1, 
-                                                                     cell_low[3, c] + cell_start[3, c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                                               Val(1); role=:worker)
-                     finally
-                        unlock(lk)
-                     end
-            #lock(lk)
-            view(u, 1:5, cell_size[1, c]-1, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
-                                            cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c) .= #try 
-                                                                                                      fetch(u_face)
-                                                                                                   #finally
-                                                                                                   #   unlock(lk)
-                                                                                                   #end
-            @info "$clusterid/$node: copy faces 10.2 - z=$z c=$c" 
          end
 
          if cell_coord[2, c] != 1
@@ -495,24 +392,6 @@ function copy_faces(flag,
                   end
                end
             end
-         elseif flag
-            @info "$clusterid/$node: copy faces 11.1 - z=$z c=$c" 
-            lock(lk)
-            u_face = try
-                        remotecall(collect_face, 1, z, cell_low[1, c] + cell_start[1, c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
-                                                                     cell_low[3, c] + cell_start[3, c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                                               Val(4); role=:worker)
-                     finally
-                        unlock(lk)
-                     end
-            #lock(lk)
-            view(u, 1:5, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 0, 
-                         cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c) .= #try 
-                                                                                   fetch(u_face)
-                                                                                #finally
-                                                                                #   unlock(lk)
-                                                                                #end
-            @info "$clusterid/$node: copy faces 11.2 - z=$z c=$c" 
          end
 
          if cell_coord[2, c] != ncells
@@ -526,24 +405,6 @@ function copy_faces(flag,
                   end
                end
             end
-         elseif flag
-            @info "$clusterid/$node: copy faces 12.1 - z=$z c=$c" 
-            lock(lk)
-            u_face = try
-                        remotecall(collect_face, 1, z, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
-                                                                     cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                                               Val(3); role=:worker)
-                     finally
-                        unlock(lk)
-                     end
-            #lock(lk)
-            view(u, 1:5, cell_start[1,c]:cell_size[1,c]-cell_end[1,c]-1, cell_size[2, c]-1, 
-                         cell_start[3,c]:cell_size[3,c]-cell_end[3,c]-1, c) .= #try 
-                                                                                 fetch(u_face)
-                                                                               #finally
-                                                                               #   unlock(lk)
-                                                                               #end
-            @info "$clusterid/$node: copy faces 12.2 - z=$z c=$c" 
          end
 
          if cell_coord[3, c] != 1
@@ -578,7 +439,7 @@ function copy_faces(flag,
       end
       if (timeron) timer_stop(t_bpack) end
 
-      @info "$clusterid/$node: copy faces 13 - z=$z" 
+      # @info "$clusterid/$node: copy faces 13 - z=$z" 
 
 #---------------------------------------------------------------------
 #     do the rest of the rhs that uses the copied face values          
@@ -630,7 +491,7 @@ function copy_faces(flag,
                   zzcon5,
                )
 
-      @info "$clusterid/$node: copy faces 14 - z=$z" 
+      # @info "$clusterid/$node: copy faces 14 - z=$z" 
 
       return nothing
 end
