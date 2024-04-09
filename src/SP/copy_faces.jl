@@ -274,7 +274,7 @@ function copy_faces(flag, z,
                       end
                    end
                 end
-            end
+             end
 
 #---------------------------------------------------------------------
 #            fill the buffer to be sent to top neighbors (k-dir)

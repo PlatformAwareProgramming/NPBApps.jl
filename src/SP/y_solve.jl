@@ -68,7 +68,7 @@ function y_solve(_::Val{ncells}, # ::Int64,
           kp        = cell_coord[3, c]-1
 
           buffer_size = (isize-cell_start[1, c]-cell_end[1, c]) *(
-                        ksize-cell_start[3, c]-cell_end[3, c])
+                         ksize-cell_start[3, c]-cell_end[3, c])
 
           if stage != 1
 
@@ -553,10 +553,3 @@ function y_solve(_::Val{ncells}, # ::Int64,
 
        return nothing
 end
-
-
-
-
-
-
-
