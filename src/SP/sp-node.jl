@@ -66,7 +66,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
           zone = proc_zone_id[iz]
 
-          alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]])
+          alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]], x_zones, y_zones) 
           make_set(iz, [nx[zone], ny[zone], nz[zone]])
 
           for c = 1:ncells
