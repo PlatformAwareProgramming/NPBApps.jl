@@ -80,7 +80,7 @@ end
 
 function alloc_field_space(z, grid_points, x_zones, y_zones)
 
-      problem_size = maximum(grid_points ./ [x_zones, y_zones, 1])
+      problem_size = maximum(div.(grid_points, [x_zones, y_zones, 1]) .+ 1)
 
       MAX_CELL_DIM[z] = div(problem_size, maxcells)+1
 
