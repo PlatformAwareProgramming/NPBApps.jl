@@ -83,7 +83,7 @@ function compute_rhs(ncells,
 #                  (don't need speed and ainx until the lhs computation)
 #---------------------------------------------------------------------
                    aux = c1c2*rho_inv* (u[i, j, k, 5, c] - square[i, j, k, c])
-                   aux = sqrt(aux)
+                   aux = sqrt(abs(aux))
                    speed[i, j, k, c] = aux
                    ainv[i, j, k, c]  = 1.0e0/aux
                 end
