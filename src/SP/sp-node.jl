@@ -78,6 +78,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          end
       end
 
+      @info "$clusterid/$node: TOTAL SIZE = $(total_size[]) bytes"
+
        for i = 1:t_last
           timer_clear(i)
        end

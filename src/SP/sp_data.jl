@@ -74,6 +74,8 @@ function alloc_zone_vectors(x_zones, y_zones)
 end
 
 
+total_size = Ref{Int64}(0)
+
 #---------------------------------------------------------------------
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
@@ -82,7 +84,7 @@ function alloc_field_space(z, grid_points, x_zones, y_zones)
 
       problem_size = maximum(grid_points)
 
-      MAX_CELL_DIM[z] = div(problem_size, maxcells)+1
+      MAX_CELL_DIM[z] = div(problem_size, maxcells) + 1
 
       IMAX[z] = div(grid_points[1], maxcells) + 1 #MAX_CELL_DIM
       JMAX[z] = div(grid_points[2], maxcells) + 1 #MAX_CELL_DIM
@@ -109,68 +111,111 @@ function alloc_field_space(z, grid_points, x_zones, y_zones)
       
       # field arrays
 
+      a = 0
+
       u0 = zeros(Float64, IMAXP[z]+4, JMAXP[z]+4, KMAX[z] + 4, 5, maxcells)
       u[z] = OffsetArray(u0, -2:IMAXP[z]+1, -2:JMAXP[z]+1, -2:KMAX[z]+1, 1:5, 1:maxcells)
+
+      total_size[] += sizeof(u[z])
 
       us0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
       us[z] = OffsetArray(us0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
       
+      total_size[] += sizeof(us[z])
+
       vs0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
       vs[z] = OffsetArray(vs0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
+
+      total_size[] += sizeof(vs[z])
 
       ws0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
       ws[z] = OffsetArray(ws0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
 
+      total_size[] += sizeof(ws[z])
+
       qs0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
       qs[z] = OffsetArray(qs0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
      
+      total_size[] += sizeof(qs[z])
+
       ainv0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
       ainv[z] = OffsetArray(ainv0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
      
+      total_size[] += sizeof(ainv[z])
+
       rho_i0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
       rho_i[z] = OffsetArray(rho_i0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
+
+      total_size[] += sizeof(rho_i[z])
 
       speed0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
       speed[z] = OffsetArray(speed0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
       
+      total_size[] += sizeof(speed[z])
+
       square0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
       square[z] = OffsetArray(square0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
+
+      total_size[] += sizeof(square[z])
 
       rhs0 = zeros(Float64, IMAXP[z], JMAXP[z], KMAX[z], 5, maxcells)
       rhs[z] = OffsetArray(rhs0, 0:IMAXP[z]-1, 0:JMAXP[z]-1, 0:KMAX[z]-1, 1:5, 1:maxcells)
 
+      total_size[] += sizeof(rhs[z])
+
       forcing0 = zeros(Float64, IMAXP[z], JMAXP[z], KMAX[z], 5, maxcells)
       forcing[z] = OffsetArray(forcing0, 0:IMAXP[z]-1, 0:JMAXP[z]-1, 0:KMAX[z]-1, 1:5, 1:maxcells)
       
+      total_size[] += sizeof(forcing[z])
+
       lhs0 = zeros(Float64, IMAXP[z], JMAXP[z], KMAX[z], 15, maxcells)
       lhs[z] = OffsetArray(lhs0, 0:IMAXP[z]-1, 0:JMAXP[z]-1, 0:KMAX[z]-1, 1:15, 1:maxcells)
+
+      total_size[] += sizeof(lhs[z])
 
       in_buffer[z] = Array{Float64}(undef, BUF_SIZE[z])
       out_buffer[z] = Array{Float64}(undef, BUF_SIZE[z])
 
+      total_size[] += sizeof(in_buffer[z])
+      total_size[] += sizeof(out_buffer[z])
+
       cv0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
       cv[z] = OffsetArray(cv0, -2:MAX_CELL_DIM[z]+1)
+
+      total_size[] += sizeof(cv[z])
 
       rhon0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
       rhon[z] = OffsetArray(rhon0, -2:MAX_CELL_DIM[z]+1)
 
+      total_size[] += sizeof(rhon[z])
+      
       rhos0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
       rhos[z] = OffsetArray(rhos0, -2:MAX_CELL_DIM[z]+1)
+      
+      total_size[] += sizeof(rhos[z])
       
       rhoq0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
       rhoq[z] = OffsetArray(rhoq0, -2:MAX_CELL_DIM[z]+1)
 
+      total_size[] += sizeof(rhoq[z])
+      
       cuf0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
       cuf[z] = OffsetArray(cuf0, -2:MAX_CELL_DIM[z]+1)
 
+      total_size[] += sizeof(cuf[z])
+      
       q0 = zeros(Float64, MAX_CELL_DIM[z] + 4)
       q[z] = OffsetArray(q0, -2:MAX_CELL_DIM[z]+1)
       
       ue0 = zeros(Float64, MAX_CELL_DIM[z] + 4, 5)
       ue[z] = OffsetArray(ue0, -2:MAX_CELL_DIM[z]+1, 1:5)
 
+      total_size[] += sizeof(ue[z])
+      
       buf0 = zeros(Float64, MAX_CELL_DIM[z] + 4, 5)
       buf[z] = OffsetArray(buf0, -2:MAX_CELL_DIM[z]+1, 1:5)               
+      
+      total_size[] += sizeof(buf[z])
       
       return nothing
 end
