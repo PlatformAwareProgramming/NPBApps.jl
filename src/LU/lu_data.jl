@@ -69,7 +69,7 @@ end
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
- function alloc_field_space(z, nx0, ny0, nz0)
+ function alloc_field_space(z, nx0, ny0, nz0, nx, ny, nz)
 
       rsdnm[z] = Array{Float64}(undef,5)
       errnm[z] = Array{Float64}(undef,5)
@@ -100,6 +100,16 @@ end
       buf[z] = zeros(Float64, 5, 2*ny0*nz0)
       buf1[z] = zeros(Float64, 5, 2*ny0*nz0)
 
+      buf_exch_w_in[z] = Array{Float64}(undef, 5*nx*nz)
+      buf_exch_e_in[z] = Array{Float64}(undef, 5*nx*nz)
+      buf_exch_n_in[z] = Array{Float64}(undef, 5*ny*nz)
+      buf_exch_s_in[z] = Array{Float64}(undef, 5*ny*nz)
+
+      buf_exch_w_out[z] = Array{Float64}(undef, 5*nx*nz)
+      buf_exch_e_out[z] = Array{Float64}(undef, 5*nx*nz)
+      buf_exch_n_out[z] = Array{Float64}(undef, 5*ny*nz)
+      buf_exch_s_out[z] = Array{Float64}(undef, 5*ny*nz)
+
       return nothing
       
 end
@@ -108,7 +118,6 @@ function alloc_field_space_zones(proc_num_zones)
 
       global rsdnm = Array{Array{Float64}}(undef, proc_num_zones)
       global errnm = Array{Array{Float64}}(undef, proc_num_zones)
-
 
       global u = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
       global rsd = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
@@ -125,6 +134,16 @@ function alloc_field_space_zones(proc_num_zones)
 
       global buf = Array{Array{Float64, 2}}(undef, proc_num_zones) 
       global buf1 = Array{Array{Float64, 2}}(undef, proc_num_zones) 
+
+      global buf_exch_w_in = Array{Array{Float64}}(undef, proc_num_zones) 
+      global buf_exch_e_in = Array{Array{Float64}}(undef, proc_num_zones) 
+      global buf_exch_n_in = Array{Array{Float64}}(undef, proc_num_zones) 
+      global buf_exch_s_in = Array{Array{Float64}}(undef, proc_num_zones) 
+
+      global buf_exch_w_out = Array{Array{Float64}}(undef, proc_num_zones) 
+      global buf_exch_e_out = Array{Array{Float64}}(undef, proc_num_zones) 
+      global buf_exch_n_out = Array{Array{Float64}}(undef, proc_num_zones) 
+      global buf_exch_s_out = Array{Array{Float64}}(undef, proc_num_zones) 
 
       return nothing
             

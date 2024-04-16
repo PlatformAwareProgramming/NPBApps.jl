@@ -44,7 +44,8 @@
 
 
 
-function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, itimer_=false, npb_verbose_=0)
+
+function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer_=false, npb_verbose_=0)
 
        global clusterid = clusterid_
        global num_clusters = length(clusters) 
@@ -101,6 +102,10 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
             ss[iz] = SA[start_send_east[iz]::Int start_send_west[iz]::Int start_send_north[iz]::Int start_send_south[iz]::Int start_send_top[iz]::Int start_send_bottom[iz]::Int]
             sr[iz] = SA[start_recv_east[iz]::Int start_recv_west[iz]::Int start_recv_north[iz]::Int start_recv_south[iz]::Int start_recv_top[iz]::Int start_recv_bottom[iz]::Int]
             b_size[iz] = SA[east_size[iz]::Int west_size[iz]::Int north_size[iz]::Int south_size[iz]::Int top_size[iz]::Int bottom_size[iz]::Int]
+            if iz == 1 && clusterid==0 && node == 0
+               @info "ss($iz) = $(ss[iz])"
+               @info "sr($iz) = $(sr[iz])"
+            end
          else
             ss[iz] = nothing
             sr[iz] = nothing
@@ -112,8 +117,13 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        s = Array{Array{Float64}}(undef,proc_num_zones)
        for iz = 1:proc_num_zones
          requests[iz] = Array{MPI.Request}(undef,12)
+         for i = 1:12
+             requests[iz][i] = MPI.REQUEST_NULL
+         end
          s[iz] = Array{Float64}(undef,5)
        end
+
+       
 
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
@@ -121,15 +131,33 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        if num_clusters > 1 || proc_num_zones > 1
             exch_qbc(Val(ncells),
                      proc_num_zones,
+                     zone_proc_id,
+                     proc_zone_id,
+                     iz_west,
+                     iz_east,
+                     iz_north,
+                     iz_south,
                      cell_coord,
                      cell_size, 
                      cell_start,
                      cell_end,
                      cell_low,
                      cell_high,
+                     successor,
+                     predecessor,
                      u,
-                     timeron,) 
+                     in_buffer,
+                     out_buffer,
+                     requests,
+                     ss,
+                     sr,
+                     b_size,
+                     comm_exch,
+                     timeron,)  
        end
+
+       #@info "FINISHED !"
+       #@goto L999
 
        for zone = 1:proc_num_zones
          adi(zone, 
@@ -251,13 +279,28 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
           if num_clusters > 1 || proc_num_zones > 1
             exch_qbc(Val(ncells),
                      proc_num_zones,
+                     zone_proc_id,
+                     proc_zone_id,
+                     iz_west,
+                     iz_east,
+                     iz_north,
+                     iz_south,
                      cell_coord,
                      cell_size, 
                      cell_start,
                      cell_end,
                      cell_low,
                      cell_high,
+                     successor,
+                     predecessor,
                      u,
+                     in_buffer,
+                     out_buffer,
+                     requests,
+                     ss,
+                     sr,
+                     b_size,
+                     comm_exch,
                      timeron,) 
           end
          

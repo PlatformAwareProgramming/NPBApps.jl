@@ -51,7 +51,7 @@
 
 
 
-function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx0, ny0, nz0, proc_num_zones, proc_zone_id_, iz_west, iz_east, iz_south, iz_north, itimer_=false, npb_verbose_=0)
+function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx0, ny0, nz0, proc_num_zones, proc_zone_id_, zone_proc_id_, iz_west, iz_east, iz_south, iz_north, itimer_=false, npb_verbose_=0)
 
       global clusterid = clusterid_
       global num_clusters = length(clusters) 
@@ -60,6 +60,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       global npb_verbose = npb_verbose_
       global max_zones = x_zones * y_zones
       global proc_zone_id = proc_zone_id_
+      global zone_proc_id = zone_proc_id_
       num_zones = max_zones
       niter = itmax
       
@@ -116,8 +117,6 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 #---------------------------------------------------------------------
             south[iz], east[iz], north[iz], west[iz] = neighbors(row[iz], col[iz]) 
 
-            alloc_field_space(iz, nx0[zone], ny0[zone], nz0[zone])
-
 #---------------------------------------------------------------------
 #   set up sub-domain sizes (calculate nx, ny, nz, ipt, jpt, ist, jst, iend, jend for zone iz)
 #---------------------------------------------------------------------
@@ -127,6 +126,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
             #@info "$clusterid/$node, zone=$(proc_zone_id[iz]): row[$iz]=$(row[iz])  col[$iz]=$(col[iz]) ipt[$iz]=$(ipt[iz])  jpt[$iz]=$(jpt[iz])  ist[$iz]=$(ist[iz])  iend[$iz]=$(iend[iz])  jst[$iz]=$(jst[iz])  jend[$iz]=$(jend[iz])"
 
+            alloc_field_space(iz, nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz])
 
             #@info "nx0[$zone]=$(nx0[zone]) ny0[$zone]=$(ny0[zone]) nz0[$zone]=$(nz0[zone])"
             #@info "nx[$iz]=$(nx[iz]) ny[$iz]=$(ny[iz]) nz[$iz]=$(nz[iz])"
@@ -199,7 +199,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       end
 
       if num_clusters > 1 || proc_num_zones > 1
-         exch_qbc(proc_num_zones, u, row, col, west, east, north, south, nx, ny, nz, timeron, proc_zone_id, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north)
+         exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in)
       end
 
      #= for iz = 1:proc_num_zones
@@ -367,7 +367,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             timer_start(63)
          
             if num_clusters > 1 || proc_num_zones > 1
-               exch_qbc(proc_num_zones, u, row, col, west, east, north, south, nx, ny, nz, timeron, proc_zone_id, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north)
+               exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in) 
             end
 
             t_63 = timer_stop(63); t_63s += t_63

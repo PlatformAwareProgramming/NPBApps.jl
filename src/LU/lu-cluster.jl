@@ -108,15 +108,15 @@ function deposit_face(z, l1, h1, l2, h2, buffer, _::Val{4})
    perform_deposit_face(z, iz_north[proc_zone_id[z]], l1, h1, l2, h2, 4, ny[zone]#=-2=#, nz[zone]#=-2=#, buffer, send_south_face)
 end
 
-function proc_zone_id_inv(zone)
-   for iz in 1:proc_num_zones
+function proc_zone_id_inv(zone, proc_zone_id)
+   for iz in eachindex(proc_zone_id)
      proc_zone_id[iz] == zone && return iz
    end
-   #@info "$clusterid: zone $zone not found"
-end
+   # @info "$clusterid: zone $zone not found"
+ end
 
 function send_west_face(zone, buffer)
-   z = proc_zone_id_inv(zone)
+   z = proc_zone_id_inv(zone, proc_zone_id)
    #@info "$clusterid: send_west_face - BEGIN 1 --- zone=$zone z=$z"
    face_receive_wait(z, 1, nx[zone], nz[zone])
    #@info "$clusterid: send_west_face - BEGIN 2 --- zone=$zone z=$z"
@@ -125,7 +125,7 @@ function send_west_face(zone, buffer)
 end
 
 function send_east_face(zone, buffer)
-   z = proc_zone_id_inv(zone)
+   z = proc_zone_id_inv(zone, proc_zone_id)
    #@info "$clusterid: send_east_face - BEGIN 1 --- zone=$zone z=$z"
    face_receive_wait(z, 2, nx[zone], nz[zone])
    #@info "$clusterid: send_east_face - BEGIN 2 --- zone=$zone z=$z"
@@ -134,7 +134,7 @@ function send_east_face(zone, buffer)
 end
 
 function send_south_face(zone, buffer)
-   z = proc_zone_id_inv(zone)
+   z = proc_zone_id_inv(zone, proc_zone_id)
    #@info "$clusterid: send_south_face - BEGIN 1 --- zone=$zone z=$z"
    face_receive_wait(z, 3, ny[zone], nz[zone])
    #@info "$clusterid: send_south_face - BEGIN 2 --- zone=$zone z=$z"
@@ -143,7 +143,7 @@ function send_south_face(zone, buffer)
 end
 
 function send_north_face(zone, buffer)
-   z = proc_zone_id_inv(zone)
+   z = proc_zone_id_inv(zone, proc_zone_id)
    #@info "$clusterid: send_north_face - BEGIN 1 --- zone=$zone z=$z"
    face_receive_wait(z, 4, ny[zone], nz[zone])
    #@info "$clusterid: send_north_face - BEGIN 2 --- zone=$zone z=$z"
@@ -315,9 +315,9 @@ function go_cluster(clusters, niter, inorm, dt, ratio, x_zones, y_zones, gx_size
    global lk1 = ReentrantLock()
    global lk2 = ReentrantLock()
 
-   LU.go_node(clusterid, clusters, niter, inorm, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, iz_west, iz_east, iz_south, iz_north, itimer, npb_verbose) 
+   LU.go_node(clusterid, clusters, niter, inorm, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_south, iz_north, itimer, npb_verbose) 
 end
 
-function go_node(clusterid, no_nodes, niter, inorm, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, iz_west, iz_east, iz_south, iz_north, itimer, npb_verbose)
-   @everywhere workers() LU.perform($clusterid, $no_nodes, $niter, $inorm, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $proc_zone_id, $iz_west, $iz_east, $iz_south, $iz_north, $itimer, $npb_verbose) 
+function go_node(clusterid, no_nodes, niter, inorm, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_south, iz_north, itimer, npb_verbose)
+   @everywhere workers() LU.perform($clusterid, $no_nodes, $niter, $inorm, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $proc_zone_id, $zone_proc_id, $iz_west, $iz_east, $iz_south, $iz_north, $itimer, $npb_verbose) 
 end

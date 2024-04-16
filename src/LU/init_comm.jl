@@ -23,6 +23,7 @@
 
       if (!active) return end
 
+      global comm_exch = MPI.Comm_dup(comm_setup)
       global comm_solve = Array{MPI.Comm}(undef, proc_num_zones)
       for iz = 1:proc_num_zones
           comm_solve[iz] = MPI.Comm_dup(comm_setup)

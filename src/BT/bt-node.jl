@@ -44,7 +44,7 @@
 
 
 
-function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id_, itimer_=false, npb_verbose_=0)
+function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id_, zone_proc_id_, iz_west, iz_east, iz_north, iz_south, itimer_=false, npb_verbose_=0)
 
        global clusterid = clusterid_
        global num_clusters = length(clusters) 
@@ -53,6 +53,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        global npb_verbose = npb_verbose_
        global max_zones = x_zones * y_zones
        global proc_zone_id = proc_zone_id_
+       global zone_proc_id = zone_proc_id_
        num_zones = max_zones
        
        setup_mpi(proc_num_zones) 
@@ -121,19 +122,32 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 #---------------------------------------------------------------------
 
       if num_clusters > 1 || proc_num_zones > 1
-          exchange_qbc(Val(ncells),
-                       proc_num_zones,
-                       cell_coord,
-                       cell_size,
-                       cell_start,
-                       cell_end,
-                       cell_low,
-                       cell_high,
-                       u,
-                       timeron,
-          )          
-      end
-
+            exch_qbc(Val(ncells),
+                     proc_num_zones,
+                     zone_proc_id,
+                     proc_zone_id,
+                     iz_west,
+                     iz_east,
+                     iz_north,
+                     iz_south,
+                     cell_coord,
+                     cell_size, 
+                     cell_start,
+                     cell_end,
+                     cell_low,
+                     cell_high,
+                     successor,
+                     predecessor,
+                     u,
+                     in_buffer,
+                     out_buffer,
+                     requests,
+                     ss,
+                     sr,
+                     b_size,
+                     comm_exch,
+                     timeron,)  
+       end
 
 #=Threads.@threads=# for iz = 1:proc_num_zones
       adi(ss[iz], 
@@ -247,18 +261,32 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
           timer_start(64)
           timer_start(63)
  
-           if num_clusters > 1 || proc_num_zones > 1
-            exchange_qbc(Val(ncells),
-                       proc_num_zones,
-                       cell_coord,
-                       cell_size,
-                       cell_start,
-                       cell_end,
-                       cell_low,
-                       cell_high,
-                       u,
-                       timeron, 
-            )          
+          if num_clusters > 1 || proc_num_zones > 1
+            exch_qbc(Val(ncells),
+                     proc_num_zones,
+                     zone_proc_id,
+                     proc_zone_id,
+                     iz_west,
+                     iz_east,
+                     iz_north,
+                     iz_south,
+                     cell_coord,
+                     cell_size,  
+                     cell_start,
+                     cell_end,
+                     cell_low,
+                     cell_high,
+                     successor,
+                     predecessor,
+                     u,
+                     in_buffer,
+                     out_buffer,
+                     requests,
+                     ss,
+                     sr,
+                     b_size,
+                     comm_exch,
+                     timeron,) 
           end
  
           t_63 = timer_stop(63); t_63s += t_63

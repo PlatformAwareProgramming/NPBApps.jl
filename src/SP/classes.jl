@@ -13,7 +13,7 @@ struct Params
 end
 
 const sp_class = Dict([ (CLASS_UNDEFINED, Params(100, 0.015e0, 1.0, 4, 4, 24, 24, 6)),
-                        (CLASS_S, Params(100, 0.015e0, 1.0, 1, 1, 24, 24, 6 )),
+                        (CLASS_S, Params(100, 0.015e0, 1.0, 2, 2, 24, 24, 6 )),
                         (CLASS_W, Params(400, 0.0015e0, 1.0, 4, 4, 64, 64, 8)),
                         (CLASS_A, Params(400, 0.0015e0, 1.0, 4, 4, #=4, 4,=# 128, 128, 16)),
                         (CLASS_B, Params(400, 0.001e0, 1.0, 8, 8, 304, 208, 17)),
