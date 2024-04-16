@@ -260,7 +260,7 @@ function verify(class, dt, no_time_steps)
 #---------------------------------------------------------------------
 #    reference data for class D
 #---------------------------------------------------------------------
-   elseif class == "D"
+   elseif class == CLASS_D
       dtref =  0.00002e0
       niterref = 250
 
