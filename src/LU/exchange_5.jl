@@ -4,7 +4,7 @@
 
  function exchange_5(g, ibeg, ifin1, nz0, nx, nz, south, north, comm_solve)
 
-      msgid1 = Ref{MPI.Request}()
+      msgid1 = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
       dum = Array{Float64}(undef, nz0)
 

@@ -2,7 +2,7 @@
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
-const mid = Ref{MPI.Request}()
+const mid = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
 function exchange_3(g, iex,
                       comm_solve, 

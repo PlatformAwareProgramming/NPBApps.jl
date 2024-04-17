@@ -436,7 +436,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       errnm_all = zeros(5)
       rsdnm_all = zeros(5)
 
-      frc = 0
+      frc = 0.0
       for iz = 1:proc_num_zones
           zone = proc_zone_id[iz]
 

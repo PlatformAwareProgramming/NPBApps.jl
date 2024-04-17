@@ -1,8 +1,8 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-const send_id = Ref{MPI.Request}()
-const recv_id = Ref{MPI.Request}()
+const send_id = Ref{MPI.Request}(MPI.REQUEST_NULL)
+const recv_id = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
 function adi(ss, 
             sr, 

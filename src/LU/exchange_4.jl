@@ -6,8 +6,8 @@
 
       dum = Array{Float64}(undef, 2*ny0+4)
 
-      msgid1 = Ref{MPI.Request}()
-      msgid3 = Ref{MPI.Request}()
+      msgid1 = Ref{MPI.Request}(MPI.REQUEST_NULL)
+      msgid3 = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
       ny2 = ny + 2
 

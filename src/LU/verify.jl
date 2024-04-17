@@ -223,7 +223,7 @@ function verify(class::CLASS, dt, itmax)
 #---------------------------------------------------------------------
 #   Reference value of surface integral
 #---------------------------------------------------------------------
-           xciref    = 0.1125826349653e+05
+            xciref    = 0.1125826349653e+05
 
         elseif class == CLASS_D
 
