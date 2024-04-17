@@ -4,7 +4,7 @@
  function pintgr(u, phi1, phi2, ny0, nz0, nx, ny, nz, ipt, jpt, west, east, south, north, comm_solve)
 
 #---------------------------------------------------------------------
-#   set up the sub-domains for integeration in each processor
+#   set up the sub-domains for integration in each processor
 #---------------------------------------------------------------------
       ibeg = nx + 1
       ifin = 0
