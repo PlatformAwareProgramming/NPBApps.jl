@@ -103,6 +103,11 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       north = Array{Int64}(undef, proc_num_zones)
       west = Array{Int64}(undef, proc_num_zones)
 
+      south2 = Array{Int64}(undef, proc_num_zones)
+      east2 = Array{Int64}(undef, proc_num_zones)
+      north2 = Array{Int64}(undef, proc_num_zones)
+      west2 = Array{Int64}(undef, proc_num_zones)
+
       for iz = 1:proc_num_zones
            
             zone = proc_zone_id[iz]
@@ -115,7 +120,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 #---------------------------------------------------------------------
 #   determine the neighbors
 #---------------------------------------------------------------------
-            south[iz], east[iz], north[iz], west[iz] = neighbors(row[iz], col[iz]) 
+            south[iz], east[iz], north[iz], west[iz], south2[iz], east2[iz], north2[iz], west2[iz] = neighbors(row[iz], col[iz]) 
 
 #---------------------------------------------------------------------
 #   set up sub-domain sizes (calculate nx, ny, nz, ipt, jpt, ist, jst, iend, jend for zone iz)
@@ -199,8 +204,11 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       end
 
       if num_clusters > 1 || proc_num_zones > 1
-         exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in)
+         exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in)
       end
+
+     #@info "FINISHED"
+     #@goto L999
 
      #= for iz = 1:proc_num_zones
             zone = proc_zone_id[iz]
@@ -367,7 +375,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             timer_start(63)
          
             if num_clusters > 1 || proc_num_zones > 1
-               exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in) 
+               exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in) 
             end
 
             t_63 = timer_stop(63); t_63s += t_63
