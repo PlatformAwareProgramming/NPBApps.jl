@@ -64,8 +64,8 @@
          end
       end
 
-      @info "$clusterid/$node: pintgr 4"
-      
+      @info "$clusterid/$node: pintgr 4  ny0=$ny0, nx=$nx, ny=$ny, ibeg=$ibeg, ifin1=$ifin1, jbeg=$jbeg, jfin1=$jfin1"
+
 #---------------------------------------------------------------------
 #  communicate in i and j directions
 #---------------------------------------------------------------------
