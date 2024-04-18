@@ -354,6 +354,9 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
        #@info "$clusterid/$node: STEP 7 --- niter=$niter"       
 
+       #GC.gc()
+      # @info "GO !"
+
       #---------------------------------------------------------------------
       #   perform the SSOR iterations
       #---------------------------------------------------------------------

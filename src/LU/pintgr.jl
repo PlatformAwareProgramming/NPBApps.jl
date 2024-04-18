@@ -40,7 +40,7 @@
         end
       end
 
-      @info "$clusterid/$node: pintgr 3"
+      @info "$clusterid/$node: pintgr 3   ny0=$ny0, nx=$nx, ny=$ny, ibeg=$ibeg, ifin1=$ifin1, jbeg=$jbeg, jfin1=$jfin1"
       
       for j = jbeg:jfin
          jglob = jpt + j
@@ -64,7 +64,7 @@
          end
       end
 
-      @info "$clusterid/$node: pintgr 4  ny0=$ny0, nx=$nx, ny=$ny, ibeg=$ibeg, ifin1=$ifin1, jbeg=$jbeg, jfin1=$jfin1"
+      @info "$clusterid/$node: pintgr 4"
 
 #---------------------------------------------------------------------
 #  communicate in i and j directions
