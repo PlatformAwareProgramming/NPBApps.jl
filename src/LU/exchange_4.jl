@@ -2,7 +2,10 @@
 #   compute the right hand side based on exact solution
 #---------------------------------------------------------------------
 
- function exchange_4(g, h, ibeg, ifin1, jbeg, jfin1, ny0, nx, ny, west, east, south, north, comm_solve)
+function exchange_4(g, h, ibeg, ifin1, jbeg, jfin1, ny0, nx, ny, west, east, south, north, comm_solve)
+
+      @info "$clusterid/$node: ny0=$ny0, nx=$nx, ny=$ny, ibeg=$ibeg, ifin1=$ifin1, jbeg=$jbeg, jfin1=$jfin1"
+
 
       dum = Array{Float64}(undef, 2*ny0+4)
 
@@ -10,7 +13,7 @@
       msgid3 = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
       ny2 = ny + 2
-
+y0
 #---------------------------------------------------------------------
 #   communicate in the east and west directions
 #---------------------------------------------------------------------
