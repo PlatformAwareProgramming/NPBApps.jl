@@ -94,8 +94,8 @@ end
       phi10 = zeros(Float64, nx0 + 2, ny0 + 2)
       phi1[z] = OffsetArray(phi10, 0:nx0+1, 0:ny0+1)
 
-      phi20 = zeros(Float64, ny0 + 2, nz0 + 2)
-      phi2[z] = OffsetArray(phi20, 0:ny0+1, 0:nz0+1)
+      phi20 = zeros(Float64, nx0 + 2, ny0 + 2)
+      phi2[z] = OffsetArray(phi20, 0:nx0+1, 0:ny0+1)
 
       buf[z] = zeros(Float64, 5, 2*nx0*ny0)
       buf1[z] = zeros(Float64, 5, 2*nx0*ny0)

@@ -13,7 +13,7 @@ function exchange_4(g, h, ibeg, ifin1, jbeg, jfin1, ny0, nx, ny, west, east, sou
       msgid3 = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
       ny2 = ny + 2
-y0
+
 #---------------------------------------------------------------------
 #   communicate in the east and west directions
 #---------------------------------------------------------------------
