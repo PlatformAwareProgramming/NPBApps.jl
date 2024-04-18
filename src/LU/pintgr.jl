@@ -3,6 +3,7 @@
 
  function pintgr(u, phi1, phi2, ny0, nz0, nx, ny, nz, ipt, jpt, west, east, south, north, comm_solve)
 
+     @info "$clusterid/$node: pintgr 1"
 #---------------------------------------------------------------------
 #   set up the sub-domains for integration in each processor
 #---------------------------------------------------------------------
@@ -27,6 +28,8 @@
       if (ipt + ifin1 == ii2) ifin1 = ifin -1 end
       if (jpt + jfin1 == ji2) jfin1 = jfin -1 end
 
+      @info "$clusterid/$node: pintgr 2"
+      
 #---------------------------------------------------------------------
 #   initialize
 #---------------------------------------------------------------------
@@ -37,6 +40,8 @@
         end
       end
 
+      @info "$clusterid/$node: pintgr 3"
+      
       for j = jbeg:jfin
          jglob = jpt + j
          for i = ibeg:ifin
@@ -59,11 +64,15 @@
          end
       end
 
+      @info "$clusterid/$node: pintgr 4"
+      
 #---------------------------------------------------------------------
 #  communicate in i and j directions
 #---------------------------------------------------------------------
       exchange_4(phi1, phi2, ibeg, ifin1, jbeg, jfin1, ny0, nx, ny, west, east, south, north, comm_solve)
 
+      @info "$clusterid/$node: pintgr 5"
+      
       frc1 = 0.0e+00
 
       for j = jbeg:jfin1
@@ -79,6 +88,8 @@
          end
       end
 
+      @info "$clusterid/$node: pintgr 6"
+      
 #---------------------------------------------------------------------
 #  compute the global sum of individual contributions to frc1
 #---------------------------------------------------------------------
@@ -87,6 +98,8 @@
 
       frc1 = MPI.Allreduce(frc1, MPI.SUM, comm_solve)
 
+      @info "$clusterid/$node: pintgr 7"
+      
       frc1 = dxi * deta * frc1
 
 #---------------------------------------------------------------------
@@ -114,6 +127,8 @@
         end
       end
 
+      @info "$clusterid/$node: pintgr 8"
+      
       jglob = jpt + jfin
       ind2 = 0
       if jglob == ji2
@@ -130,16 +145,23 @@
         end
       end
 
+      @info "$clusterid/$node: pintgr 9"
+      
 #---------------------------------------------------------------------
 #  communicate in i direction
 #---------------------------------------------------------------------
       if ind1 == 1
         exchange_5(phi1, ibeg, ifin1, nz0, nx, nz, south, north, comm_solve)
       end
+
+      @info "$clusterid/$node: pintgr 10"
+      
       if ind2 == 1
         exchange_5(phi2, ibeg, ifin1, nz0, nx, nz, south, north, comm_solve)
       end
 
+      @info "$clusterid/$node: pintgr 11"
+      
       frc2 = 0.0e+00
       for k = ki1:ki2-1
          for i = ibeg:ifin1
@@ -154,6 +176,8 @@
          end
       end
 
+      @info "$clusterid/$node: pintgr 12"
+      
 #---------------------------------------------------------------------
 #  compute the global sum of individual contributions to frc2
 #---------------------------------------------------------------------
@@ -162,6 +186,8 @@
       
       frc2 = MPI.Allreduce(frc2, MPI.SUM, comm_solve)
 
+      @info "$clusterid/$node: pintgr 13"
+      
       frc2 = dxi * dzeta * frc2
 
 #---------------------------------------------------------------------
@@ -189,6 +215,8 @@
         end
       end
 
+      @info "$clusterid/$node: pintgr 14"
+      
       iglob = ipt + ifin
       ind2 = 0
       if iglob == ii2
@@ -205,16 +233,23 @@
         end
       end
 
+      @info "$clusterid/$node: pintgr 15"
+      
 #---------------------------------------------------------------------
 #  communicate in j direction
 #---------------------------------------------------------------------
       if ind1 == 1
         exchange_6(phi1, jbeg, jfin1, nz0, ny, nz, east, west, comm_solve)
       end
+     
+      @info "$clusterid/$node: pintgr 16"
+      
       if ind2 == 1
         exchange_6(phi2, jbeg, jfin1, nz0, ny, nz, east, west, comm_solve)
       end
 
+      @info "$clusterid/$node: pintgr 17"
+      
       frc3 = 0.0e+00
 
       for k = ki1:ki2-1
@@ -230,6 +265,8 @@
          end
       end
 
+      @info "$clusterid/$node: pintgr 18"
+      
 #---------------------------------------------------------------------
 #  compute the global sum of individual contributions to frc3
 #---------------------------------------------------------------------
@@ -238,9 +275,13 @@
 
       frc3 = MPI.Allreduce(frc3, MPI.SUM, comm_solve)
 
+      @info "$clusterid/$node: pintgr 19"
+      
       frc3 = deta * dzeta * frc3
       frc = 0.25e+00 * ( frc1 + frc2 + frc3 )
 #      if (id.eq.0) write (*,1001) frc
 
+      @info "$clusterid/$node: pintgr 20"
+            
       return frc
 end
