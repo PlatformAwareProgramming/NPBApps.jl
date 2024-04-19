@@ -197,28 +197,27 @@ function update_face_in_count(z, l1, h1, l2, h2, f, n1, n2)
 end
 
 function perform_collect_face(z, l1, h1, l2, h2, f, n1, n2)
-   #@info "$clusterid: collect_face($f) BEGIN 1 --- z=$z $l1/$h1/$l2/$h2"
-   #lock(lk2)
-   #@info "$clusterid: collect_face($f) BEGIN 2 --- z=$z $l1/$h1/$l2/$h2"
-   #try
-      lock(face_in_collect[z][f])
-      try
-         while face_in_count[z][f] == n1*n2*5
-            wait(face_in_collect[z][f])
-         end
-         #@info "$clusterid: collect_face($f) PASSED --- z=$z"
-      finally
-         unlock(face_in_collect[z][f])
+  # @info "$clusterid: collect_face($f) 1 --- z=$z $l1/$h1/$l2/$h2"
+   lock(face_in_collect[z][f])
+  # @info "$clusterid: collect_face($f) 2 --- z=$z $l1/$h1/$l2/$h2"
+   try
+     # @info "$clusterid: collect_face($f) 3 --- z=$z $l1/$h1/$l2/$h2"
+      while face_in_count[z][f] == n1*n2*5
+         wait(face_in_collect[z][f])
       end
-      
-      r = face_in[z][f][1:5, l1:h1, l2:h2]
-      @async update_face_in_count(z, l1, h1, l2, h2, f, n1, n2)
-      #@info "$clusterid: collect_face($f) END --- z=$z -- $(face_in_count[z][f]) == $(n1*n2*5)"
-      r
-      #view(face_in[z][f], 1:5, l1:h1, l2:h2)   
-   #finally
-   #   unlock(lk2)
-   #end
+     # @info "$clusterid: collect_face($f) 4 --- z=$z $l1/$h1/$l2/$h2"
+      #@info "$clusterid: collect_face($f) PASSED --- z=$z"
+   finally
+      unlock(face_in_collect[z][f])
+   end
+   
+  # @info "$clusterid: collect_face($f) 5 --- z=$z $l1/$h1/$l2/$h2"
+   r = face_in[z][f][1:5, l1:h1, l2:h2]
+  # @info "$clusterid: collect_face($f) 6 --- z=$z $l1/$h1/$l2/$h2  r=$r"
+   @async update_face_in_count(z, l1, h1, l2, h2, f, n1, n2)
+  # @info "$clusterid: collect_face($f) 7 --- z=$z $l1/$h1/$l2/$h2"
+   #@info "$clusterid: collect_face($f) END --- z=$z -- $(face_in_count[z][f]) == $(n1*n2*5)"
+   r
 end
 
 function collect_face(z, l1, h1, l2, h2, _::Val{1})
@@ -273,20 +272,20 @@ function go_cluster(clusters, niter, inorm, dt, ratio, x_zones, y_zones, gx_size
    for iz = 1:proc_num_zones
       zone = proc_zone_id[iz]
       face_out[iz] = Array{Array{Float64}}(undef, 4)
-      face_out[iz][1] = Array{Float64}(undef, 5, ny[zone], gz_size) 
-      face_out[iz][2] = Array{Float64}(undef, 5, ny[zone], gz_size) 
-      face_out[iz][3] = Array{Float64}(undef, 5, nx[zone], gz_size) 
-      face_out[iz][4] = Array{Float64}(undef, 5, nx[zone], gz_size) 
+      face_out[iz][1] = Array{Float64}(undef, 5, nx[zone], gz_size) 
+      face_out[iz][2] = Array{Float64}(undef, 5, nx[zone], gz_size) 
+      face_out[iz][3] = Array{Float64}(undef, 5, ny[zone], gz_size) 
+      face_out[iz][4] = Array{Float64}(undef, 5, ny[zone], gz_size) 
    end
 
    global face_in = Array{Array{Array{Float64}}}(undef, proc_num_zones)
    for iz = 1:proc_num_zones
       zone = proc_zone_id[iz]
       face_in[iz] = Array{Array{Float64}}(undef, 4)
-      face_in[iz][1] = Array{Float64}(undef, 5, ny[zone], gz_size)
-      face_in[iz][2] = Array{Float64}(undef, 5, ny[zone], gz_size)
-      face_in[iz][3] = Array{Float64}(undef, 5, nx[zone], gz_size)
-      face_in[iz][4] = Array{Float64}(undef, 5, nx[zone], gz_size)
+      face_in[iz][1] = Array{Float64}(undef, 5, nx[zone], gz_size)
+      face_in[iz][2] = Array{Float64}(undef, 5, nx[zone], gz_size)
+      face_in[iz][3] = Array{Float64}(undef, 5, ny[zone], gz_size)
+      face_in[iz][4] = Array{Float64}(undef, 5, ny[zone], gz_size)
    end
 
    global face_in_count = Array{Array{Int64}}(undef, proc_num_zones)

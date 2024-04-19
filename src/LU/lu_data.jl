@@ -69,36 +69,38 @@ end
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
- function alloc_field_space(z, nx0, ny0, nz0, nx, ny, nz)
+ function alloc_field_space(z, nx, ny, nz#=, nx, ny, nz=#)
 
       rsdnm[z] = Array{Float64}(undef,5)
       errnm[z] = Array{Float64}(undef,5)
 
-      u0 = zeros(Float64, 5, nx0 + 4, ny0 + 4, nz0)
-      u[z] = OffsetArray(u0, 1:5, -1:nx0+2, -1:ny0+2, 1:nz0)
+      u0 = zeros(Float64, 5, nx + 4, ny + 4, nz)
+      u[z] = OffsetArray(u0, 1:5, -1:nx+2, -1:ny+2, 1:nz)
 
-      rsd0 = zeros(Float64, 5, nx0 + 4, ny0 + 4, nz0)
-      rsd[z] = OffsetArray(rsd0, 1:5, -1:nx0+2, -1:ny0+2, 1:nz0)
+      rsd0 = zeros(Float64, 5, nx + 4, ny + 4, nz)
+      rsd[z] = OffsetArray(rsd0, 1:5, -1:nx+2, -1:ny+2, 1:nz)
 
-      frct0 = zeros(Float64, 5, nx0 + 4, ny0 + 4, nz0)
-      frct[z] = OffsetArray(frct0, 1:5, -1:nx0+2, -1:ny0+2, 1:nz0)
+      frct0 = zeros(Float64, 5, nx + 4, ny + 4, nz)
+      frct[z] = OffsetArray(frct0, 1:5, -1:nx+2, -1:ny+2, 1:nz)
 
-      flux0 = zeros(Float64, 5, nx0 + 2, ny0 + 2, nz0)
-      flux[z] = OffsetArray(flux0, 1:5, 0:nx0+1,  0:ny0+1, 1:nz0)
+      flux0 = zeros(Float64, 5, nx + 2, ny + 2, nz)
+      flux[z] = OffsetArray(flux0, 1:5, 0:nx+1,  0:ny+1, 1:nz)
 
-      a[z] = zeros(Float64, 5, 5, nx0)
-      b[z] = zeros(Float64, 5, 5, nx0)
-      c[z] = zeros(Float64, 5, 5, nx0)
-      d[z] = zeros(Float64, 5, 5, nx0)
+      a[z] = zeros(Float64, 5, 5, nx)
+      b[z] = zeros(Float64, 5, 5, nx)
+      c[z] = zeros(Float64, 5, 5, nx)
+      d[z] = zeros(Float64, 5, 5, nx)
 
-      phi10 = zeros(Float64, nx0 + 2, ny0 + 2)
-      phi1[z] = OffsetArray(phi10, 0:nx0+1, 0:ny0+1)
+      nmax = max(nx, ny, nz)
 
-      phi20 = zeros(Float64, nx0 + 2, ny0 + 2)
-      phi2[z] = OffsetArray(phi20, 0:nx0+1, 0:ny0+1)
+      phi10 = zeros(Float64, nmax + 2, nmax + 2)
+      phi1[z] = OffsetArray(phi10, 0:nmax+1, 0:nmax+1)
 
-      buf[z] = zeros(Float64, 5, 2*nx0*ny0)
-      buf1[z] = zeros(Float64, 5, 2*nx0*ny0)
+      phi20 = zeros(Float64, nmax + 2, nmax + 2)
+      phi2[z] = OffsetArray(phi20, 0:nmax+1, 0:nmax+1)
+
+      buf[z] = zeros(Float64, 5, 2*max(nx,ny)*nz)
+      buf1[z] = zeros(Float64, 5, 2*max(nx,ny)*nz)
 
       buf_exch_w_in[z] = Array{Float64}(undef, 5*nx*nz)
       buf_exch_e_in[z] = Array{Float64}(undef, 5*nx*nz)

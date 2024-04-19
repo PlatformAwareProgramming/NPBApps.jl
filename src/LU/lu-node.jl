@@ -131,7 +131,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
             #@info "$clusterid/$node, zone=$(proc_zone_id[iz]): row[$iz]=$(row[iz])  col[$iz]=$(col[iz]) ipt[$iz]=$(ipt[iz])  jpt[$iz]=$(jpt[iz])  ist[$iz]=$(ist[iz])  iend[$iz]=$(iend[iz])  jst[$iz]=$(jst[iz])  jend[$iz]=$(jend[iz])"
 
-            alloc_field_space(iz, nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz])
+            alloc_field_space(iz, #=nx0[zone], ny0[zone], nz0[zone],=# nx[iz], ny[iz], nz[iz])
 
             #@info "nx0[$zone]=$(nx0[zone]) ny0[$zone]=$(ny0[zone]) nz0[$zone]=$(nz0[zone])"
             #@info "nx[$iz]=$(nx[iz]) ny[$iz]=$(ny[iz]) nz[$iz]=$(nz[iz])"
@@ -163,7 +163,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 #   initialize a,b,c,d to zero (guarantees that page tables have been
 #   formed, if applicable on given architecture, before timestepping).
 #---------------------------------------------------------------------
-            init_workarray(nx0[zone], a[iz], b[iz], c[iz], d[iz])
+            init_workarray(nx[iz], a[iz], b[iz], c[iz], d[iz])
 
             #@info "$clusterid/$node: STEP 2 - iz = $iz"
 #---------------------------------------------------------------------
@@ -202,6 +202,8 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
 
       end
+
+      #@info "$clusterid/$node: STEP 3"
 
       if num_clusters > 1 || proc_num_zones > 1
          exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in)

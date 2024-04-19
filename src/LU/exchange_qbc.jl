@@ -208,9 +208,11 @@ function exchange_qbc_send(z, zone_proc_id, u, row, col, west, east, north, sout
             iend = row*nx
             kst = 1
             kend = nz
-            #@info "$clusterid/$node: copy faces recv WEST - BEGIN - z=$z zone=$zone  ist=$ist  iend=$iend  kst=$kst  kend=$kend" 
+            #@info "$clusterid/$node: copy faces recv WEST - BEGIN 1 - z=$z zone=$zone  ist=$ist  iend=$iend  kst=$kst  kend=$kend" 
             u_face = remotecall(collect_face, 1, z, ist, iend, kst, kend, Val(1); role=:worker)
+            #@info "$clusterid/$node: copy faces recv WEST - BEGIN 2 - z=$z zone=$zone  ist=$ist  iend=$iend  kst=$kst  kend=$kend" 
             u_face_fetch = fetch(u_face; role=:worker)
+            #@info "$clusterid/$node: copy faces recv WEST - BEGIN 3 - z=$z zone=$zone  ist=$ist  iend=$iend  kst=$kst  kend=$kend" 
             view(u, 1:5, 1:nx, 1, 1:nz) .= u_face_fetch
             #@info "$clusterid/$node: copy faces recv WEST - END - z=$z zone=$zone  ist=$ist  iend=$iend  kst=$kst  kend=$kend " 
          else
