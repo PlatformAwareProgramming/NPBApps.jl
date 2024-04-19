@@ -302,10 +302,10 @@ function go_cluster(clusters, niter, inorm, dt, ratio, x_zones, y_zones, gx_size
          face_in_collect[iz][f] = Threads.Condition()
          face_in_receive[iz][f] = Threads.Condition()
       end
-      face_in_count[iz][1] = (ny[zone]#=-2=#)*(nz[zone]#=-2=#)*5
-      face_in_count[iz][2] = (ny[zone]#=-2=#)*(nz[zone]#=-2=#)*5
-      face_in_count[iz][3] = (nx[zone]#=-2=#)*(nz[zone]#=-2=#)*5 
-      face_in_count[iz][4] = (nx[zone]#=-2=#)*(nz[zone]#=-2=#)*5
+      face_in_count[iz][1] = (nx[zone]#=-2=#)*(nz[zone]#=-2=#)*5
+      face_in_count[iz][2] = (nx[zone]#=-2=#)*(nz[zone]#=-2=#)*5
+      face_in_count[iz][3] = (ny[zone]#=-2=#)*(nz[zone]#=-2=#)*5 
+      face_in_count[iz][4] = (ny[zone]#=-2=#)*(nz[zone]#=-2=#)*5
    end
 
    global lkout = ReentrantLock()

@@ -1,6 +1,6 @@
 using Distributed
-addprocs(1)
-process_count = [(2,4)#=,(3,4),(4,4),(5,4)=#]
+addprocs(2)
+process_count = [(2,4),(3,4)#=,(4,4),(5,4)=#]
 @everywhere workers() using MPIClusterManagers
 @everywhere workers() using MPI
 for (w,np) in process_count
@@ -9,5 +9,5 @@ end
 @everywhere workers() @everywhere workers() using NPBApps
 
 using NPBApps
-LU.go(LU.CLASS_B; itimer=2, npb_verbose=3#=, zone_mapping=[(2, [1,2,3]), (3, [4,5,6,7,8,9,10,11,12,13,14,15,16])]=#)
+LU.go(LU.CLASS_A; itimer=2, npb_verbose=3#=, zone_mapping=[(2, [1,2,3]), (3, [4,5,6,7,8,9,10,11,12,13,14,15,16])]=#)
 
