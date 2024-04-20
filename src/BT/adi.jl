@@ -137,9 +137,9 @@ function adi(iz, ss,
             )
 
 
-        if iz == 1 
-            write_u(iz)
-         end
+      #  if iz == 1 
+      #      write_u(iz)
+      #   end
 
       x_solve(
             MAX_CELL_DIM,

@@ -155,7 +155,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        #@info "FINISHED !"
        #@goto L999
 
-       for zone = 1:proc_num_zones
+       Threads.@threads for zone = 1:proc_num_zones
          adi(zone, 
                Val(no_nodes),
                Val(ncells),
@@ -260,6 +260,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        timer_clear(64); t_64 = 0.0; t_64s = 0.0
        timer_clear(63); t_63 = 0.0; t_63s = 0.0
 
+       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads())"
+
        for STEP = 1:niter
           if node == root
             Q = STEP > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
@@ -302,10 +304,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          
           t_63 = timer_stop(63); t_63s += t_63
 
-          #@info "NUMBER OF THREADS= $(Threads.nthreads())"
-
-          Threads.@threads for zone = 1:proc_num_zones
-                          
+          Threads.@threads for zone = 1:proc_num_zones                          
               adi(zone, 
                   Val(no_nodes),
                   Val(ncells),

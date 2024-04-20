@@ -238,7 +238,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 #---------------------------------------------------------------------
 #   perform one SSOR iteration to touch all data and program pages 
 #---------------------------------------------------------------------
-      for iz = 1:proc_num_zones
+      Threads.@threads for iz = 1:proc_num_zones
             zone = proc_zone_id[iz]
  
             #@info "$clusterid/$node: STEP 4 - iz = $iz"
@@ -290,7 +290,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       #---------------------------------------------------------------------
       #   reset the boundary and initial values
       #---------------------------------------------------------------------
-      for iz = 1:proc_num_zones
+      Threads.@threads for iz = 1:proc_num_zones
             zone = proc_zone_id[iz]
 
             setbv(u[iz], nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], west[iz], east[iz], north[iz], south[iz], ipt[iz], jpt[iz])
@@ -357,7 +357,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
        #@info "$clusterid/$node: STEP 7 --- niter=$niter"       
 
        #GC.gc()
-      # @info "GO !"
+       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads())"
 
       #---------------------------------------------------------------------
       #   perform the SSOR iterations
@@ -385,7 +385,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
             t_63 = timer_stop(63); t_63s += t_63
 
-            for iz = 1:proc_num_zones
+            Threads.@threads for iz = 1:proc_num_zones
                   #@info "$clusterid/$node: STEP 83 --- istep=$istep zone=$iz"       
                   zone = proc_zone_id[iz]
                   #@info "$clusterid/$node: STEP 84 --- istep=$istep zone=$iz"       
@@ -442,7 +442,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       rsdnm_all = zeros(5)
 
       frc = 0.0
-      for iz = 1:proc_num_zones
+      Threads.@threads for iz = 1:proc_num_zones
           zone = proc_zone_id[iz]
 
           #---------------------------------------------------------------------
