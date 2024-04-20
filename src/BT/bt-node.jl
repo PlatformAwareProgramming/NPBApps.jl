@@ -78,7 +78,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
              if (cell_size[iz][1, c] > IMAX[iz]) ||(cell_size[iz][2, c] > JMAX[iz]) ||(cell_size[iz][3, c] > KMAX[iz])
                 println(stdout, node, c, view(cell_size[iz], 1:3, c)...)
                 println(stdout, " Problem size too big for compiled array sizes")
-                @goto L999
+                #@goto L999
              end
          end
       end
