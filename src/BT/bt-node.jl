@@ -67,7 +67,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        alloc_field_space_zones(proc_num_zones)
        
-       for iz = 1:proc_num_zones
+       Threads.@threads for iz = 1:proc_num_zones
 
           zone = proc_zone_id[iz]
 
@@ -98,7 +98,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        @info "$clusterid/$node: STEP 2"
 
-       for iz = 1:proc_num_zones         
+       Threads.@threads for iz = 1:proc_num_zones         
+         @info "$clusterid/$node: STEP 2.1 BEGIN iz=$iz"
          initialize(iz) 
          lhsinit(iz) 
          exact_rhs(iz) 
@@ -113,6 +114,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          #   sr[iz] = SA[0 0 0 0 0 0]
          #   b_size[iz] = SA[0 0 0 0 0 0]
          #end
+         @info "$clusterid/$node: STEP 2.1 END iz=$iz"
       end
 
       @info "$clusterid/$node: STEP 3"
