@@ -245,7 +245,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        @info "$clusterid/$node: STEP 6"
 
 
-       @goto L999
+       #@goto L999
 
        for iz = 1:proc_num_zones
            initialize(iz)
