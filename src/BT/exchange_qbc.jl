@@ -26,6 +26,7 @@ function exch_qbc(_::Val{ncells},
                     ) where {ncells}  
 
     for iz = 1:proc_num_zones
+        mod(iz, 64) == 0 && @info "$clusterid/$node: STEP QBC_EXCH SEND BEGIN iz=$iz"
         exch_qbc_send(Val(ncells),
                         iz,
                         zone_proc_id,
@@ -98,6 +99,7 @@ function exch_qbc(_::Val{ncells},
 
 
     for iz = 1:proc_num_zones
+        mod(iz, 64) == 0 && @info "$clusterid/$node: STEP QBC_EXCH RECV BEGIN iz=$iz"
         exch_qbc_recv(Val(ncells),
                         iz,
                         zone_proc_id,

@@ -99,7 +99,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        @info "$clusterid/$node: STEP 2"
 
        Threads.@threads for iz = 1:proc_num_zones         
-         #@info "$clusterid/$node: STEP 2.1 BEGIN iz=$iz"
+         mod(iz, 64) == 0 && @info "$clusterid/$node: STEP 2.1 BEGIN iz=$iz"
          initialize(iz) 
          lhsinit(iz) 
          exact_rhs(iz) 
@@ -167,6 +167,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        @info "$clusterid/$node: STEP 5"
 
        Threads.@threads for iz = 1:proc_num_zones
+         mod(iz, 32) == 0 && @info "$clusterid/$node: STEP 5.1 BEGIN iz=$iz"
             adi(iz, ss[iz], 
                   sr[iz], 
                   b_size[iz],
