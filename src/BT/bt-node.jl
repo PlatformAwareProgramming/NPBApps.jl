@@ -99,7 +99,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        @info "$clusterid/$node: STEP 2"
 
        Threads.@threads for iz = 1:proc_num_zones         
-         @info "$clusterid/$node: STEP 2.1 BEGIN iz=$iz"
+         #@info "$clusterid/$node: STEP 2.1 BEGIN iz=$iz"
          initialize(iz) 
          lhsinit(iz) 
          exact_rhs(iz) 
@@ -114,7 +114,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          #   sr[iz] = SA[0 0 0 0 0 0]
          #   b_size[iz] = SA[0 0 0 0 0 0]
          #end
-         @info "$clusterid/$node: STEP 2.1 END iz=$iz"
+         #@info "$clusterid/$node: STEP 2.1 END iz=$iz"
       end
 
       @info "$clusterid/$node: STEP 3"
