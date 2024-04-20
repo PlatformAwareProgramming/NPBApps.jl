@@ -4,7 +4,7 @@
 const send_id = Ref{MPI.Request}(MPI.REQUEST_NULL)
 const recv_id = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
-function adi(ss, 
+function adi(iz, ss, 
             sr, 
             b_size,
             MAX_CELL_DIM,
@@ -136,6 +136,11 @@ function adi(ss,
                   requests,
             )
 
+
+        if iz == 1 
+            write_u(iz)
+         end
+
       x_solve(
             MAX_CELL_DIM,
             JMAX,
@@ -166,7 +171,7 @@ function adi(ss,
             predecessor,
             successor
         ) #maxdepth=3 modules=[BT]
-
+   
         y_solve(
             MAX_CELL_DIM,
             IMAX,

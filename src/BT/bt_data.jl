@@ -118,8 +118,7 @@ end
 #      KMAX[z] = div(grid_points[3], maxcells) + 1 #MAX_CELL_DIM
 
 
-      BUF_SIZE[z] = MAX_CELL_DIM[z]*MAX_CELL_DIM[z]*(maxcells-1)*60+1
- #     @info "$clusterid/$node: **** BUF_SIZE[$z]=$(BUF_SIZE[z])  --- MAX_CELL_DIM[$z] = $(MAX_CELL_DIM[z]) --- maxcells=$maxcells"
+      BUF_SIZE[z] = MAX_CELL_DIM[z]*MAX_CELL_DIM[z]*(maxcells)*60+1
 
       cell_coord[z] = zeros(Int64, 3, maxcells)
       cell_low[z] = zeros(Int64, 3, maxcells)
@@ -272,7 +271,8 @@ function print_u(z)
                for jj = -1:JMAX[z]
                   for ii = -1:IMAX[z]
                         for m = 1:5
-                            @info  "u[$z][$m, $ii, $jj, $kk, $c] = $(u[z][m, ii, jj, kk, c])"
+#                            @info  "u[$z][$m, $ii, $jj, $kk, $c] = $(u[z][m, ii, jj, kk, c])"
+                             @info  "$ii $jj $kk $m $c $(u[z][m, ii, jj, kk, c])"
                         end
                   end
                end

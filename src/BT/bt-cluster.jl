@@ -193,9 +193,6 @@ end
 function perform_collect_face(z, l1, h1, l2, h2, f, n1, n2)
    zone = proc_zone_id[z]
    # @info "$clusterid: collect_face($f) BEGIN 1 --- zone=$zone z=$z $l1/$h1/$l2/$h2"
-   #lock(lk2)
-   # @info "$clusterid: collect_face($f) BEGIN 2 --- zone=$zone z=$z $l1/$h1/$l2/$h2"
-   #try
       lock(face_in_collect[z][f])
       try
          while face_in_count[z][f] == (n1[zone]-2)*(n2[zone]-2)*5
@@ -210,11 +207,7 @@ function perform_collect_face(z, l1, h1, l2, h2, f, n1, n2)
       @async update_face_in_count(z, l1, h1, l2, h2, f, n1[zone], n2[zone])
       # @info "$clusterid: collect_face($f) END --- zone=$zone z=$z -- $(face_in_count[z][f]) == $((n1[zone]-2)*(n2[zone]-2)*5)"
       r
-      #view(face_in[z][f], 1:5, l1:h1, l2:h2)   
-   #finally
-   #   unlock(lk2)
-   #end
-end
+ end
 
 function collect_face(z, l1, h1, l2, h2, _::Val{1})
    perform_collect_face(z, l1, h1, l2, h2, 1, ny, nz)

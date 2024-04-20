@@ -6,19 +6,19 @@ function zone_setup(x_zones, y_zones, gx_size, gy_size, gz_size, nx, nxmax, ny, 
 
          x_r   = exp(log(ratio)/(x_zones-1))
          y_r   = exp(log(ratio)/(y_zones-1))
-@info "xr=$x_r y_r=$y_r"
-
+         
          x_smallest = float(gx_size)*(x_r-1.0e0)/(x_r^x_zones-1.0e0)
          y_smallest = float(gy_size)*(y_r-1.0e0)/(y_r^y_zones-1.0e0)
+
 
 #        compute tops of intervals, using a slightly tricked rounding to make sure that the intervals are increasing monotonically in size
 
          for i = 1:x_zones
-            x_end[i] = x_smallest*(x_r^i-1.0e0)/(x_r-1.0e0)+0.45e0
+            x_end[i] = trunc(x_smallest*(x_r^i-1.0e0)/(x_r-1.0e0)+0.45e0)
          end
 
          for j = 1:y_zones
-            y_end[j] = y_smallest*(y_r^j-1.0e0)/(y_r-1.0e0)+0.45e0
+            y_end[j] = trunc(y_smallest*(y_r^j-1.0e0)/(y_r-1.0e0)+0.45e0) 
          end
 
        else

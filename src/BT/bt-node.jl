@@ -97,15 +97,15 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          exact_rhs(iz) 
          compute_buffer_size(iz, 5)
 
-         if (no_nodes > 1)
+         #if (no_nodes > 1)
             ss[iz] = SA[start_send_east[iz]::Int start_send_west[iz]::Int start_send_north[iz]::Int start_send_south[iz]::Int start_send_top[iz]::Int start_send_bottom[iz]::Int]
             sr[iz] = SA[start_recv_east[iz]::Int start_recv_west[iz]::Int start_recv_north[iz]::Int start_recv_south[iz]::Int start_recv_top[iz]::Int start_recv_bottom[iz]::Int]
             b_size[iz] = SA[east_size[iz]::Int west_size[iz]::Int north_size[iz]::Int south_size[iz]::Int top_size[iz]::Int bottom_size[iz]::Int]
-         else
-            ss[iz] = nothing
-            sr[iz] = nothing
-            b_size[iz] = nothing
-         end
+         #else
+         #   ss[iz] = SA[0 0 0 0 0 0]
+         #   sr[iz] = SA[0 0 0 0 0 0]
+         #   b_size[iz] = SA[0 0 0 0 0 0]
+         #end
       end
 
        requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
@@ -117,11 +117,11 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          utmp[iz] = OffsetArray(zeros(Float64, 6, JMAX[iz]+4), 1:6, -2:JMAX[iz]+1)
       end
 
-#---------------------------------------------------------------------
+ #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
 
-      if num_clusters > 1 || proc_num_zones > 1
+      if (no_nodes > 1 && num_clusters > 1) || proc_num_zones > 1
             exch_qbc(Val(ncells),
                      proc_num_zones,
                      zone_proc_id,
@@ -149,8 +149,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                      timeron,)  
        end
 
-#=Threads.@threads=# for iz = 1:proc_num_zones
-      adi(ss[iz], 
+       for iz = 1:proc_num_zones
+        adi(iz, ss[iz], 
             sr[iz], 
             b_size[iz],
             MAX_CELL_DIM[iz],
@@ -225,6 +225,10 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          )
        end
 
+#       write_u(1)
+
+       @goto L999
+
        for iz = 1:proc_num_zones
            initialize(iz)
        end
@@ -261,7 +265,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
           timer_start(64)
           timer_start(63)
  
-          if num_clusters > 1 || proc_num_zones > 1
+          if (no_nodes > 1 && num_clusters > 1) || proc_num_zones > 1
             exch_qbc(Val(ncells),
                      proc_num_zones,
                      zone_proc_id,
@@ -291,8 +295,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
  
           t_63 = timer_stop(63); t_63s += t_63
 
-          for iz = 1:proc_num_zones                          
-               adi(ss[iz], 
+          Threads.@threads for iz = 1:proc_num_zones                          
+               adi(iz, ss[iz], 
                   sr[iz], 
                   b_size[iz],
                   MAX_CELL_DIM[iz],
@@ -301,7 +305,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                   KMAX[iz],
                   cell_coord[iz],
                   cell_size[iz],
-                  cell_start[iz],
+                  cell_start[iz], 
                   cell_end[iz], 
                    slice[iz],
                   forcing[iz],           

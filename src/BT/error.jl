@@ -112,7 +112,8 @@ function write_u(z)
             ii = cell_low[z][1, c] + cell_start[z][1, c]
             for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
                for m = 1:5
-                  @info "$node: u[$m, $ii, $jj, $kk][$zone] = $(u[z][m, i, j, k, c])"
+#                  @info "$node: u[$m, $ii, $jj, $kk][$zone] = $(u[z][m, i, j, k, c])"
+                  @info "$m $ii $jj $kk  $(rhs[z][m, i, j, k, c])"
                end
                ii += 1
             end

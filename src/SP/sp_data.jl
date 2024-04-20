@@ -96,7 +96,7 @@ function alloc_field_space(z, grid_points, x_zones, y_zones)
 #---------------------------------------------------------------------
 # +1 at end to avoid zero length arrays for 1 node
 #---------------------------------------------------------------------
-      BUF_SIZE[z] = MAX_CELL_DIM[z]*MAX_CELL_DIM[z]*(maxcells-1)*60*2+1
+      BUF_SIZE[z] = MAX_CELL_DIM[z]*MAX_CELL_DIM[z]*(maxcells)*60*2+1
 
       cell_coord[z] = zeros(Int64, 3, maxcells)
       cell_low[z] = zeros(Int64, 3, maxcells)

@@ -280,10 +280,10 @@ function exch_qbc_send(_::Val{ncells},
 #            fill the buffer to be sent to southern neighbors 
 #---------------------------------------------------------------------
              if cell_coord[2, c] == 1
-                u_face = view(u, 1:5, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 1, 
-                                      cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c)
                 zone_cluster = zone_proc_id[iz_north[proc_zone_id[z]]]
                 if zone_cluster != clusterid
+                   u_face = view(u, 1:5, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 1, 
+                                         cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c)
                    remotecall(deposit_face, 1, z, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
                                                   cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
                                                   u_face, Val(TO_NORTH); role=:worker)
@@ -422,7 +422,7 @@ function exch_qbc_recv(_::Val{ncells},
                                                          Val(FROM_NORTH); role=:worker)
 
                     view(u, 1:5, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 0, 
-                            cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c) .= fetch(u_face; role=:worker)  
+                                 cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, c) .= fetch(u_face; role=:worker)  
                else
                     #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_north[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_NORTH"
                     for m = 1:5
@@ -443,10 +443,10 @@ function exch_qbc_recv(_::Val{ncells},
                if zone_cluster != clusterid
                   u_face = remotecall(collect_face, 1, z, cell_low[1, c] + cell_start[1,c] + 1, cell_high[1, c] - cell_end[1,c] + 1, 
                                                           cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
-                                                      Val(FROM_SOUTH); role=:worker)
+                                                       Val(FROM_SOUTH); role=:worker)
 
                   view(u, 1:5, cell_start[1,c]:cell_size[1,c]-cell_end[1,c]-1, cell_size[2, c]-1, 
-                          cell_start[3,c]:cell_size[3,c]-cell_end[3,c]-1, c) .= fetch(u_face; role=:worker)
+                               cell_start[3,c]:cell_size[3,c]-cell_end[3,c]-1, c) .= fetch(u_face; role=:worker)
                else
                   #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_south[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_SOUTH"
                   for m = 1:5

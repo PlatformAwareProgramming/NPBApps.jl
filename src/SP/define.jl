@@ -27,9 +27,6 @@ end
 
 function compute_buffer_size(z, dim)
 
-   if (ncells == 1) 
-     return 
-   end
 
 #---------------------------------------------------------------------
 #      compute the actual sizes of the buffers; note that there is 
@@ -42,36 +39,36 @@ function compute_buffer_size(z, dim)
 
    for c = 1:ncells
       face_size = cell_size[z][2, c] * cell_size[z][3, c] * dim * 2
-      if (cell_coord[z][1, c] != 1) 
+      #if (cell_coord[z][1, c] != 1) 
         west_size[z] = west_size[z] + face_size 
-      end
-      if (cell_coord[z][1, c] != ncells) 
+      #end
+      #if (cell_coord[z][1, c] != ncells) 
         east_size[z] = east_size[z] + face_size
-      end
+      #end
    end
 
    north_size[z] = 0
    south_size[z] = 0
    for c = 1:ncells
       face_size = cell_size[z][1, c]*cell_size[z][3, c] * dim * 2
-      if (cell_coord[z][2, c] != 1) 
+      #if (cell_coord[z][2, c] != 1) 
         south_size[z] = south_size[z] + face_size 
-      end
-      if (cell_coord[z][2, c] != ncells) 
+      #end
+      #if (cell_coord[z][2, c] != ncells) 
         north_size[z] = north_size[z] + face_size
-      end
+      #end
    end
 
    top_size[z] = 0
    bottom_size[z] = 0
    for c = 1:ncells
       face_size = cell_size[z][1, c] * cell_size[z][2, c] * dim * 2
-      if (cell_coord[z][3, c] != 1) 
+      #if (cell_coord[z][3, c] != 1) 
         bottom_size[z] = bottom_size[z] + face_size
-      end
-      if (cell_coord[z][3, c] != ncells) 
+      #end
+      #if (cell_coord[z][3, c] != ncells) 
         top_size[z] = top_size[z] + face_size
-      end
+      #end
    end
 
    start_send_west[z]   = 1

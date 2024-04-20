@@ -205,7 +205,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
       #@info "$clusterid/$node: STEP 3"
 
-      if num_clusters > 1 || proc_num_zones > 1
+      if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
          exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in)
       end
 
@@ -379,7 +379,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             timer_start(64)
             timer_start(63)
          
-            if num_clusters > 1 || proc_num_zones > 1
+            if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
                exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in) 
             end
 
