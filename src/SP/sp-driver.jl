@@ -66,6 +66,9 @@ function go(class::CLASS; itimer=0, npb_verbose=0, zone_mapping = nothing)
    gy_size = sp_class[class].gy_size
    gz_size = sp_class[class].gz_size
 
+   problem_size = sp_class[class].problem_size
+
+
    # =====================================================
    # the commands below are supposed to be prior executed  
    # @everywhere workers() using NPBApps              
@@ -127,7 +130,7 @@ function go(class::CLASS; itimer=0, npb_verbose=0, zone_mapping = nothing)
    verified = false
    t = Threads.@spawn verified = verify(class, dt, niter)
 
-   @everywhere workers() SP.go_cluster($clusters, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $x_size, $y_size, $zone_proc_id, $proc_zone_id, $iz_west, $iz_east, $iz_south, $iz_north, $itimer, $npb_verbose)       
+   @everywhere workers() SP.go_cluster($clusters, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $problem_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $x_size, $y_size, $zone_proc_id, $proc_zone_id, $iz_west, $iz_east, $iz_south, $iz_north, $itimer, $npb_verbose)       
 
    wait(t)
 

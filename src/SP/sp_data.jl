@@ -80,15 +80,13 @@ total_size = Ref{Int64}(0)
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
-function alloc_field_space(z, grid_points, x_zones, y_zones)
-
-      problem_size = maximum(grid_points)
+function alloc_field_space(z, grid_points, x_zones, y_zones, problem_size)
 
       MAX_CELL_DIM[z] = div(problem_size, maxcells) + 1
 
-      IMAX[z] = div(grid_points[1], maxcells) + 1 #MAX_CELL_DIM
-      JMAX[z] = div(grid_points[2], maxcells) + 1 #MAX_CELL_DIM
-      KMAX[z] = div(grid_points[3], maxcells) + 1 #MAX_CELL_DIM
+      IMAX[z] = MAX_CELL_DIM[z] # div(grid_points[1], maxcells) + 1 #MAX_CELL_DIM
+      JMAX[z] = MAX_CELL_DIM[z] # div(grid_points[2], maxcells) + 1 #MAX_CELL_DIM
+      KMAX[z] = MAX_CELL_DIM[z] # div(grid_points[3], maxcells) + 1 #MAX_CELL_DIM
 
       IMAXP[z] = div(IMAX[z],2)*2+1
       JMAXP[z] = div(JMAX[z],2)*2+1

@@ -69,7 +69,7 @@ end
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
- function alloc_field_space(z, nx, ny, nz#=, nx, ny, nz=#)
+ function alloc_field_space(z, nx, ny, nz, problem_size)
 
       rsdnm[z] = Array{Float64}(undef,5)
       errnm[z] = Array{Float64}(undef,5)

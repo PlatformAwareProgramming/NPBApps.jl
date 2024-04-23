@@ -45,7 +45,7 @@
 
 
 
-function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer_=false, npb_verbose_=0)
+function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer_=false, npb_verbose_=0)
 
        global clusterid = clusterid_
        global num_clusters = length(clusters) 
@@ -67,7 +67,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
           zone = proc_zone_id[iz]
 
-          alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]], x_zones, y_zones) 
+          alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]], x_zones, y_zones, problem_size) 
           make_set(iz, [nx[zone], ny[zone], nz[zone]])
 
           for c = 1:ncells

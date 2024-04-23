@@ -44,7 +44,7 @@
 
 
 
-function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id_, zone_proc_id_, iz_west, iz_east, iz_north, iz_south, itimer_=false, npb_verbose_=0)
+function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id_, zone_proc_id_, iz_west, iz_east, iz_north, iz_south, itimer_=false, npb_verbose_=0)
 
    
        global clusterid = clusterid_

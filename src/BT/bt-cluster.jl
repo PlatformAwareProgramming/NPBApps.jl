@@ -237,7 +237,7 @@ function reportTimersNode(tsum, tming, tmaxg)
    remotecall(reportTimersCluster, 1, clusterid, tsum, tming, tmaxg; role = :worker)
 end
 
-function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx_, ny_, nz_, proc_num_zones_all, x_size, y_size, zone_proc_id_, proc_zone_id_all, iz_west_, iz_east_, iz_south_, iz_north_, itimer, npb_verbose)
+function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx_, ny_, nz_, proc_num_zones_all, x_size, y_size, zone_proc_id_, proc_zone_id_all, iz_west_, iz_east_, iz_south_, iz_north_, itimer, npb_verbose)
    global clusterid = Distributed.myid(role=:worker) - 2 
 
    global nx = nx_
@@ -299,9 +299,9 @@ function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_si
    global lk1 = ReentrantLock()
    global lk2 = ReentrantLock()
 
-   BT.go_node(clusterid, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose) 
+   BT.go_node(clusterid, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose) 
 end
 
-function go_node(clusterid, no_nodes, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose)
-   @everywhere workers() BT.perform($clusterid, $no_nodes, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $proc_zone_id, $zone_proc_id, $iz_west, $iz_east, $iz_north, $iz_south, $itimer, $npb_verbose)  
+function go_node(clusterid, no_nodes, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose)
+   @everywhere workers() BT.perform($clusterid, $no_nodes, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $problem_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $proc_zone_id, $zone_proc_id, $iz_west, $iz_east, $iz_north, $iz_south, $itimer, $npb_verbose)  
 end

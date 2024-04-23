@@ -51,7 +51,7 @@
 
 
 
-function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, nxmax, nx0, ny0, nz0, proc_num_zones, proc_zone_id_, zone_proc_id_, iz_west, iz_east, iz_south, iz_north, itimer_=false, npb_verbose_=0)
+function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx0, ny0, nz0, proc_num_zones, proc_zone_id_, zone_proc_id_, iz_west, iz_east, iz_south, iz_north, itimer_=false, npb_verbose_=0)
 
       global clusterid = clusterid_
       global num_clusters = length(clusters) 
