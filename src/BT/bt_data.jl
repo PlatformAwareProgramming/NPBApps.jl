@@ -107,13 +107,13 @@ end
 
       MAX_CELL_DIM[z] = div(problem_size, maxcells)+1
 
-#      IMAX[z] = MAX_CELL_DIM[z]
-#      JMAX[z] = MAX_CELL_DIM[z]
-#      KMAX[z] = MAX_CELL_DIM[z]
+      IMAX[z] = MAX_CELL_DIM[z]
+      JMAX[z] = MAX_CELL_DIM[z]
+      KMAX[z] = MAX_CELL_DIM[z]
 
-      IMAX[z] = div(grid_points[1], maxcells) + 1 #MAX_CELL_DIM
-      JMAX[z] = div(grid_points[2], maxcells) + 1 #MAX_CELL_DIM
-      KMAX[z] = div(grid_points[3], maxcells) + 1 #MAX_CELL_DIM
+#      IMAX[z] = div(grid_points[1], maxcells) + 1 #MAX_CELL_DIM
+#      JMAX[z] = div(grid_points[2], maxcells) + 1 #MAX_CELL_DIM
+#      KMAX[z] = div(grid_points[3], maxcells) + 1 #MAX_CELL_DIM
 
 
       BUF_SIZE[z] = MAX_CELL_DIM[z]*MAX_CELL_DIM[z]*(maxcells)*60+1

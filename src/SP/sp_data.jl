@@ -80,7 +80,7 @@ total_size = Ref{Int64}(0)
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
-function alloc_field_space(z, grid_points, x_zones, y_zones, problem_size)
+function alloc_field_space(z, grid_points, problem_size)
 
       MAX_CELL_DIM[z] = div(problem_size, maxcells) + 1
 
