@@ -167,7 +167,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        @info "$clusterid/$node: STEP 5"
 
        Threads.@threads for iz = 1:proc_num_zones
-         mod(iz, 32) == 0 && @info "$clusterid/$node: STEP 5.1 BEGIN iz=$iz"
+         @info "$clusterid/$node: STEP 5.1 BEGIN iz=$iz"
             adi(iz, ss[iz], 
                   sr[iz], 
                   b_size[iz],
@@ -241,7 +241,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                   utmp[iz],
                   requests[iz],
                )
-       end
+               @info "$clusterid/$node: STEP 5.1 END iz=$iz"
+            end
 
        @info "$clusterid/$node: STEP 6"
 
