@@ -59,7 +59,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        
        setup_mpi(proc_num_zones) 
 
-       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads()) ---- number of zones = $proc_num_zones"
+       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads()) ---- number of zones = $proc_num_zones --- maxcells=$maxcells"
 
        if (!active) @goto L999 end
 

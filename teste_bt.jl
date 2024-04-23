@@ -9,5 +9,5 @@ end
 @everywhere workers() @everywhere workers() using NPBApps
 
 using NPBApps
-BT.go(BT.CLASS_W; itimer=2, npb_verbose=3#=, zone_mapping=[(2, [1,2,3]), (3, [4])]=#)
+BT.go(BT.CLASS_E; itimer=2, npb_verbose=3#=, zone_mapping=[(2, [1,2,3]), (3, [4])]=#)
 

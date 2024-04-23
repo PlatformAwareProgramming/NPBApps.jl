@@ -105,7 +105,7 @@ end
 
  function alloc_field_space(z, grid_points, problem_size)
 
-      MAX_CELL_DIM[z] = div(problem_size, maxcells)+1
+      MAX_CELL_DIM[z] = div(problem_size, maxcells)+1    #64
 
       IMAX[z] = MAX_CELL_DIM[z]
       JMAX[z] = MAX_CELL_DIM[z]
@@ -130,15 +130,15 @@ end
       successor[z] = zeros(Int64,3)
 
       forcing0 = zeros(Float64, 5, IMAX[z], JMAX[z], KMAX[z], maxcells)
-      forcing[z] = OffsetArray(forcing0, 1:5, 0:IMAX[z]-1, 0:JMAX[z]-1, 0:KMAX[z]-1, 1:maxcells)            
+      forcing[z] = OffsetArray(forcing0, 1:5, 0:IMAX[z]-1, 0:JMAX[z]-1, 0:KMAX[z]-1, 1:maxcells)    # 20,971,520
 
       u0 = zeros(Float64, 5, IMAX[z]+4, JMAX[z]+4, KMAX[z] + 4, maxcells)
-      u[z] = OffsetArray(u0, 1:5, -2:IMAX[z]+1, -2:JMAX[z]+1, -2:KMAX[z]+1, 1:maxcells)
+      u[z] = OffsetArray(u0, 1:5, -2:IMAX[z]+1, -2:JMAX[z]+1, -2:KMAX[z]+1, 1:maxcells)   # 25,154,560
 
       rhs0 = zeros(Float64, 5, IMAX[z]+1, JMAX[z]+1, KMAX[z]+1, maxcells)
-      rhs[z] = OffsetArray(rhs0, 1:5, -1:IMAX[z]-1, -1:JMAX[z]-1, -1:KMAX[z]-1, 1:maxcells)
+      rhs[z] = OffsetArray(rhs0, 1:5, -1:IMAX[z]-1, -1:JMAX[z]-1, -1:KMAX[z]-1, 1:maxcells) # 21.970.000
 
-      lhsc0 = zeros(Float64, 5, 5, IMAX[z]+1, JMAX[z]+1, KMAX[z]+1, maxcells)
+      lhsc0 = zeros(Float64, 5, 5, IMAX[z]+1, JMAX[z]+1, KMAX[z]+1, maxcells) # 21.970.000
       lhsc[z] = OffsetArray(lhsc0, 1:5, 1:5, -1:IMAX[z]-1, -1:JMAX[z]-1, -1:KMAX[z]-1, 1:maxcells)
 
       backsub_info0 = zeros(Float64, 5, MAX_CELL_DIM[z]+1, MAX_CELL_DIM[z]+1, maxcells)
@@ -184,22 +184,22 @@ end
       lhsb[z] = OffsetArray(lhsb0, 1:5, 1:5, -1:MAX_CELL_DIM[z])            
 
       us0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
-      us[z] = OffsetArray(us0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
+      us[z] = OffsetArray(us0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)      # 4,599,936
       
       vs0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
-      vs[z] = OffsetArray(vs0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
+      vs[z] = OffsetArray(vs0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)      # 4,599,936
 
       ws0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
-      ws[z] = OffsetArray(ws0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
+      ws[z] = OffsetArray(ws0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)      # 4,599,936
 
       qs0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
-      qs[z] = OffsetArray(qs0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
+      qs[z] = OffsetArray(qs0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)      # 4,599,936
       
       rho_i0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
-      rho_i[z] = OffsetArray(rho_i0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
+      rho_i[z] = OffsetArray(rho_i0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)      # 4,599,936
 
       square0 = zeros(Float64, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
-      square[z] = OffsetArray(square0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)
+      square[z] = OffsetArray(square0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)      # 4,599,936
       
       return nothing
 end

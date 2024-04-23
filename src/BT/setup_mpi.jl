@@ -15,8 +15,8 @@ function setup_mpi(proc_num_zones)
 #     get a process grid that requires a square number of procs.
 #     excess ranks are marked as inactive.
 #---------------------------------------------------------------------
-      global _, maxcells, no_nodes, total_nodes, node, comm_setup, active = get_active_nprocs(MPI.COMM_WORLD, 1)
-
+       global _, maxcells, no_nodes, total_nodes, node, comm_setup, active = get_active_nprocs(MPI.COMM_WORLD, 1)
+      @info "maxcells = $maxcells"
       if (!active) return end
 
       global comm_solve = Array{MPI.Comm}(undef, proc_num_zones)
