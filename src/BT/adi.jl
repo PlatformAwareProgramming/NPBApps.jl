@@ -78,6 +78,8 @@ function adi(iz, ss,
             requests,
             )
 
+      @info "$clusterid/$node: ADI 1"
+
       copy_faces( ss, 
                   sr, 
                   b_size,
@@ -137,9 +139,7 @@ function adi(iz, ss,
             )
 
 
-      #  if iz == 1 
-      #      write_u(iz)
-      #   end
+      @info "$clusterid/$node: ADI 2"
 
       x_solve(
             MAX_CELL_DIM,
@@ -172,6 +172,8 @@ function adi(iz, ss,
             successor
         ) #maxdepth=3 modules=[BT]
    
+        @info "$clusterid/$node: ADI 3"
+
         y_solve(
             MAX_CELL_DIM,
             IMAX,
@@ -204,6 +206,8 @@ function adi(iz, ss,
             utmp
       )
 
+      @info "$clusterid/$node: ADI 4"
+
       z_solve(
             MAX_CELL_DIM,
             IMAX,
@@ -235,13 +239,17 @@ function adi(iz, ss,
             utmp
      )
 
-      add(cell_size,
+     @info "$clusterid/$node: ADI 5"
+
+     add(cell_size,
             cell_start,
             cell_end,         
             u,
             rhs,
             ncells,   
             )
+
+      @info "$clusterid/$node: ADI 6"
 
       return nothing
 end
