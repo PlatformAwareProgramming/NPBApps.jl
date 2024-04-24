@@ -36,7 +36,9 @@ function z_solve(
                comm_solve,
                predecessor,
                successor,
-               utmp
+               utmp,
+               send_id,
+               recv_id
           )  where ncells
 
       kstart = 0

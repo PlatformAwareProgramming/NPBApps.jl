@@ -1,8 +1,6 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-const send_id = Ref{MPI.Request}(MPI.REQUEST_NULL)
-const recv_id = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
 function adi(iz, ss, 
             sr, 
@@ -35,7 +33,7 @@ function adi(iz, ss,
             square,
             dt,
             timeron,
-            ncells,
+            ::Val{ncells},
             tx1,
             tx2,
             ty1,
@@ -69,18 +67,20 @@ function adi(iz, ss,
             zzcon3,
             zzcon4,
             zzcon5,
-            no_nodes, 
+            ::Val{no_nodes}, 
             comm_solve,
             comm_rhs,
             predecessor,
             successor,
             utmp,
             requests,
-            )
+            send_id,
+            recv_id,
+            ) where {no_nodes, ncells}
 
-      @info "$clusterid/$node: ADI 1"
+      #@info "$clusterid/$node: z=$iz ADI 1"
 
-      copy_faces( ss, 
+     copy_faces(iz, ss, 
                   sr, 
                   b_size,
                   cell_coord,
@@ -100,7 +100,7 @@ function adi(iz, ss,
                   square,
                   timeron,
                   dt,
-                  ncells,
+                  Val(ncells),
                   tx2,
                   ty2,
                   tz2,
@@ -131,7 +131,7 @@ function adi(iz, ss,
                   zzcon3,
                   zzcon4,
                   zzcon5,
-                  no_nodes, 
+                  Val(no_nodes), 
                   comm_rhs,
                   predecessor,
                   successor,
@@ -139,7 +139,7 @@ function adi(iz, ss,
             )
 
 
-      @info "$clusterid/$node: ADI 2"
+      #@info "$clusterid/$node: z=$iz ADI 2"
 
       x_solve(
             MAX_CELL_DIM,
@@ -164,15 +164,17 @@ function adi(iz, ss,
             rho_i,
             dt,
             timeron,
-            ncells,
+            Val(ncells),
             tx1,
             tx2,
             comm_solve,
             predecessor,
-            successor
+            successor,
+            send_id,
+            recv_id
         ) #maxdepth=3 modules=[BT]
    
-        @info "$clusterid/$node: ADI 3"
+        #@info "$clusterid/$node: z=$iz ADI 3"
 
         y_solve(
             MAX_CELL_DIM,
@@ -197,16 +199,18 @@ function adi(iz, ss,
             qs,
             dt,
             timeron,
-            ncells,
+            Val(ncells),
             ty1,
             ty2,
             comm_solve,     
             predecessor,
             successor,
-            utmp
+            utmp,
+            send_id,
+            recv_id
       )
 
-      @info "$clusterid/$node: ADI 4"
+      #@info "$clusterid/$node: z=$iz ADI 4"
 
       z_solve(
             MAX_CELL_DIM,
@@ -230,26 +234,28 @@ function adi(iz, ss,
             qs,
             dt,
             timeron,
-            ncells,
+            Val(ncells),
             tz1,
             tz2,
             comm_solve,
             predecessor,
             successor,
-            utmp
+            utmp,
+            send_id,
+            recv_id
      )
 
-     @info "$clusterid/$node: ADI 5"
+     #@info "$clusterid/$node: z=$iz ADI 5"
 
      add(cell_size,
             cell_start,
             cell_end,         
             u,
             rhs,
-            ncells,   
+            Val(ncells),   
             )
 
-      @info "$clusterid/$node: ADI 6"
+      #@info "$clusterid/$node: z=$iz ADI 6"
 
       return nothing
 end

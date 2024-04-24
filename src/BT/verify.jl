@@ -433,7 +433,7 @@ function verify(dt, ss, sr, b_size,
 
        error_norm(iz, xce_sub, [nx[zone], ny[zone], nz[zone]])
      
-       copy_faces(ss[iz], 
+       copy_faces(iz, ss[iz], 
                   sr[iz], 
                   b_size[iz],
                   cell_coord[iz],

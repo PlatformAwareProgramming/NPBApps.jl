@@ -59,7 +59,9 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        
        setup_mpi(proc_num_zones) 
 
-       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads()) ---- number of zones = $proc_num_zones --- maxcells=$maxcells"
+       #GC.enable(false)
+
+       #@info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads()) ---- number of zones = $proc_num_zones --- $(MPI.Query_thread()) "
 
        if (!active) @goto L999 end
 
@@ -83,7 +85,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          end
       end
 
-      @info "$clusterid/$node: STEP 1"
+      #@info "$clusterid/$node: STEP 1"
 
       for i = 1:t_last
           timer_clear(i)
@@ -96,10 +98,10 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        compute_buffer_size_initial(proc_num_zones)
        set_constants(dt, gx_size, gy_size, gz_size, x_zones, y_zones) 
 
-       @info "$clusterid/$node: STEP 2"
+       #@info "$clusterid/$node: STEP 2"
 
        Threads.@threads for iz = 1:proc_num_zones         
-         mod(iz, 64) == 0 && @info "$clusterid/$node: STEP 2.1 BEGIN iz=$iz"
+         mod(iz, 64) == 0 && #@info "$clusterid/$node: STEP 2.1 BEGIN iz=$iz"
          initialize(iz) 
          lhsinit(iz) 
          exact_rhs(iz) 
@@ -114,23 +116,26 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          #   sr[iz] = SA[0 0 0 0 0 0]
          #   b_size[iz] = SA[0 0 0 0 0 0]
          #end
-         #@info "$clusterid/$node: STEP 2.1 END iz=$iz"
+         ##@info "$clusterid/$node: STEP 2.1 END iz=$iz"
       end
 
-      @info "$clusterid/$node: STEP 3"
+      #@info "$clusterid/$node: STEP 3"
 
 
       requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
        s = Array{Array{Float64}}(undef,proc_num_zones)
        utmp = Array{OffsetArray{Float64, 2, Array{Float64, 2}}}(undef,proc_num_zones)
+       send_id = Array{Ref{MPI.Request}}(undef,proc_num_zones)
+       recv_id = Array{Ref{MPI.Request}}(undef,proc_num_zones)
        for iz = 1:proc_num_zones
          requests[iz] = Array{MPI.Request}(undef,12)
          s[iz] = Array{Float64}(undef,5)
          utmp[iz] = OffsetArray(zeros(Float64, 6, JMAX[iz]+4), 1:6, -2:JMAX[iz]+1)
+         send_id[iz] = Ref{MPI.Request}(MPI.REQUEST_NULL)
+         recv_id[iz] = Ref{MPI.Request}(MPI.REQUEST_NULL)
       end
 
-      @info "$clusterid/$node: STEP 4"
-
+      #@info "$clusterid/$node: STEP 4"
 
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
@@ -164,10 +169,10 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                      timeron,)  
        end
 
-       @info "$clusterid/$node: STEP 5"
+       #@info "$clusterid/$node: STEP 5"
 
        Threads.@threads for iz = 1:proc_num_zones
-         @info "$clusterid/$node: STEP 5.1 BEGIN iz=$iz"
+         #@info "$clusterid/$node: z=$iz STEP 5.1 BEGIN"
             adi(iz, ss[iz], 
                   sr[iz], 
                   b_size[iz],
@@ -240,11 +245,13 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                   successor[iz],
                   utmp[iz],
                   requests[iz],
+                  send_id[iz],
+                  recv_id[iz],
                )
-               @info "$clusterid/$node: STEP 5.1 END iz=$iz"
-            end
+               #@info "$clusterid/$node: iz=$iz STEP 5.1 END"
+       end
 
-       @info "$clusterid/$node: STEP 6"
+       #@info "$clusterid/$node: STEP 6"
 
 
        #@goto L999
@@ -253,7 +260,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
            initialize(iz)
        end
 
-       @info "$clusterid/$node: STEP 7"
+       #@info "$clusterid/$node: STEP 7"
 
 
 #---------------------------------------------------------------------
@@ -275,10 +282,11 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        timer_clear(64); t_64 = 0.0; t_64s = 0.0
        timer_clear(63); t_63 = 0.0; t_63s = 0.0
 
-       @info "$clusterid/$node: STEP 8 - GO !"
+       #@info "$clusterid/$node: STEP 8 - GO !"
 
 
        for STEP = 1:niter
+          #GC.gc()
           if node == root
             Q = STEP > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
 
@@ -386,13 +394,15 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                   zzcon3,
                   zzcon4,
                   zzcon5,
-                  Val(no_nodes), 
+                  Val(no_nodes),  
                   comm_solve[iz],
                   comm_rhs[iz],
                   predecessor[iz], 
                   successor[iz],
                   utmp[iz],
                   requests[iz],
+                  send_id[iz],
+                  recv_id[iz],
                )
            end
 

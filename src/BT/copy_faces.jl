@@ -14,7 +14,7 @@
 #     exit immediately if there are no faces to be copied           
 #---------------------------------------------------------------------
 
-function copy_faces(sr, 
+function copy_faces(z, sr, 
                      b_size,
                      cell_coord,
                      cell_size,
@@ -122,7 +122,7 @@ end
 
 
 
-function copy_faces( ss, 
+function copy_faces(z, ss, 
                      sr, 
                      b_size,
                      cell_coord,
@@ -181,7 +181,7 @@ function copy_faces( ss,
                      ) where {no_nodes, ncells}
 
 
-# @info "$clusterid/$node: copy faces 0 - z=$z" 
+##@info "$clusterid/$node: copy faces 0 - z=$z" 
                      
 #---------------------------------------------------------------------
 #     because the difference stencil for the diagonalized scheme is 
@@ -198,13 +198,13 @@ function copy_faces( ss,
       p5 = 0
 
       for c = 1:ncells
-         # @info "$clusterid/$node: copy faces 1 BEGIN - c=$c" 
+         ##@info "$clusterid/$node: copy faces 1 BEGIN - c=$c" 
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to eastern neighbors (i-dir)
 #---------------------------------------------------------------------
          if cell_coord[1, c] != ncells
-            # @info "$clusterid/$node: copy faces inner 2.1 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 2.1 - z=$z c=$c" 
             for k = 0:cell_size[3, c]-1
                for j = 0:cell_size[2, c]-1
                   for i = cell_size[1, c]-2:cell_size[1, c]-1
@@ -215,14 +215,14 @@ function copy_faces( ss,
                   end
                end
             end
-            # @info "$clusterid/$node: copy faces inner 2.2 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 2.2 - z=$z c=$c" 
          end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to western neighbors 
 #---------------------------------------------------------------------
          if cell_coord[1, c] != 1
-            # @info "$clusterid/$node: copy faces inner 3.1 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 3.1 - z=$z c=$c" 
             for k = 0:cell_size[3, c]-1
                for j = 0:cell_size[2, c]-1
                   for i = 0:1
@@ -233,14 +233,14 @@ function copy_faces( ss,
                   end
                end
             end
-            # @info "$clusterid/$node: copy faces inner 3.2 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 3.2 - z=$z c=$c" 
          end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to northern neighbors (j_dir)
 #---------------------------------------------------------------------
          if cell_coord[2, c] != ncells
-            # @info "$clusterid/$node: copy faces inner 4.1 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 4.1 - z=$z c=$c" 
             for k = 0:cell_size[3, c]-1
                for j = cell_size[2, c]-2:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
@@ -251,14 +251,14 @@ function copy_faces( ss,
                   end
                end
             end
-            # @info "$clusterid/$node: copy faces inner 4.2 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 4.2 - z=$z c=$c" 
          end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to southern neighbors 
 #---------------------------------------------------------------------
          if cell_coord[2, c] != 1
-            # @info "$clusterid/$node: copy faces inner 5.1 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 5.1 - z=$z c=$c" 
             for k = 0:cell_size[3, c]-1
                for j = 0:1
                   for i = 0:cell_size[1, c]-1
@@ -269,34 +269,34 @@ function copy_faces( ss,
                   end
                end
             end
-            # @info "$clusterid/$node: copy faces inner 5.2 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 5.2 - z=$z c=$c" 
          end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to top neighbors (k-dir)
 #---------------------------------------------------------------------
          if cell_coord[3, c] != ncells
-            # @info "$clusterid/$node: copy faces inner 101.1 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 101.1 - z=$z c=$c" 
             for k = cell_size[3, c]-2:cell_size[3, c]-1
                for j = 0:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
                      for m = 1:5
-                        # # @info "$clusterid/$node: zone=$z length(out_buffer)=$(length(out_buffer)) out_buffer[$(ss[5]+p4)] --- m=$m i=$i j=$j k=$k ss[5]=$(ss[5]) p4=$p4 - BEGIN"
+                        # ##@info "$clusterid/$node: zone=$z length(out_buffer)=$(length(out_buffer)) out_buffer[$(ss[5]+p4)] --- m=$m i=$i j=$j k=$k ss[5]=$(ss[5]) p4=$p4 - BEGIN"
                         out_buffer[ss[5]+p4] = u[m, i, j, k, c]
-                        # # @info "$clusterid/$node: zone=$z length(out_buffer)=$(length(out_buffer)) out_buffer[$(ss[5]+p4)] --- m=$m i=$i j=$j k=$k ss[5]=$(ss[5]) p4=$p4 - END"
+                        # ##@info "$clusterid/$node: zone=$z length(out_buffer)=$(length(out_buffer)) out_buffer[$(ss[5]+p4)] --- m=$m i=$i j=$j k=$k ss[5]=$(ss[5]) p4=$p4 - END"
                         p4 = p4 + 1
                      end
                   end
                end
             end
-            # @info "$clusterid/$node: copy faces inner 101.2 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 101.2 - z=$z c=$c" 
          end
 
 #---------------------------------------------------------------------
 #     fill the buffer to be sent to bottom neighbors
 #---------------------------------------------------------------------
          if cell_coord[3, c] != 1
-            # @info "$clusterid/$node: copy faces inner 102.1 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 102.1 - z=$z c=$c" 
             for k = 0:1
                for j = 0:cell_size[2, c]-1
                   for i = 0:cell_size[1, c]-1
@@ -307,9 +307,9 @@ function copy_faces( ss,
                   end
                end
             end
-            # @info "$clusterid/$node: copy faces inner 102.2 - z=$z c=$c" 
+            ##@info "$clusterid/$node: copy faces inner 102.2 - z=$z c=$c" 
          end
-         # @info "$clusterid/$node: copy faces 1 END - c=$c" 
+         ##@info "$clusterid/$node: copy faces 1 END - c=$c" 
 #---------------------------------------------------------------------
 #     cell loop
 #---------------------------------------------------------------------
@@ -318,7 +318,7 @@ function copy_faces( ss,
 
       if (timeron) timer_start(t_exch) end
 
-      # @info "$clusterid/$node: copy faces 6 - z=$z" 
+      ##@info "$clusterid/$node: copy faces 6 - z=$z" 
 
       requests[1] = MPI.Irecv!(view(in_buffer, sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = successor[1], tag = WEST)
       requests[2] = MPI.Irecv!(view(in_buffer, sr[2]:sr[2]+b_size[2]-1), comm_rhs; source = predecessor[1], tag = EAST)
@@ -334,11 +334,19 @@ function copy_faces( ss,
       requests[11] = MPI.Isend(view(out_buffer, ss[5]:ss[5]+b_size[5]-1), comm_rhs; dest = successor[3], tag = TOP)
       requests[12] = MPI.Isend(view(out_buffer, ss[6]:ss[6]+b_size[6]-1), comm_rhs; dest = predecessor[3], tag = BOTTOM)
 
-      # @info "$clusterid/$node: copy faces 7 - z=$z" 
+      ##@info "$clusterid/$node: copy faces 7 - z=$z" 
 
-      MPI.Waitall(requests)
+      #try
+         #@info "$clusterid/$node: z=$z ARRIVE WAIT ALL"
+      #   lock(lock_comm)
+      #   #@info "$clusterid/$node: z=$z ENTER WAIT ALL"
+         MPI.Waitall(requests)
+         #@info "$clusterid/$node: z=$z DEPART WAIT ALL"
+      #finally
+      #   unlock(lock_comm)
+      #end
 
-      # @info "$clusterid/$node: copy faces 8 - z=$z" 
+      ##@info "$clusterid/$node: copy faces 8 - z=$z" 
 
       if (timeron) timer_stop(t_exch) end
 
@@ -439,7 +447,7 @@ function copy_faces( ss,
       end
       if (timeron) timer_stop(t_bpack) end
 
-      # @info "$clusterid/$node: copy faces 13 - z=$z" 
+      ##@info "$clusterid/$node: copy faces 13 - z=$z" 
 
 #---------------------------------------------------------------------
 #     do the rest of the rhs that uses the copied face values          
@@ -491,7 +499,7 @@ function copy_faces( ss,
                   zzcon5,
                )
 
-      # @info "$clusterid/$node: copy faces 14 - z=$z" 
+      ##@info "$clusterid/$node: copy faces 14 - z=$z" 
 
       return nothing
 end

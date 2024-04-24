@@ -39,7 +39,9 @@ function x_solve(
                tx2,
                comm_solve,
                predecessor,
-               successor
+               successor,
+               send_id,
+               recv_id
     ) where ncells
 
       #istart = 0
