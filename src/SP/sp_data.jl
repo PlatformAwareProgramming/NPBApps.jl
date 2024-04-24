@@ -74,13 +74,14 @@ function alloc_zone_vectors(x_zones, y_zones)
 end
 
 
-total_size = Ref{Int64}(0)
 
 #---------------------------------------------------------------------
 # allocate space dynamically for data arrays
 #---------------------------------------------------------------------
 
 function alloc_field_space(z, grid_points, problem_size)
+
+      total_size = Ref{Int64}(0)
 
       MAX_CELL_DIM[z] = div(problem_size, maxcells) + 1
 
@@ -108,8 +109,6 @@ function alloc_field_space(z, grid_points, problem_size)
 #      grid_size[z] = zeros(Int64, 3)
       
       # field arrays
-
-      a = 0
 
       u0 = zeros(Float64, IMAXP[z]+4, JMAXP[z]+4, KMAX[z] + 4, 5, maxcells)
       u[z] = OffsetArray(u0, -2:IMAXP[z]+1, -2:JMAXP[z]+1, -2:KMAX[z]+1, 1:5, 1:maxcells)
@@ -215,7 +214,7 @@ function alloc_field_space(z, grid_points, problem_size)
       
       total_size[] += sizeof(buf[z])
       
-      return nothing
+      return total_size[]
 end
 
 

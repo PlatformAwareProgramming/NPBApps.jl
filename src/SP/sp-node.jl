@@ -63,11 +63,12 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        alloc_field_space_zones(proc_num_zones)
        
+       total_size = 0
        for iz = 1:proc_num_zones
 
           zone = proc_zone_id[iz]
 
-          alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]], problem_size) 
+          total_size += alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]], problem_size) 
           make_set(iz, [nx[zone], ny[zone], nz[zone]])
 
           for c = 1:ncells
@@ -79,7 +80,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          end
       end
 
-      @info "$clusterid/$node: TOTAL SIZE = $(total_size[]) bytes"
+      @info "$clusterid/$node: TOTAL SIZE = $(total_size) bytes"
 
        for i = 1:t_last
           timer_clear(i)

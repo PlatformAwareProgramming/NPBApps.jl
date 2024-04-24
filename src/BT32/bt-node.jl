@@ -126,14 +126,14 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
 
       requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
-       s = Array{Array{Float64}}(undef,proc_num_zones)
-       utmp = Array{OffsetArray{Float64, 2, Array{Float64, 2}}}(undef,proc_num_zones)
+       s = Array{Array{Float32}}(undef,proc_num_zones)
+       utmp = Array{OffsetArray{Float32, 2, Array{Float32, 2}}}(undef,proc_num_zones)
        send_id = Array{Ref{MPI.Request}}(undef,proc_num_zones)
        recv_id = Array{Ref{MPI.Request}}(undef,proc_num_zones)
        for iz = 1:proc_num_zones
          requests[iz] = Array{MPI.Request}(undef,12)
-         s[iz] = Array{Float64}(undef,5)
-         utmp[iz] = OffsetArray(zeros(Float64, 6, JMAX[iz]+4), 1:6, -2:JMAX[iz]+1)
+         s[iz] = Array{Float32}(undef,5)
+         utmp[iz] = OffsetArray(zeros(Float32, 6, JMAX[iz]+4), 1:6, -2:JMAX[iz]+1)
          send_id[iz] = Ref{MPI.Request}(MPI.REQUEST_NULL)
          recv_id[iz] = Ref{MPI.Request}(MPI.REQUEST_NULL)
       end
