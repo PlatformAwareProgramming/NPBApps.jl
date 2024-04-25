@@ -131,7 +131,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
             #@info "$clusterid/$node, zone=$(proc_zone_id[iz]): row[$iz]=$(row[iz])  col[$iz]=$(col[iz]) ipt[$iz]=$(ipt[iz])  jpt[$iz]=$(jpt[iz])  ist[$iz]=$(ist[iz])  iend[$iz]=$(iend[iz])  jst[$iz]=$(jst[iz])  jend[$iz]=$(jend[iz])"
 
-            alloc_field_space(iz, #=nx0[zone], ny0[zone], nz0[zone],=# nx[iz], ny[iz], nz[iz])
+            alloc_field_space(iz, #=nx0[zone], ny0[zone], nz0[zone],=# nx[iz], ny[iz], nz[iz], problem_size)
 
             #@info "nx0[$zone]=$(nx0[zone]) ny0[$zone]=$(ny0[zone]) nz0[$zone]=$(nz0[zone])"
             #@info "nx[$iz]=$(nx[iz]) ny[$iz]=$(ny[iz]) nz[$iz]=$(nz[iz])"
