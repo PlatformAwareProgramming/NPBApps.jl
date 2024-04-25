@@ -65,7 +65,7 @@ function go(class::CLASS; itimer=0, npb_verbose=0, zone_mapping = nothing)
    gy_size = lu_class[class].gy_size
    gz_size = lu_class[class].gz_size
 
-   problem_size = sp_class[class].problem_size
+   problem_size = lu_class[class].problem_size
 
    # =====================================================
    # the commands below are supposed to be prior executed  
