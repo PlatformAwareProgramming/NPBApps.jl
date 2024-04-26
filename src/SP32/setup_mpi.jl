@@ -24,11 +24,17 @@ function setup_mpi(proc_num_zones)
       if (!active) return end
 
       global comm_solve = Array{MPI.Comm}(undef, proc_num_zones)
+      @info "$clusterid/$node: SETUP 4.1 -- $proc_num_zones"
       global comm_rhs = Array{MPI.Comm}(undef, proc_num_zones)
+      @info "$clusterid/$node: SETUP 4.2"
       global comm_exch =  MPI.Comm_dup(comm_setup)
+      @info "$clusterid/$node: SETUP 4.3"
       for iz = 1:proc_num_zones
-          comm_solve[iz] = MPI.Comm_dup(comm_setup)
-          comm_rhs[iz] = MPI.Comm_dup(comm_setup)
+         @info "$clusterid/$node: SETUP 4.4 iz = $iz"
+         comm_solve[iz] = MPI.Comm_dup(comm_setup)
+         @info "$clusterid/$node: SETUP 4.5 iz = $iz"
+         comm_rhs[iz] = MPI.Comm_dup(comm_setup)
+         @info "$clusterid/$node: SETUP 4.6 iz = $iz"
       end
 
       @info "$clusterid/$node: SETUP 4"
