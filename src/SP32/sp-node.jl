@@ -55,7 +55,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        global max_zones = x_zones * y_zones
        num_zones = max_zones
        
-       @info "$clusterid/??: STEP 1" 
+       @info "$clusterid/??: STEP 1 - $proc_num_zones" 
 
        setup_mpi(proc_num_zones) 
 

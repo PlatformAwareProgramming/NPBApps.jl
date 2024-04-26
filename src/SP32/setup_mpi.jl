@@ -8,14 +8,18 @@ function setup_mpi(proc_num_zones)
 
       global DEFAULT_TAG = 0
 
+      @info "$clusterid/?: SETUP 1 -- $proc_num_zones -- $max_zones"
+
       MPI.Init_thread(MPI.THREAD_MULTIPLE)
 
-
+      @info "$clusterid/?: SETUP 2"
 #---------------------------------------------------------------------
 #     get a process grid that requires a square number of procs.
 #     excess ranks are marked as inactive.
 #---------------------------------------------------------------------
       global _, maxcells, no_nodes, total_nodes, node, comm_setup, active = get_active_nprocs(MPI.COMM_WORLD, 1)
+
+      @info "$clusterid/$node: SETUP 3"
 
       if (!active) return end
 
@@ -26,6 +30,8 @@ function setup_mpi(proc_num_zones)
           comm_solve[iz] = MPI.Comm_dup(comm_setup)
           comm_rhs[iz] = MPI.Comm_dup(comm_setup)
       end
+
+      @info "$clusterid/$node: SETUP 4"
 
 #---------------------------------------------------------------------
 #     let node 0 be the root for the group (there is only one)
@@ -39,6 +45,8 @@ function setup_mpi(proc_num_zones)
          active = true
          color = 0
       end
+
+      @info "$clusterid/$node: SETUP 5 --- active=$active --- map_zones=$max_zones"
 
       #mpi_comm_split(MPI_COMM_WORLD, color, clusterid, comm_setup, ierror)
       if (!active) return end
