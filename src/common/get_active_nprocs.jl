@@ -105,6 +105,6 @@ function get_active_nprocs(comm_in, pkind)
 
       comm_out = MPI.Comm_split(comm_in, ic, RANK)  # ios = ?
       
-      return Int(np1), Int(np2), Int(npa), nprocs, RANK, comm_out, activev
+      return Int(np1), Int(np2), Int(npa), nprocs, RANK, comm_out, active
 
 end
