@@ -113,6 +113,10 @@ function map_zones(num_clusters, num_zones, zone_mapping)
          end
    end
 
+   @info "proc_num_zones = $proc_num_zones"
+   @info "proc_zone_id = $proc_zone_id"
+   @info "zone_proc_id = $zone_proc_id"
+
    return proc_num_zones, proc_zone_id, zone_proc_id
 end
       

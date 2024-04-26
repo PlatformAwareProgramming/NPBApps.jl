@@ -32,7 +32,7 @@ function setup_mpi(proc_num_zones)
       for iz = 1:proc_num_zones
          @info "$clusterid/$node: SETUP 4.4 iz = $iz"
          comm_solve[iz] = MPI.Comm_dup(comm_setup)
-         @info "$clusterid/$node: SETUP 4.5 iz = $iz"
+         @info "$clusterid/$node: SETUP 4.5 iz = $iz -- $(length(comm_rhs[iz]))"
          comm_rhs[iz] = MPI.Comm_dup(comm_setup)
          @info "$clusterid/$node: SETUP 4.6 iz = $iz"
       end
