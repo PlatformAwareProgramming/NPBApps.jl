@@ -240,12 +240,16 @@ function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_si
    global ny = ny_
    global nz = nz_
 
+   @info "$clusterid: PASS 1"
+
    global zone_proc_id = zone_proc_id_
    global proc_zone_id = proc_zone_id_all[clusterid+1]
    global iz_west = iz_west_ 
    global iz_east = iz_east_ 
    global iz_south = iz_south_
    global iz_north = iz_north_
+
+   @info "$clusterid: PASS 2"
 
    global proc_num_zones = proc_num_zones_all[clusterid+1]
 
@@ -259,6 +263,8 @@ function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_si
       face_out[iz][4] = Array{Float32}(undef, nx[zone], gz_size, 5) 
    end
 
+   @info "$clusterid: PASS 3"
+
    global face_in = Array{Array{Array{Float32}}}(undef, proc_num_zones)
    for iz = 1:proc_num_zones
       zone = proc_zone_id[iz]
@@ -268,6 +274,8 @@ function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_si
       face_in[iz][3] = Array{Float32}(undef, nx[zone], gz_size, 5)
       face_in[iz][4] = Array{Float32}(undef, nx[zone], gz_size, 5)
    end
+
+   @info "$clusterid: PASS 4"
 
    global face_in_count = Array{Array{Int64}}(undef, proc_num_zones)
    global face_out_count = Array{Array{Int64}}(undef, proc_num_zones)
@@ -289,11 +297,15 @@ function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_si
       face_in_count[iz][4] = (nx[zone]-2)*(nz[zone]-2)*5
    end
 
+   @info "$clusterid: PASS 5"
+
    global lkout = ReentrantLock()
    global lkin = ReentrantLock()
 
    global lk1 = ReentrantLock()
    global lk2 = ReentrantLock()
+
+   @info "$clusterid: PASS 6"
 
    SP.go_node(clusterid, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose) 
 end
