@@ -90,7 +90,20 @@ function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
    elseif topology == :master_worker
       remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
    elseif topology == :custom
-      
+      target_worker_config = Distributed.worker_from_id(target_id).config
+      target_connect_idents = target_worker_config.connect_idents
+      target_ident = target_worker_config.ident
+
+      my_worker_config = Distributed.worker_from_id(myid()).config
+      my_connect_idents = my_worker_config.connect_idents
+      my_ident = my_worker_config.ident
+
+      if in(my_ident, target_connect_idents) || in(target_ident, my_connect_idents)
+         remotecall(send_proc, target_id, target_zone, face_data; role=:worker)
+      else
+         remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
+      end
+
    end
 end
 

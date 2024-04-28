@@ -8,36 +8,36 @@ function setup_mpi(proc_num_zones)
 
       global DEFAULT_TAG = 0
 
-      @info "$clusterid/?: SETUP 1 -- $proc_num_zones -- $max_zones"
+      #@info "$clusterid/?: SETUP 1 -- $proc_num_zones -- $max_zones"
 
       MPI.Init_thread(MPI.THREAD_MULTIPLE)
 
-      @info "$clusterid/?: SETUP 2"
+      #@info "$clusterid/?: SETUP 2"
 #---------------------------------------------------------------------
 #     get a process grid that requires a square number of procs.
 #     excess ranks are marked as inactive.
 #---------------------------------------------------------------------
       global _, maxcells, no_nodes, total_nodes, node, comm_setup, active = get_active_nprocs(MPI.COMM_WORLD, 1)
 
-      @info "$clusterid/$node: SETUP 3 ---- active=$active"
+      #@info "$clusterid/$node: SETUP 3 ---- active=$active"
 
       if (!active) return end
 
       global comm_solve = Array{MPI.Comm}(undef, proc_num_zones)
-      @info "$clusterid/$node: SETUP 4.1 -- $proc_num_zones"
+      #@info "$clusterid/$node: SETUP 4.1 -- $proc_num_zones"
       global comm_rhs = Array{MPI.Comm}(undef, proc_num_zones)
-      @info "$clusterid/$node: SETUP 4.2"
+      #@info "$clusterid/$node: SETUP 4.2"
       global comm_exch =  MPI.Comm_dup(comm_setup)
-      @info "$clusterid/$node: SETUP 4.3"
+      #@info "$clusterid/$node: SETUP 4.3"
       for iz = 1:proc_num_zones
-         @info "$clusterid/$node: SETUP 4.4 iz = $iz"
+         #@info "$clusterid/$node: SETUP 4.4 iz = $iz"
          comm_solve[iz] = MPI.Comm_dup(comm_setup)
-         @info "$clusterid/$node: SETUP 4.5 iz = $iz -- $(length(comm_rhs))"
+         #@info "$clusterid/$node: SETUP 4.5 iz = $iz -- $(length(comm_rhs))"
          comm_rhs[iz] = MPI.Comm_dup(comm_setup)
-         @info "$clusterid/$node: SETUP 4.6 iz = $iz"
+         #@info "$clusterid/$node: SETUP 4.6 iz = $iz"
       end
 
-      @info "$clusterid/$node: SETUP 4"
+      #@info "$clusterid/$node: SETUP 4"
 
 #---------------------------------------------------------------------
 #     let node 0 be the root for the group (there is only one)
@@ -52,7 +52,7 @@ function setup_mpi(proc_num_zones)
          color = 0
       end
 
-      @info "$clusterid/$node: SETUP 5 --- active=$active --- map_zones=$max_zones"
+      #@info "$clusterid/$node: SETUP 5 --- active=$active --- map_zones=$max_zones"
 
       #mpi_comm_split(MPI_COMM_WORLD, color, clusterid, comm_setup, ierror)
       if (!active) return end
