@@ -120,6 +120,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          s[iz] = Array{Float32}(undef,5)
        end
 
+       @info "$clusterid/$node: TOUCH ITERATION (EXCH_QBC) !"
        
 
 #---------------------------------------------------------------------
@@ -155,6 +156,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        #@info "FINISHED !"
        #@goto L999
+
+       @info "$clusterid/$node: TOUCH ITERATION (ADI) !"
 
        Threads.@threads for zone = 1:proc_num_zones
          adi(zone, 
@@ -238,6 +241,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
             )
        end
 
+       @info "$clusterid/$node: INITIALIZE (ADI) !"
+
        for zone = 1:proc_num_zones
            initialize(zone)
        end
@@ -261,7 +266,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        timer_clear(64); t_64 = 0.0; t_64s = 0.0
        timer_clear(63); t_63 = 0.0; t_63s = 0.0
 
-       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads())"
+       @info "$clusterid/$node: GO ! NUM_THREADS = $(Threads.nthreads())"
 
        for STEP = 1:niter
           if node == root
@@ -272,7 +277,6 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
             end
           end
 
-          timer_start(64)
           timer_start(63)
  
           if (no_nodes > 1 && num_clusters > 1) || proc_num_zones > 1
@@ -304,6 +308,9 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
           end
          
           t_63 = timer_stop(63); t_63s += t_63
+
+          timer_start(64)
+
 
           Threads.@threads for zone = 1:proc_num_zones                          
               adi(zone, 
