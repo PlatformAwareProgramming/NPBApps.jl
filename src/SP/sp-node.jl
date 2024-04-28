@@ -92,6 +92,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        compute_buffer_size_initial(proc_num_zones)
 
+       @info "$clusterid/$node: SP-NODE 1"
+
        for iz = 1:proc_num_zones         
          set_constants(iz, dt, gx_size, gy_size, gz_size, x_zones, y_zones) 
          initialize(iz) 
@@ -110,6 +112,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          #end
       end
 
+       @info "$clusterid/$node: SP-NODE 2"
+
        requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
        s = Array{Array{Float64}}(undef,proc_num_zones)
        for iz = 1:proc_num_zones
@@ -120,7 +124,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          s[iz] = Array{Float64}(undef,5)
        end
 
-       
+       @info "$clusterid/$node: SP-NODE 3"
 
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
@@ -152,6 +156,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                      comm_exch,
                      timeron,)  
        end
+
+       @info "$clusterid/$node: SP-NODE 4"
 
        #@info "FINISHED !"
        #@goto L999
@@ -237,6 +243,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                requests[zone]
             )
        end
+
+       @info "$clusterid/$node: SP-NODE 5"
 
        for zone = 1:proc_num_zones
            initialize(zone)

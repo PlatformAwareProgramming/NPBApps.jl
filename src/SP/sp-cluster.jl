@@ -110,7 +110,8 @@ function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
       target_ident, target_connect_idents = fetch_connect_idents(targetid)
       my_ident, my_connect_idents = fetch_connect_idents(myid())
 
-      if in(my_ident, target_connect_idents) || in(target_ident, my_connect_idents)
+      if (!isnothing(target_connect_idents) && in(my_ident, target_connect_idents)) || 
+         (!isnothing(my_connect_idents) && in(target_ident, my_connect_idents))
          @info "$(clusterid+2)->$target_id: CUSTOM TRUE --- $my_ident, $target_ident, $my_connect_idents, $target_connect_idents"
          remotecall(send_proc, target_id, target_zone, face_data; role=:worker)
       else
