@@ -82,6 +82,17 @@ function perform_deposit_face(z, target_zone, l1, h1, l2, h2, f, n1, n2, buffer,
    # @info "$clusterid: perform_deposit_face($f) END --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
 end
 
+worker_config_cache = Dict()
+
+function fetch_connect_idents(id)
+   if !haskey(worker_config_cache, id) 
+      worker_config_cache[id] = @fetchfrom role=:worker 1 Distributed.worker_from_id(id).config
+   end
+   worker_config = worker_config_cache[id]
+   ident = worker_config.ident
+   connect_idents = worker_config.connect_idents
+   return ident, connect_idents
+end
 
 function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
    topology = Distributed.PGRP(role=:worker).topology
@@ -90,26 +101,15 @@ function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
    elseif topology == :master_worker
       remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
    elseif topology == :custom
-      @info "$clusterid->$target_id: CUSTOM 1 "
-      target_worker_config = Distributed.worker_from_id(target_id).config
-      @info "$clusterid->$target_id: CUSTOM 2 $(target_worker_config)"
-      target_connect_idents = target_worker_config.connect_idents
-      @info "$clusterid->$target_id: CUSTOM 3 $(target_connect_idents)"
-      target_ident = target_worker_config.ident
-      @info "$clusterid->$target_id: CUSTOM 4 $(target_ident)"
 
-      my_worker_config = Distributed.worker_from_id(myid()).config
-      @info "$clusterid->$target_id: CUSTOM 5 $(my_worker_config)"
-      my_connect_idents = my_worker_config.connect_idents
-      @info "$clusterid->$target_id: CUSTOM 6 $(my_connect_idents)"
-      my_ident = my_worker_config.ident
-      @info "$clusterid->$target_id: CUSTOM 7 $(my_ident)"
+      target_ident, target_connect_idents = fetch_connect_idents(targetid)
+      my_ident, my_connect_idents = fetch_connect_idents(myid())
 
       if in(my_ident, target_connect_idents) || in(target_ident, my_connect_idents)
-         @info "$clusterid->$target_id: CUSTOM 8 TRUE"
+         @info "$(clusterid+2)->$target_id: CUSTOM TRUE --- $my_ident, $target_ident, $my_connect_idents, $target_connect_idents"
          remotecall(send_proc, target_id, target_zone, face_data; role=:worker)
       else
-         @info "$clusterid->$target_id: CUSTOM 7 FALSE"
+         @info "$(clusterid+2)->$target_id: CUSTOM FALSE --- $my_ident, $target_ident, $my_connect_idents, $target_connect_idents"
          remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
       end
 
