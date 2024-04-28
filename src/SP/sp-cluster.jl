@@ -100,12 +100,17 @@ function fetch_connect_idents(id)
 end
 
 function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
+   @info "$(clusterid+2)->$target_id: send_proc_remote 1 f=$f target_zone=$target_zone"
    topology = Distributed.PGRP(role=:worker).topology
+   @info "$(clusterid+2)->$target_id: send_proc_remote 2 f=$f target_zone=$target_zone"
    if topology == :all_to_all
+      @info "$(clusterid+2)->$target_id: send_proc_remote 2.1 f=$f target_zone=$target_zone"
       remotecall(send_proc, target_id, target_zone, face_data; role=:worker)
    elseif topology == :master_worker
+      @info "$(clusterid+2)->$target_id: send_proc_remote 2.2 f=$f target_zone=$target_zone"
       remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
    elseif topology == :custom
+      @info "$(clusterid+2)->$target_id: send_proc_remote 2.3 f=$f target_zone=$target_zone"
 
       target_ident, target_connect_idents = fetch_connect_idents(targetid)
       my_ident, my_connect_idents = fetch_connect_idents(myid())
