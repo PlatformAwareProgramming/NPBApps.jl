@@ -85,12 +85,17 @@ end
 worker_config_cache = Dict()
 
 function fetch_connect_idents(id)
+   @info "$clusterid: fetch_connect_idents 1 $id"
    if !haskey(worker_config_cache, id) 
       worker_config_cache[id] = @fetchfrom role=:worker 1 Distributed.worker_from_id(id).config
    end
+   @info "$clusterid: fetch_connect_idents 2 $id"
    worker_config = worker_config_cache[id]
+   @info "$clusterid: fetch_connect_idents 3 $worker_config"
    ident = worker_config.ident
+   @info "$clusterid: fetch_connect_idents 4 $ident"
    connect_idents = worker_config.connect_idents
+   @info "$clusterid: fetch_connect_idents 5 $connect_idents   "
    return ident, connect_idents
 end
 
