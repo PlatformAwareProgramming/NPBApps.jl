@@ -298,7 +298,6 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
             end
           end
 
-          timer_start(64)
           timer_start(63)
  
           if (no_nodes > 1 && num_clusters > 1) || proc_num_zones > 1
@@ -330,6 +329,8 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
           end
  
           t_63 = timer_stop(63); t_63s += t_63
+
+          timer_start(64)
 
           Threads.@threads for iz = 1:proc_num_zones                          
                adi(iz, ss[iz], 

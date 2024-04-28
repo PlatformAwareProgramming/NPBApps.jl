@@ -376,7 +376,6 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             end
             #@info "$clusterid/$node: STEP 82 --- istep=$istep"       
 
-            timer_start(64)
             timer_start(63)
          
             if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
@@ -384,6 +383,8 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             end
 
             t_63 = timer_stop(63); t_63s += t_63
+
+            timer_start(64)
 
             Threads.@threads for iz = 1:proc_num_zones
                   #@info "$clusterid/$node: STEP 83 --- istep=$istep zone=$iz"       

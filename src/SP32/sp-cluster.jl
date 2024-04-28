@@ -60,26 +60,26 @@ end
 proc = ["send_east_face", "send_west_face", "send_north_face", "send_south_face"]
 
 function perform_deposit_face(z, target_zone, l1, h1, l2, h2, f, n1, n2, buffer, send_proc)
-   # @info "$clusterid: perform_deposit_face($f) BEGIN --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
+   #@info "$clusterid: perform_deposit_face($f) BEGIN --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
    view(face_out[z][f], l1:h1, l2:h2, #=m=# 1:5) .= buffer 
    if update_and_test_face_out_count(f, z, l1, h1, l2, h2, n1, n2)
       clusterid_ = zone_proc_id[target_zone] 
       if clusterid_ != clusterid  
-         # @info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][1]; role=:worker) - BEGIN"
+         #@info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][1]; role=:worker) - BEGIN"
          lock(lk1)
          try
             send_proc_remote(send_proc, clusterid_ + 2, f, target_zone, face_out[z][f])           
          finally
             unlock(lk1)
          end
-         # @info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][1]; role=:worker) - END"
+         #@info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][1]; role=:worker) - END"
       else
-         # @info "$clusterid: (local) $(proc[f])($target_zone, face_out[$z][1]) - BEGIN"
+         #@info "$clusterid: (local) $(proc[f])($target_zone, face_out[$z][1]) - BEGIN"
          send_proc(target_zone, face_out[z][f]) 
-         # @info "$clusterid: (local) $(proc[f])($target_zone, face_out[$z][1]) - END"
+         #@info "$clusterid: (local) $(proc[f])($target_zone, face_out[$z][1]) - END"
       end
    end
-   # @info "$clusterid: perform_deposit_face($f) END --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
+   #@info "$clusterid: perform_deposit_face($f) END --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
 end
 
 worker_config_cache = Dict()
@@ -102,19 +102,19 @@ function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
       remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
    elseif topology == :custom
 
-      target_ident, target_connect_idents = fetch_connect_idents(targetid)
-      my_ident, my_connect_idents = fetch_connect_idents(myid())
+      target_ident, target_connect_idents = fetch_connect_idents(target_id)
+      my_ident, my_connect_idents = fetch_connect_idents(myid(role=:worker))
 
-      if in(my_ident, target_connect_idents) || in(target_ident, my_connect_idents)
-         @info "$(clusterid+2)->$target_id: CUSTOM TRUE --- $my_ident, $target_ident, $my_connect_idents, $target_connect_idents"
+      if (!isnothing(target_connect_idents) && in(my_ident, target_connect_idents)) || 
+         (!isnothing(my_connect_idents) && in(target_ident, my_connect_idents))
          remotecall(send_proc, target_id, target_zone, face_data; role=:worker)
       else
-         @info "$(clusterid+2)->$target_id: CUSTOM FALSE --- $my_ident, $target_ident, $my_connect_idents, $target_connect_idents"
          remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
       end
 
    end
 end
+
 
 function deposit_face(z, l1, h1, l2, h2, buffer, _::Val{1})
    perform_deposit_face(z, iz_west[proc_zone_id[z]], l1, h1, l2, h2, 1, ny, nz, buffer, send_east_face)
