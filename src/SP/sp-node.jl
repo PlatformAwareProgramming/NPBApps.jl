@@ -80,7 +80,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          end
       end
 
-      @info "$clusterid/$node: TOTAL SIZE = $(total_size) bytes"
+      #@info "$clusterid/$node: TOTAL SIZE = $(total_size) bytes"
 
        for i = 1:t_last
           timer_clear(i)
@@ -92,7 +92,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        compute_buffer_size_initial(proc_num_zones)
 
-       @info "$clusterid/$node: SP-NODE 1"
+       #@info "$clusterid/$node: SP-NODE 1"
 
        for iz = 1:proc_num_zones         
          set_constants(iz, dt, gx_size, gy_size, gz_size, x_zones, y_zones) 
@@ -112,7 +112,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          #end
       end
 
-       @info "$clusterid/$node: SP-NODE 2"
+       #@info "$clusterid/$node: SP-NODE 2"
 
        requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
        s = Array{Array{Float64}}(undef,proc_num_zones)
@@ -124,7 +124,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          s[iz] = Array{Float64}(undef,5)
        end
 
-       @info "$clusterid/$node: SP-NODE 3"
+       #@info "$clusterid/$node: SP-NODE 3"
 
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
@@ -157,9 +157,9 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                      timeron,)  
        end
 
-       @info "$clusterid/$node: SP-NODE 4"
+       #@info "$clusterid/$node: SP-NODE 4"
 
-       #@info "FINISHED !"
+       ##@info "FINISHED !"
        #@goto L999
 
        Threads.@threads for zone = 1:proc_num_zones
@@ -244,7 +244,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
             )
        end
 
-       @info "$clusterid/$node: SP-NODE 5"
+       #@info "$clusterid/$node: SP-NODE 5"
 
        for zone = 1:proc_num_zones
            initialize(zone)
@@ -269,7 +269,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        timer_clear(64); t_64 = 0.0; t_64s = 0.0
        timer_clear(63); t_63 = 0.0; t_63s = 0.0
 
-       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads())"
+       #@info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads())"
 
        for STEP = 1:niter
           if node == root
