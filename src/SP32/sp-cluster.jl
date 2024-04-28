@@ -68,7 +68,7 @@ function perform_deposit_face(z, target_zone, l1, h1, l2, h2, f, n1, n2, buffer,
          # @info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][1]; role=:worker) - BEGIN"
          lock(lk1)
          try
-            remotecall(send_proc, clusterid_ + 2, target_zone, face_out[z][f]; role=:worker) 
+            send_proc_remote(send_proc, clusterid_ + 2, f, target_zone, face_out[z][f])           
          finally
             unlock(lk1)
          end
@@ -80,6 +80,18 @@ function perform_deposit_face(z, target_zone, l1, h1, l2, h2, f, n1, n2, buffer,
       end
    end
    # @info "$clusterid: perform_deposit_face($f) END --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
+end
+
+
+function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
+   topology = Distributed.PGRP(role=:worker).topology
+   if topology == :all_to_all
+      remotecall(send_proc, target_id, target_zone, face_data; role=:worker)
+   elseif topology == :master_worker
+      remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
+   elseif topology == :custom
+      
+   end
 end
 
 function deposit_face(z, l1, h1, l2, h2, buffer, _::Val{1})

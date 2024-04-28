@@ -206,4 +206,18 @@ function reportTimersCluster(clusterid, tsum, tming, tmaxg)
    set(timers_all, clusterid+1, (tsum, tming, tmaxg))
 end
 
+function send_face_through_driver(target_id, target_zone, face_data, _::Val{1})
+   remotecall(send_east_face, target_id, target_zone, face_data; role = :master)
+end
 
+function send_face_through_driver(target_id, target_zone, face_data, _::Val{2})
+   remotecall(send_west_face, target_id, target_zone, face_data; role = :master)
+end
+
+function send_face_through_driver(target_id, target_zone, face_data, _::Val{3})
+   remotecall(send_north_face, target_id, target_zone, face_data; role = :master)
+end
+
+function send_face_through_driver(target_id, target_zone, face_data, _::Val{4})
+   remotecall(send_south_face, target_id, target_zone, face_data; role = :master)
+end

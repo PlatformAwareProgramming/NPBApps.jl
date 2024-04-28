@@ -55,24 +55,14 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        global max_zones = x_zones * y_zones
        num_zones = max_zones
        
-       @info "$clusterid/??: STEP 1 - $proc_num_zones" 
-
        setup_mpi(proc_num_zones) 
-
-       @info "$clusterid/$node: STEP 2" 
 
        if (!active) @goto L999 end
 
-       @info "$clusterid/$node: STEP 3" 
-
        class = set_class(niter, x_zones, y_zones, gx_size, gy_size, gz_size)
-
-       @info "$clusterid/$node: STEP 4" 
 
        alloc_field_space_zones(proc_num_zones)
        
-       @info "$clusterid/$node: STEP 5" 
-
        total_size = 0
        for iz = 1:proc_num_zones
 
