@@ -63,10 +63,10 @@ function exch_qbc(_::Val{ncells},
        zs = proc_zone_id_inv(iz_south[proc_zone_id[iz]], proc_zone_id); tag_south = isnothing(zs) ? -1 : NORTH + zs
        zn = proc_zone_id_inv(iz_north[proc_zone_id[iz]], proc_zone_id); tag_north = isnothing(zn) ? -1 : SOUTH + zn
 
-       @info "$clusterid/$node: tag = $tag_east --- src=$(successor[iz][1]) -- z=$iz RECV FROM EAST -- size=$(b_size[iz][1]) -- sr[1]=$(ss[iz][1])"
-       @info "$clusterid/$node: tag = $tag_west --- src=$(predecessor[iz][1]) -- z=$iz RECV FROM WEST -- size=$(b_size[iz][2]) -- sr[2]=$(sr[iz][2])"
-       @info "$clusterid/$node: tag = $tag_south --- src=$(successor[iz][2]) -- z=$iz RECV FROM SOUTH -- size=$(b_size[iz][3]) -- sr[3]=$(sr[iz][3])"
-       @info "$clusterid/$node: tag = $tag_north --- src=$(predecessor[iz][2]) -- z=$iz RECV FROM NORTH -- size=$(b_size[iz][4]) -- sr[4]=$(sr[iz][4])"
+       #@info "$clusterid/$node: tag = $tag_east --- src=$(successor[iz][1]) -- z=$iz RECV FROM EAST -- size=$(b_size[iz][1]) -- sr[1]=$(ss[iz][1])"
+       #@info "$clusterid/$node: tag = $tag_west --- src=$(predecessor[iz][1]) -- z=$iz RECV FROM WEST -- size=$(b_size[iz][2]) -- sr[2]=$(sr[iz][2])"
+       #@info "$clusterid/$node: tag = $tag_south --- src=$(successor[iz][2]) -- z=$iz RECV FROM SOUTH -- size=$(b_size[iz][3]) -- sr[3]=$(sr[iz][3])"
+       #@info "$clusterid/$node: tag = $tag_north --- src=$(predecessor[iz][2]) -- z=$iz RECV FROM NORTH -- size=$(b_size[iz][4]) -- sr[4]=$(sr[iz][4])"
 
        requests[iz][1] = tag_east  > 0 ? MPI.Irecv!(view(in_buffer[iz], sr[iz][1]:sr[iz][1]+b_size[iz][1]-1), comm_exch; source = successor[iz][1], tag = tag_east) : MPI.REQUEST_NULL
        requests[iz][2] = tag_west  > 0 ? MPI.Irecv!(view(in_buffer[iz], sr[iz][2]:sr[iz][2]+b_size[iz][2]-1), comm_exch; source = predecessor[iz][1], tag = tag_west) : MPI.REQUEST_NULL
@@ -197,12 +197,12 @@ function exch_qbc_send(_::Val{ncells},
                                                  cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
                                                  u_face, Val(TO_EAST); role=:worker)
                else
-                  @info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_east[proc_zone_id[z]]) zone_cluster=$zone_cluster TO_EAST"
+                  #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_east[proc_zone_id[z]]) zone_cluster=$zone_cluster TO_EAST"
                   for m = 1:5
                       for k = cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1
                           for j = cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1
                               i = cell_size[1, c]-2
-                              @info "$clusterid/$node: z=$z send-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - TO EAST p0=$(p0) ss[1]=$(ss[1])"
+                              #@info "$clusterid/$node: z=$z send-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - TO EAST p0=$(p0) ss[1]=$(ss[1])"
                               out_buffer[ss[1] + p0] = u[i, j, k, m, c]
                               p0 = p0 + 1
                           end
@@ -226,13 +226,13 @@ function exch_qbc_send(_::Val{ncells},
                                                  cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
                                                  u_face, Val(TO_WEST); role=:worker)
                else
-                  @info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_west[proc_zone_id[z]]) zone_cluster=$zone_cluster TO_WEST"
+                  #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_west[proc_zone_id[z]]) zone_cluster=$zone_cluster TO_WEST"
                   # adjacent zone is the same cluster (send through MPI.jl)
                   for m = 1:5
                       for k = cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1
                           for j = cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1
                               i = 1
-                            @info "$clusterid/$node: z=$z send-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - TO WEST p1=$(p1) ss[2]=$(ss[2])"
+                            #@info "$clusterid/$node: z=$z send-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - TO WEST p1=$(p1) ss[2]=$(ss[2])"
                               out_buffer[ss[2] + p1] = u[i, j, k, m, c]
                               p1 = p1 + 1
                           end
@@ -254,12 +254,12 @@ function exch_qbc_send(_::Val{ncells},
                                                  cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
                                                  u_face, Val(TO_SOUTH); role=:worker)
                else
-                  @info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_south[proc_zone_id[z]]) zone_cluster=$zone_cluster TO_SOUTH"
+                  #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_south[proc_zone_id[z]]) zone_cluster=$zone_cluster TO_SOUTH"
                   for m = 1:5
                       for k = cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1
                           j = cell_size[2, c]-2
                           for i = cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1
-                              #@info "$clusterid/$node: z=$z send-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - TO SOUTH p2=$(p2) ss[3]=$(ss[3])"
+                              ##@info "$clusterid/$node: z=$z send-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - TO SOUTH p2=$(p2) ss[3]=$(ss[3])"
                               out_buffer[ss[3] + p2] = u[i, j, k, m, c]
                               p2 = p2 + 1
                         end
@@ -280,12 +280,12 @@ function exch_qbc_send(_::Val{ncells},
                                                   cell_low[3, c] + cell_start[3,c] + 1, cell_high[3, c] - cell_end[3,c] + 1, 
                                                   u_face, Val(TO_NORTH); role=:worker)
                 else
-                   @info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_north[proc_zone_id[z]]) zone_cluster=$zone_cluster TO_NORTH"
+                   #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_north[proc_zone_id[z]]) zone_cluster=$zone_cluster TO_NORTH"
                    for m = 1:5
                        for k = cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1
                            j = 1    
                             for i = cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1
-                                #@info "$clusterid/$node: z=$z send-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - TO NORTH p3=$(p3) ss[4]=$(ss[4])"
+                                ##@info "$clusterid/$node: z=$z send-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - TO NORTH p3=$(p3) ss[4]=$(ss[4])"
                                 out_buffer[ss[4] + p3] = u[i, j, k, m, c]
                                 p3 = p3 + 1
                            end
@@ -305,10 +305,10 @@ function exch_qbc_send(_::Val{ncells},
     zs = proc_zone_id_inv(iz_south[proc_zone_id[z]], proc_zone_id); tag_south = isnothing(zs) ? -1 : SOUTH + z
     zn = proc_zone_id_inv(iz_north[proc_zone_id[z]], proc_zone_id); tag_north = isnothing(zn) ? -1 : NORTH + z
 
-#     @info "$clusterid/$node: tag = $tag_east --- dest=$(successor[1]) -- z=$z SEND TO EAST -- b_size[1]=$(b_size[1]) -- ss[1]=$(ss[1])"
-#     @info "$clusterid/$node: tag = $tag_west --- dest=$(predecessor[1]) -- z=$z SEND TO WEST -- b_size[2]=$(b_size[2]) -- ss[2]=$(ss[2])"
-#     @info "$clusterid/$node: tag = $tag_south --- dest=$(successor[2]) -- z=$z SEND TO SOUTH -- b_size[3]=$(b_size[3]) -- ss[3]=$(ss[3])"
-#     @info "$clusterid/$node: tag = $tag_north --- dest=$(predecessor[2]) -- z=$z SEND TO NORTH -- b_size[4]=$(b_size[4]) -- ss[4]=$(ss[4])"
+#     #@info "$clusterid/$node: tag = $tag_east --- dest=$(successor[1]) -- z=$z SEND TO EAST -- b_size[1]=$(b_size[1]) -- ss[1]=$(ss[1])"
+#     #@info "$clusterid/$node: tag = $tag_west --- dest=$(predecessor[1]) -- z=$z SEND TO WEST -- b_size[2]=$(b_size[2]) -- ss[2]=$(ss[2])"
+#     #@info "$clusterid/$node: tag = $tag_south --- dest=$(successor[2]) -- z=$z SEND TO SOUTH -- b_size[3]=$(b_size[3]) -- ss[3]=$(ss[3])"
+#     #@info "$clusterid/$node: tag = $tag_north --- dest=$(predecessor[2]) -- z=$z SEND TO NORTH -- b_size[4]=$(b_size[4]) -- ss[4]=$(ss[4])"
 
      requests[5] = tag_east  > 0 ? MPI.Isend(view(out_buffer, ss[1]:ss[1]+b_size[1]-1), comm_exch; dest = successor[1],   tag = tag_east) : MPI.REQUEST_NULL
      requests[6] = tag_west  > 0 ? MPI.Isend(view(out_buffer, ss[2]:ss[2]+b_size[2]-1), comm_exch; dest = predecessor[1], tag = tag_west) : MPI.REQUEST_NULL
@@ -369,13 +369,13 @@ function exch_qbc_recv(_::Val{ncells},
                     view(u, 0, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
                                cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, 1:5, c) .= fetch(u_face; role=:worker)
                else
-                    @info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_west[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_WEST"
+                    #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_west[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_WEST"
                     for m = 1:5
                         for k = cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1
                             for j = cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1
                                 i = 0
                                 u[i, j, k, m, c] = in_buffer[sr[2] + p0]
-                                @info "$clusterid/$node: z=$z recv-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - FROM WEST p0=$(p0) sr[2]=$(sr[2])"
+                                #@info "$clusterid/$node: z=$z recv-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - FROM WEST p0=$(p0) sr[2]=$(sr[2])"
                                 p0 = p0 + 1
                             end
                         end
@@ -392,13 +392,13 @@ function exch_qbc_recv(_::Val{ncells},
                     view(u, cell_size[1, c]-1, cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1, 
                                                cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, 1:5, c) .= fetch(u_face; role=:worker)
                else
-                    @info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_east[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_EAST"
+                    #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_east[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_EAST"
                     for m = 1:5
                         for k = cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1
                             for j = cell_start[2,c]:cell_size[2, c]-cell_end[2,c]-1
                                 i = cell_size[1, c]-1
                                 u[i, j, k, m, c] = in_buffer[sr[1] + p1]
-                               @info "$clusterid/$node: z=$z recv-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - FROM EAST p1=$(p1) sr[1]=$(sr[1])"
+                               #@info "$clusterid/$node: z=$z recv-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - FROM EAST p1=$(p1) sr[1]=$(sr[1])"
                                 p1 = p1 + 1
                          end
                       end
@@ -416,13 +416,13 @@ function exch_qbc_recv(_::Val{ncells},
                     view(u, cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1, 0, 
                             cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1, 1:5, c) .= fetch(u_face; role=:worker)  
                else
-                    @info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_north[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_NORTH"
+                    #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_north[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_NORTH"
                     for m = 1:5
                         for k = cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1
                             j = 0
                             for i = cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1
                                 u[i, j, k, m, c] = in_buffer[sr[4] + p2]
-                                @info "$clusterid/$node: z=$z recv-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - FROM NORTH p2=$(p2) sr[4]=$(sr[4])"
+                                #@info "$clusterid/$node: z=$z recv-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - FROM NORTH p2=$(p2) sr[4]=$(sr[4])"
                                 p2 = p2 + 1
                             end
                         end
@@ -440,13 +440,13 @@ function exch_qbc_recv(_::Val{ncells},
                   view(u, cell_start[1,c]:cell_size[1,c]-cell_end[1,c]-1, cell_size[2, c]-1, 
                           cell_start[3,c]:cell_size[3,c]-cell_end[3,c]-1, 1:5, c) .= fetch(u_face; role=:worker)
                else
-                  @info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_south[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_SOUTH"
+                  #@info "$clusterid/$node: zone=$(proc_zone_id[z]) other_zone=$(iz_south[proc_zone_id[z]]) zone_cluster=$zone_cluster FROM_SOUTH"
                   for m = 1:5
                       for k = cell_start[3,c]:cell_size[3, c]-cell_end[3,c]-1
                           j = cell_size[2, c]-1
                           for i = cell_start[1,c]:cell_size[1, c]-cell_end[1,c]-1
                               u[i, j, k, m, c] = in_buffer[sr[3] + p3]
-                              @info "$clusterid/$node: z=$z recv-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - FROM SOUTH p3=$(p3) sr[3]=$(sr[3])"
+                              #@info "$clusterid/$node: z=$z recv-u[$i,$j,$k,$m,$c]=$(u[i,j,k,m,c]) - FROM SOUTH p3=$(p3) sr[3]=$(sr[3])"
                               p3 = p3 + 1
                           end
                       end

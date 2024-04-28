@@ -60,26 +60,26 @@ end
 proc = ["send_east_face", "send_west_face", "send_north_face", "send_south_face"]
 
 function perform_deposit_face(z, target_zone, l1, h1, l2, h2, f, n1, n2, buffer, send_proc)
-   @info "$clusterid: perform_deposit_face($f) BEGIN --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
+   #@info "$clusterid: perform_deposit_face($f) BEGIN --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
    view(face_out[z][f], l1:h1, l2:h2, #=m=# 1:5) .= buffer 
    if update_and_test_face_out_count(f, z, l1, h1, l2, h2, n1, n2)
       clusterid_ = zone_proc_id[target_zone] 
       if clusterid_ != clusterid  
-         @info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][1]; role=:worker) - BEGIN"
+         #@info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][1]; role=:worker) - BEGIN"
          lock(lk1)
          try
             send_proc_remote(send_proc, clusterid_ + 2, f, target_zone, face_out[z][f])           
          finally
             unlock(lk1)
          end
-         @info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][1]; role=:worker) - END"
+         #@info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][1]; role=:worker) - END"
       else
-         @info "$clusterid: (local) $(proc[f])($target_zone, face_out[$z][1]) - BEGIN"
+         #@info "$clusterid: (local) $(proc[f])($target_zone, face_out[$z][1]) - BEGIN"
          send_proc(target_zone, face_out[z][f]) 
-         @info "$clusterid: (local) $(proc[f])($target_zone, face_out[$z][1]) - END"
+         #@info "$clusterid: (local) $(proc[f])($target_zone, face_out[$z][1]) - END"
       end
    end
-   @info "$clusterid: perform_deposit_face($f) END --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
+   #@info "$clusterid: perform_deposit_face($f) END --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
 end
 
 worker_config_cache = Dict()
@@ -143,53 +143,53 @@ function proc_zone_id_inv(zone, proc_zone_id)
    for iz in eachindex(proc_zone_id)
      proc_zone_id[iz] == zone && return iz
    end
-   @info "$clusterid: zone $zone not found"
+   #@info "$clusterid: zone $zone not found"
  end
 
 
  function send_west_face(zone, buffer)
    z = proc_zone_id_inv(zone, proc_zone_id)
-   @info "$clusterid: send_west_face - BEGIN 1 --- zone=$zone z=$z"
+   #@info "$clusterid: send_west_face - BEGIN 1 --- zone=$zone z=$z"
    face_receive_wait(z, 1, ny[zone], nz[zone])
-   @info "$clusterid: send_west_face - BEGIN 2 --- zone=$zone z=$z"
+   #@info "$clusterid: send_west_face - BEGIN 2 --- zone=$zone z=$z"
    face_receive_and_notify(buffer, z, 1)
-   @info "$clusterid: send_west_face - END --- zone=$zone z=$z"
+   #@info "$clusterid: send_west_face - END --- zone=$zone z=$z"
 end
 
 function send_east_face(zone, buffer)
    z = proc_zone_id_inv(zone, proc_zone_id)
-   @info "$clusterid: send_east_face - BEGIN 1 --- zone=$zone z=$z"
+   #@info "$clusterid: send_east_face - BEGIN 1 --- zone=$zone z=$z"
    face_receive_wait(z, 2, ny[zone], nz[zone])
-   @info "$clusterid: send_east_face - BEGIN 2 --- zone=$zone z=$z"
+   #@info "$clusterid: send_east_face - BEGIN 2 --- zone=$zone z=$z"
    face_receive_and_notify(buffer, z, 2)
-   @info "$clusterid: send_east_face - END --- zone=$zone z=$z "
+   #@info "$clusterid: send_east_face - END --- zone=$zone z=$z "
 end
 
 function send_south_face(zone, buffer)
    z = proc_zone_id_inv(zone, proc_zone_id)
-   @info "$clusterid: send_south_face - BEGIN 1 --- zone=$zone z=$z"
+   #@info "$clusterid: send_south_face - BEGIN 1 --- zone=$zone z=$z"
    face_receive_wait(z, 3, nx[zone], nz[zone])
-   @info "$clusterid: send_south_face - BEGIN 2 --- zone=$zone z=$z"
+   #@info "$clusterid: send_south_face - BEGIN 2 --- zone=$zone z=$z"
    face_receive_and_notify(buffer, z, 3)
-   @info "$clusterid: send_south_face - END --- zone=$zone z=$z"
+   #@info "$clusterid: send_south_face - END --- zone=$zone z=$z"
 end
 
 function send_north_face(zone, buffer)
    z = proc_zone_id_inv(zone, proc_zone_id)
-   @info "$clusterid: send_north_face - BEGIN 1 --- zone=$zone z=$z"
+   #@info "$clusterid: send_north_face - BEGIN 1 --- zone=$zone z=$z"
    face_receive_wait(z, 4, nx[zone], nz[zone])
-   @info "$clusterid: send_north_face - BEGIN 2 --- zone=$zone z=$z"
+   #@info "$clusterid: send_north_face - BEGIN 2 --- zone=$zone z=$z"
    face_receive_and_notify(buffer, z, 4)
-   @info "$clusterid: send_north_face - END --- zone=$zone z=$z"
+   #@info "$clusterid: send_north_face - END --- zone=$zone z=$z"
 end
 
 function face_receive_wait(z, f, n1, n2)
    try
       lock(face_in_receive[z][f])
       while face_in_count[z][f] < (n1-2)*(n2-2)*5    
-         @info "$clusterid: receive wait f=$f z=$z BEGIN --- $(face_in_count[z][f])<$((n1-2)*(n2-2)*5)"   
+         #@info "$clusterid: receive wait f=$f z=$z BEGIN --- $(face_in_count[z][f])<$((n1-2)*(n2-2)*5)"   
          wait(face_in_receive[z][f])
-         @info "$clusterid: receive wait f=$f z=$z END --- $(face_in_count[z][f])<$((n1-2)*(n2-2)*5)"   
+         #@info "$clusterid: receive wait f=$f z=$z END --- $(face_in_count[z][f])<$((n1-2)*(n2-2)*5)"   
       end
    finally
       unlock(face_in_receive[z][f])
@@ -218,7 +218,7 @@ function update_face_in_count(z, l1, h1, l2, h2, f, n1, n2)
    lock(face_in_receive[z][f])
    try
       if face_in_count[z][f] == (n1-2)*(n2-2)*5
-         @info "$clusterid: face collect finished - notify ! z=$z f=$f count=$(face_in_count[z][f])"
+         #@info "$clusterid: face collect finished - notify ! z=$z f=$f count=$(face_in_count[z][f])"
          notify(face_in_receive[z][f]#=; all=true=#)
       end
    finally
@@ -229,19 +229,19 @@ end
 
 function perform_collect_face(z, l1, h1, l2, h2, f, n1, n2)
    zone = proc_zone_id[z]
-   @info "$clusterid: collect_face($f) --- zone=$zone z=$z BEGIN 1"
+   #@info "$clusterid: collect_face($f) --- zone=$zone z=$z BEGIN 1"
       lock(face_in_collect[z][f])
       try
          while face_in_count[z][f] == (n1[zone]-2)*(n2[zone]-2)*5
             wait(face_in_collect[z][f])
          end
-         @info "$clusterid: collect_face($f) --- zone=$zone z=$z PASSED"
+         #@info "$clusterid: collect_face($f) --- zone=$zone z=$z PASSED"
       finally
          unlock(face_in_collect[z][f])
       end
       r = face_in[z][f][l1:h1, l2:h2, #=m=# 1:5]
       @async update_face_in_count(z, l1, h1, l2, h2, f, n1[zone], n2[zone])
-      @info "$clusterid: collect_face($f) --- zone=$zone z=$z END"
+      #@info "$clusterid: collect_face($f) --- zone=$zone z=$z END"
       r 
 end
 
