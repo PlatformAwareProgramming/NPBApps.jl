@@ -112,7 +112,7 @@ function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
    elseif topology == :custom
       @info "$(clusterid+2)->$target_id: send_proc_remote 2.3 f=$f target_zone=$target_zone"
 
-      target_ident, target_connect_idents = fetch_connect_idents(targetid)
+      target_ident, target_connect_idents = fetch_connect_idents(target_id)
       my_ident, my_connect_idents = fetch_connect_idents(myid())
 
       if (!isnothing(target_connect_idents) && in(my_ident, target_connect_idents)) || 
