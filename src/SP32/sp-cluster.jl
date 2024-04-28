@@ -90,17 +90,26 @@ function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
    elseif topology == :master_worker
       remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
    elseif topology == :custom
+      @info "$clusterid->$target_id: CUSTOM 1 "
       target_worker_config = Distributed.worker_from_id(target_id).config
+      @info "$clusterid->$target_id: CUSTOM 2 $(target_worker_config)"
       target_connect_idents = target_worker_config.connect_idents
+      @info "$clusterid->$target_id: CUSTOM 3 $(target_connect_idents)"
       target_ident = target_worker_config.ident
+      @info "$clusterid->$target_id: CUSTOM 4 $(target_ident)"
 
       my_worker_config = Distributed.worker_from_id(myid()).config
+      @info "$clusterid->$target_id: CUSTOM 5 $(my_worker_config)"
       my_connect_idents = my_worker_config.connect_idents
+      @info "$clusterid->$target_id: CUSTOM 6 $(my_connect_idents)"
       my_ident = my_worker_config.ident
+      @info "$clusterid->$target_id: CUSTOM 7 $(my_ident)"
 
       if in(my_ident, target_connect_idents) || in(target_ident, my_connect_idents)
+         @info "$clusterid->$target_id: CUSTOM 8 TRUE"
          remotecall(send_proc, target_id, target_zone, face_data; role=:worker)
       else
+         @info "$clusterid->$target_id: CUSTOM 7 FALSE"
          remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
       end
 
