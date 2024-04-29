@@ -70,7 +70,7 @@ function perform_deposit_face(z, target_zone, l1, h1, l2, h2, f, n1, n2, buffer,
          #@info "$clusterid: remotecall($(proc[f]), $(clusterid_ + 2), $target_zone, face_out[$z][$f]; role=:worker) - BEGIN"
          lock(lk1)
          try
-            remotecall(send_proc, clusterid_ + 2, target_zone, face_out[z][f]; role=:worker)
+            send_proc_remote(send_proc, clusterid_ + 2, f, target_zone, face_out[z][f])  
          finally
             unlock(lk1)
          end
@@ -83,6 +83,41 @@ function perform_deposit_face(z, target_zone, l1, h1, l2, h2, f, n1, n2, buffer,
    end
    #@info "$clusterid: perform_deposit_face($f) END --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
 end
+
+
+worker_config_cache = Dict()
+
+function fetch_connect_idents(id)
+   if !haskey(worker_config_cache, id) 
+      worker_config_cache[id] = @fetchfrom role=:worker 1 Distributed.worker_from_id(id).config
+   end
+   worker_config = worker_config_cache[id]
+   ident = worker_config.ident
+   connect_idents = worker_config.connect_idents
+   return ident, connect_idents
+end
+
+function send_proc_remote(send_proc, target_id, f, target_zone, face_data)
+   topology = Distributed.PGRP(role=:worker).topology
+   if topology == :all_to_all
+      remotecall(send_proc, target_id, target_zone, face_data; role=:worker)
+   elseif topology == :master_worker
+      remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
+   elseif topology == :custom
+
+      target_ident, target_connect_idents = fetch_connect_idents(target_id)
+      my_ident, my_connect_idents = fetch_connect_idents(myid(role=:worker))
+
+      if (!isnothing(target_connect_idents) && in(my_ident, target_connect_idents)) || 
+         (!isnothing(my_connect_idents) && in(target_ident, my_connect_idents))
+         remotecall(send_proc, target_id, target_zone, face_data; role=:worker)
+      else
+         remotecall(send_face_through_driver, 1, target_id, target_zone, face_data, Val(f); role = :worker)
+      end
+
+   end
+end
+
 
 # WEST
 function deposit_face(z, l1, h1, l2, h2, buffer, _::Val{1})
