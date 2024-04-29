@@ -83,16 +83,16 @@ function get_comm_index(zone, iproc, x_zones, y_zones, zone_proc_id, x_size, y_s
       #
             comm_index = 0
             if (zone_proc_id[iz_west[zone]] == iproc)
-               comm_index = comm_index + y_size(jzone)
+               comm_index = comm_index + y_size[jzone]
             end
             if (zone_proc_id[iz_east[zone]] == iproc)
-               comm_index = comm_index + y_size(jzone)
+               comm_index = comm_index + y_size[jzone]
             end
             if (zone_proc_id[iz_south[zone]] == iproc)
-               comm_index = comm_index + x_size(izone)
+               comm_index = comm_index + x_size[izone]
             end
             if (zone_proc_id[iz_north[zone]] == iproc)
-               comm_index = comm_index + x_size(izone)
+               comm_index = comm_index + x_size[izone]
             end
       #
             return comm_index
