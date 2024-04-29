@@ -108,6 +108,8 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       north2 = Array{Int64}(undef, proc_num_zones)
       west2 = Array{Int64}(undef, proc_num_zones)
 
+      @info "$clusterid/$node: START"
+
       for iz = 1:proc_num_zones
            
             zone = proc_zone_id[iz]
@@ -203,7 +205,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
       end
 
-      #@info "$clusterid/$node: STEP 3"
+      @info "$clusterid/$node: TOUCH ITERATION (EXCH_QBC)"
 
       if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
          exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in)
@@ -233,7 +235,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       end=#
       
 
-     #@goto L999
+      @info "$clusterid/$node: TOUCH ITERATION (SSOR)"
 
 #---------------------------------------------------------------------
 #   perform one SSOR iteration to touch all data and program pages 
@@ -285,7 +287,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             #@info "$clusterid/$node: STEP 5 - iz = $iz"
       end
 
-      #@info "$clusterid/$node: STEP 6"
+      @info "$clusterid/$node: INITIALIZE!"
 
       #---------------------------------------------------------------------
       #   reset the boundary and initial values
@@ -357,7 +359,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
        #@info "$clusterid/$node: STEP 7 --- niter=$niter"       
 
        #GC.gc()
-       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads())"
+       @info "$clusterid/$node: GO! NUM_THREADS = $(Threads.nthreads())"
 
       #---------------------------------------------------------------------
       #   perform the SSOR iterations
