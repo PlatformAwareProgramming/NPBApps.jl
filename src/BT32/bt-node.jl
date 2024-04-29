@@ -140,7 +140,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          recv_id[iz] = Ref{MPI.Request}(MPI.REQUEST_NULL)
       end
 
-      #@info "$clusterid/$node: STEP 4"
+      @info "$clusterid/$node: TOUCH ITERATION (EXCH_QBC) !"
 
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
@@ -174,7 +174,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                      timeron,)  
        end
 
-       #@info "$clusterid/$node: STEP 5"
+       @info "$clusterid/$node: TOUCH ITERATION (ADI) !"
 
        Threads.@threads for iz = 1:proc_num_zones
          #@info "$clusterid/$node: z=$iz STEP 5.1 BEGIN"
@@ -259,7 +259,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        #@info "$clusterid/$node: STEP 6"
 
 
-       #@goto L999
+       @info "$clusterid/$node: INITIALIZE (ADI) !"
 
        for iz = 1:proc_num_zones
            initialize(iz)
@@ -287,7 +287,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        timer_clear(64); t_64 = 0.0; t_64s = 0.0
        timer_clear(63); t_63 = 0.0; t_63s = 0.0
 
-       #@info "$clusterid/$node: STEP 8 - GO !"
+       @info "$clusterid/$node: GO ! NUM_THREADS = $(Threads.nthreads())"
 
 
        for STEP = 1:niter
