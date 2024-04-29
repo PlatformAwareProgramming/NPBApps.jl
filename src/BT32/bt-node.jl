@@ -122,7 +122,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          #end
          ##@info "$clusterid/$node: STEP 2.1 END iz=$iz"
       end
-      GC.gc()
+      #GC.gc()
 
       #@info "$clusterid/$node: STEP 3"
 
@@ -291,7 +291,7 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
 
        for STEP = 1:niter
-          GC.gc()
+          #GC.gc()
           if node == root
             Q = STEP > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
 
