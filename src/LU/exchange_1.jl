@@ -43,10 +43,8 @@
 
       elseif iex == 1
 
-         #@info "$clusterid/$node: exchange1 1 - south=$south east=$east jst=$jst jend=$jend"
           if south != -1
               MPI.Recv!(view(buf1, 1:5, jst:jend), south, from_s, comm_solve)
-              #@info "$clusterid/$node: exchange1 1.1 - south=$south north=$north jst=$jst jend=$jend"
               for j = jst:jend
                   g[1,nx+1,j,k] = buf1[1, j]
                   g[2,nx+1,j,k] = buf1[2, j]
@@ -56,7 +54,6 @@
               end
           end
 
-          #@info "$clusterid/$node: exchange1 2 - south=$south east=$east jst=$ist jend=$iend"
           if east != -1
               MPI.Recv!(view(buf1, 1:5, ist:iend), east, from_e,  comm_solve)
               for i = ist:iend
@@ -67,7 +64,6 @@
                   g[5,i,ny+1,k] = buf1[5, i]
               end
           end
-          #@info "$clusterid/$node: exchange1 3 - south=$south east=$east"
 
       elseif iex == 2
 

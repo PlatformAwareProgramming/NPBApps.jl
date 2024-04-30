@@ -1,5 +1,6 @@
 module NPBApps
 
+
 module SP
 
     using FortranFiles
@@ -16,6 +17,8 @@ module SP
     #using InteractiveUtils
     #using ProfileView
     #using Semaphores
+
+    const FloatType = Float64
 
     include("common/DFVariable.jl") 
     include("common/timers.jl")
@@ -64,36 +67,38 @@ module BT
     using MPIClusterManagers
     using Distributed
  
+    const FloatType = Float64
+
     include("common/DFVariable.jl") 
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")
     include("common/print_results.jl")
-    include("BT32/classes.jl")
-    include("BT32/bt_data.jl")
-    include("BT32/set_constants.jl")
-    include("BT32/mpinpb.jl")
-    include("BT32/setup_mpi.jl")
-    include("BT32/zone_setup.jl")
-    include("BT32/make_set.jl")
-    include("BT32/define.jl")
-    include("BT32/initialize.jl")
-    include("BT32/add.jl")
-    include("BT32/btio.jl")
-    include("BT32/copy_faces.jl")
-    include("BT32/exchange_qbc.jl") 
-    include("BT32/error.jl")
-    include("BT32/exact_rhs.jl")
-    include("BT32/exact_solution.jl")
-    include("BT32/rhs.jl")
-    include("BT32/solve_subs.jl")
-    include("BT32/x_solve.jl")
-    include("BT32/y_solve.jl")
-    include("BT32/z_solve.jl")    
-    include("BT32/verify.jl")
-    include("BT32/adi.jl")
-    include("BT32/bt-node.jl") 
-    include("BT32/bt-cluster.jl") 
-    include("BT32/bt-driver.jl") 
+    include("BT/classes.jl")
+    include("BT/bt_data.jl")
+    include("BT/set_constants.jl")
+    include("BT/mpinpb.jl")
+    include("BT/setup_mpi.jl")
+    include("BT/zone_setup.jl")
+    include("BT/make_set.jl")
+    include("BT/define.jl")
+    include("BT/initialize.jl")
+    include("BT/add.jl")
+    include("BT/btio.jl")
+    include("BT/copy_faces.jl")
+    include("BT/exchange_qbc.jl") 
+    include("BT/error.jl")
+    include("BT/exact_rhs.jl")
+    include("BT/exact_solution.jl")
+    include("BT/rhs.jl")
+    include("BT/solve_subs.jl")
+    include("BT/x_solve.jl")
+    include("BT/y_solve.jl")
+    include("BT/z_solve.jl")    
+    include("BT/verify.jl")
+    include("BT/adi.jl")
+    include("BT/bt-node.jl") 
+    include("BT/bt-cluster.jl") 
+    include("BT/bt-driver.jl") 
 
 end
 
@@ -107,6 +112,8 @@ module LU
     using MPIClusterManagers
     using Distributed
     using ProgressMeter
+
+    const FloatType = Float64
 
     include("common/DFVariable.jl") 
     include("common/timers.jl")

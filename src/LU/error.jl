@@ -6,8 +6,8 @@
 
  function ERROR(u, nx, ny, nz, ipt, jpt, ist, jst, iend, jend, errnm, comm_solve)
 
-      u000ijk = Array{Float64}(undef, 5)
-      dummy = zeros(Float64, 5)
+      u000ijk = Array{FloatType}(undef, 5)
+      dummy = zeros(FloatType, 5)
 
       errnm .= 0.0e+00
 

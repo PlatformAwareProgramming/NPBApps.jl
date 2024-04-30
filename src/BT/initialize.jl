@@ -5,9 +5,9 @@
 
 function initialize(z)
 
-   Pface1 = Array{Array{Float64}}(undef,2)
-   Pface2 = Array{Array{Float64}}(undef,2)
-   Pface3 = Array{Array{Float64}}(undef,2)
+   Pface1 = Array{Array{FloatType}}(undef,2)
+   Pface2 = Array{Array{FloatType}}(undef,2)
+   Pface3 = Array{Array{FloatType}}(undef,2)
 
 #---------------------------------------------------------------------
 #  Later (in compute_rhs) we compute 1/u for every element. A few of 
@@ -52,7 +52,6 @@ function initialize(z)
 
                 for iz = 1:2
                   Pface3[iz] = exact_solution(xi, eta, float(iz-1))
-                 # @info "$(xi), $(eta), $(float(iz-1)) --- $(Pface3[iz])"
                 end
 
                 for m = 1:5
@@ -61,7 +60,6 @@ function initialize(z)
                    Pzeta = zeta * Pface3[2][m] +(1.0e0-zeta) * Pface3[1][m]
 
                    u[z][m, ii, jj, kk, c] = Pxi + Peta + Pzeta - Pxi*Peta - Pxi*Pzeta - Peta*Pzeta + Pxi*Peta*Pzeta
-#                   @info "$node: u[$m, $i, $j, $k][$(proc_zone_id[z]))] = $(u[z][m, ii, jj, kk, c])"
                 end
                 ii = ii + 1
              end

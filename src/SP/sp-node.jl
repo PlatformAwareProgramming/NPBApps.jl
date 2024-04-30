@@ -92,8 +92,6 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        compute_buffer_size_initial(proc_num_zones)
 
-       #@info "$clusterid/$node: SP-NODE 1"
-
        for iz = 1:proc_num_zones         
          set_constants(iz, dt, gx_size, gy_size, gz_size, x_zones, y_zones) 
          initialize(iz) 
@@ -101,30 +99,20 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          exact_rhs(iz) 
          compute_buffer_size(iz, 5)
 
-         #if (no_nodes > 1)
-            ss[iz] = SA[start_send_east[iz]::Int start_send_west[iz]::Int start_send_north[iz]::Int start_send_south[iz]::Int start_send_top[iz]::Int start_send_bottom[iz]::Int]
-            sr[iz] = SA[start_recv_east[iz]::Int start_recv_west[iz]::Int start_recv_north[iz]::Int start_recv_south[iz]::Int start_recv_top[iz]::Int start_recv_bottom[iz]::Int]
-            b_size[iz] = SA[east_size[iz]::Int west_size[iz]::Int north_size[iz]::Int south_size[iz]::Int top_size[iz]::Int bottom_size[iz]::Int]
-         #else
-         #   ss[iz] = SA[0 0 0 0 0 0]
-         #   sr[iz] = SA[0 0 0 0 0 0]
-         #   b_size[iz] = SA[0 0 0 0 0 0]
-         #end
-      end
-
-       #@info "$clusterid/$node: SP-NODE 2"
+         ss[iz] = SA[start_send_east[iz]::Int start_send_west[iz]::Int start_send_north[iz]::Int start_send_south[iz]::Int start_send_top[iz]::Int start_send_bottom[iz]::Int]
+         sr[iz] = SA[start_recv_east[iz]::Int start_recv_west[iz]::Int start_recv_north[iz]::Int start_recv_south[iz]::Int start_recv_top[iz]::Int start_recv_bottom[iz]::Int]
+         b_size[iz] = SA[east_size[iz]::Int west_size[iz]::Int north_size[iz]::Int south_size[iz]::Int top_size[iz]::Int bottom_size[iz]::Int]
+       end
 
        requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
-       s = Array{Array{Float64}}(undef,proc_num_zones)
+       s = Array{Array{FloatType}}(undef,proc_num_zones)
        for iz = 1:proc_num_zones
          requests[iz] = Array{MPI.Request}(undef,12)
          for i = 1:12
              requests[iz][i] = MPI.REQUEST_NULL
          end
-         s[iz] = Array{Float64}(undef,5)
+         s[iz] = Array{FloatType}(undef,5)
        end
-
-       #@info "$clusterid/$node: SP-NODE 3"
 
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
@@ -157,9 +145,6 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                      timeron,)  
        end
 
-       #@info "$clusterid/$node: SP-NODE 4"
-
-       ##@info "FINISHED !"
        #@goto L999
 
        Threads.@threads for zone = 1:proc_num_zones
@@ -243,8 +228,6 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
                requests[zone]
             )
        end
-
-       #@info "$clusterid/$node: SP-NODE 5"
 
        for zone = 1:proc_num_zones
            initialize(zone)

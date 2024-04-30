@@ -108,8 +108,6 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       north2 = Array{Int64}(undef, proc_num_zones)
       west2 = Array{Int64}(undef, proc_num_zones)
 
-      @info "$clusterid/$node: START"
-
       for iz = 1:proc_num_zones
            
             zone = proc_zone_id[iz]
@@ -129,15 +127,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 #---------------------------------------------------------------------
             subdomain(iz, row[iz], col[iz], west[iz], east[iz], north[iz], south[iz], nx0[zone], ny0[zone], nz0[zone], nx, ny, nz, ipt, jpt, ist, jst, iend, jend) 
 
-            #@info "$clusterid/$node, zone=$(proc_zone_id[iz]): north[$iz]=$(north[iz]) south[$iz]=$(south[iz]) west[$iz]=$(west[iz]) east[$iz]=$(east[iz])"
-
-            #@info "$clusterid/$node, zone=$(proc_zone_id[iz]): row[$iz]=$(row[iz])  col[$iz]=$(col[iz]) ipt[$iz]=$(ipt[iz])  jpt[$iz]=$(jpt[iz])  ist[$iz]=$(ist[iz])  iend[$iz]=$(iend[iz])  jst[$iz]=$(jst[iz])  jend[$iz]=$(jend[iz])"
-
             alloc_field_space(iz, #=nx0[zone], ny0[zone], nz0[zone],=# nx[iz], ny[iz], nz[iz], problem_size)
-
-            #@info "nx0[$zone]=$(nx0[zone]) ny0[$zone]=$(ny0[zone]) nz0[$zone]=$(nz0[zone])"
-            #@info "nx[$iz]=$(nx[iz]) ny[$iz]=$(ny[iz]) nz[$iz]=$(nz[iz])"
-
 
 #---------------------------------------------------------------------
 #   set up coefficients
@@ -157,9 +147,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 #---------------------------------------------------------------------
 #   compute the forcing term based on prescribed exact solution
 #---------------------------------------------------------------------
-            #@info "$clusterid/$node: STEP 0 - iz=$iz - BEGIN"
             erhs(frct[iz], rsd[iz], flux[iz], buf[iz], buf1[iz], nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], west[iz], east[iz], north[iz], south[iz], ipt[iz], jpt[iz], ist[iz], jst[iz], iend[iz], jend[iz], comm_solve[iz])
-            #@info "$clusterid/$node: STEP 0 - iz=$iz - END"
 
 #---------------------------------------------------------------------
 #   initialize a,b,c,d to zero (guarantees that page tables have been
@@ -167,7 +155,6 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 #---------------------------------------------------------------------
             init_workarray(nx[iz], a[iz], b[iz], c[iz], d[iz])
 
-            #@info "$clusterid/$node: STEP 2 - iz = $iz"
 #---------------------------------------------------------------------
 #   compute the steady-state residuals
 #---------------------------------------------------------------------
@@ -205,37 +192,11 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
       end
 
-      @info "$clusterid/$node: TOUCH ITERATION (EXCH_QBC)"
-
       if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
          exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in)
       end
 
-     #@info "FINISHED"
      #@goto L999
-
-     #= for iz = 1:proc_num_zones
-            zone = proc_zone_id[iz]
-            for m = 1:5
-                  for k = 2:nz[iz]-1
-                        for j=1:ny[iz]
-                              jglob = jpt[iz] + j
-                              #if jglob != 1 && jglob != ny0[zone]
-                                    for i=1:nx[iz]
-                                          iglob = ipt[iz] + i
-                              #            if iglob != 1 && iglob != nx0[zone]
-                                                #@info "$clusterid/$node: zone $zone --- u[$m, $iglob, $jglob, $k]=$(u[iz][ m, i, j, k ])"
-                                                #@info "$zone, $m, $k, $jglob, $iglob, $(u[iz][ m, i, j, k ]), $clusterid, $node"
-                              #            end
-                                    end
-                              #end
-                        end
-                  end
-            end
-      end=#
-      
-
-      @info "$clusterid/$node: TOUCH ITERATION (SSOR)"
 
 #---------------------------------------------------------------------
 #   perform one SSOR iteration to touch all data and program pages 
@@ -243,7 +204,6 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       Threads.@threads for iz = 1:proc_num_zones
             zone = proc_zone_id[iz]
  
-            #@info "$clusterid/$node: STEP 4 - iz = $iz"
             ssor(comm_solve[iz],
                   u[iz],
                   rsd[iz],
@@ -275,19 +235,14 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
                   tz2,
                   tz3,
                   nx[iz],
-                  #ipt,
                   ny[iz],
-                  #jpt,
                   nz[iz],
                   ist[iz],
                   iend[iz],
                   jst[iz],
                   jend[iz],
             )
-            #@info "$clusterid/$node: STEP 5 - iz = $iz"
       end
-
-      @info "$clusterid/$node: INITIALIZE!"
 
       #---------------------------------------------------------------------
       #   reset the boundary and initial values
@@ -346,7 +301,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             timer_clear(i)
        end
    
-    #     MPI.Barrier(comm_solve)
+       MPI.Barrier(comm_setup)
    
        timer_clear(1)
        timer_start(1)
@@ -356,16 +311,12 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
        timer_clear(64); t_64 = 0.0; t_64s = 0.0
        timer_clear(63); t_63 = 0.0; t_63s = 0.0
 
-       #@info "$clusterid/$node: STEP 7 --- niter=$niter"       
-
-       #GC.gc()
        @info "$clusterid/$node: GO! NUM_THREADS = $(Threads.nthreads())"
 
       #---------------------------------------------------------------------
       #   perform the SSOR iterations
       #---------------------------------------------------------------------
       for istep = 1:niter
-            #@info "$clusterid/$node: STEP 81 --- istep=$istep"       
 
             if node == root
                Q = istep > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
@@ -376,7 +327,6 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
                   end
                end
             end
-            #@info "$clusterid/$node: STEP 82 --- istep=$istep"       
 
             timer_start(63)
          
@@ -389,9 +339,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             timer_start(64)
 
             Threads.@threads for iz = 1:proc_num_zones
-                  #@info "$clusterid/$node: STEP 83 --- istep=$istep zone=$iz"       
                   zone = proc_zone_id[iz]
-                  #@info "$clusterid/$node: STEP 84 --- istep=$istep zone=$iz"       
 
                   ssor(comm_solve[iz],
                         u[iz],
@@ -436,8 +384,6 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             t_64 = timer_stop(64); t_64s += t_64
      end
 
-      #@info "$clusterid/$node: STEP 9"
-
       timer_stop(1)
       wtime = timer_read(1)      
 
@@ -467,12 +413,8 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
           frc0 =  pintgr(u[iz], phi1[iz], phi2[iz], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], ipt[iz], jpt[iz], west[iz], east[iz], south[iz], north[iz], comm_solve[iz])       
           frc += frc0
 
-          #if node == 0
-          #@info "$clusterid/$node - ZONE $zone: nx=$(nx[iz]) ny=$(ny[iz]) nz=$(nz[iz]) xcr=$(rsdnm[iz]) xce=$(errnm[iz]) xci=$frc0"
-          #end
       end
 
-      #@info "$clusterid/$node: STEP 10 frc = $frc"
 #---------------------------------------------------------------------
 #   verification test
 #---------------------------------------------------------------------
@@ -483,15 +425,13 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
          remotecall(reportMaxTimeNode, 1, tmax; role=:worker)
       end
 
-      #@info "$clusterid/$node: STEP 11.1"
-
 #---------------------------------------------------------------------
 #      More timers
 #---------------------------------------------------------------------
 
       if (!timeron) @goto L999 end
 
-      t1 = Array{Float64}(undef, t_last+2)
+      t1 = Array{FloatType}(undef, t_last+2)
 
       for i = 1:t_last
          t1[i] = timer_read(i)
@@ -500,25 +440,18 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       t1[t_last+2] = t1[t_lcomm]+t1[t_ucomm]+t1[t_rcomm]+t1[t_exch]
       t1[t_last+1] = t1[t_total] - t1[t_last+2]
 
-      #@info "$clusterid/$node: STEP 11.2"
-
       tsum = MPI.Reduce(t1, MPI.SUM, 0, comm_setup)
       tming = MPI.Reduce(t1, MPI.MIN, 0, comm_setup)
       tmaxg = MPI.Reduce(t1, MPI.MAX, 0, comm_setup)
-
-      #@info "$clusterid/$node: STEP 12"
 
       if node == root
          tavg = tsum ./ no_nodes
          remotecall(reportTimersNode, 1, tavg, tming, tmaxg; role=:worker)
       end
    
-      #@info "$clusterid/$node: STEP 13"
-
       @label L999
       MPI.Finalize()
 
-      #@info "$clusterid/$node: STEP 14"
       return nothing
 end
 

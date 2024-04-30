@@ -3,8 +3,8 @@
 #   for five nonlinear pde's.
 #---------------------------------------------------------------------
 
-const delunm = Array{Float64}(undef, 5) 
-const tmat = Array{Float64}(undef, 5, 5)
+const delunm = Array{FloatType}(undef, 5) 
+const tmat = Array{FloatType}(undef, 5, 5)
 
  function ssor(comm_solve, 
                u,
@@ -45,9 +45,7 @@ const tmat = Array{Float64}(undef, 5, 5)
                jend,
                )
 
-      tv = Array{Float64}(undef, 5, nx0) 
-
-      #@info "$clusterid/$node: SSOR 1"
+      tv = Array{FloatType}(undef, 5, nx0) 
 
 #---------------------------------------------------------------------
 #   begin pseudo-time stepping iterations
@@ -66,8 +64,6 @@ const tmat = Array{Float64}(undef, 5, 5)
                end
             end
          end
-
-         #@info "$clusterid/$node: SSOR 2"
 
          for k = 2:nz -1
 #---------------------------------------------------------------------
@@ -92,8 +88,6 @@ const tmat = Array{Float64}(undef, 5, 5)
                      )
             if (timeron) timer_stop(t_lcomm) end
 
-            #@info "$clusterid/$node: SSOR 3 k=$k"
-
             if (timeron) timer_start(t_blts) end
             for j = jst:jend
 
@@ -117,14 +111,10 @@ const tmat = Array{Float64}(undef, 5, 5)
                      iend,
                     )
 
-            #@info "$clusterid/$node: SSOR 4 k=$k"
-
 #---------------------------------------------------------------------
 #   perform the lower triangular solution
 #---------------------------------------------------------------------
              blts( j, k, omega, rsd, a, b, c, d, ist, iend)
-
-             #@info "$clusterid/$node: SSOR 5.1 k=$k"
       
             end
             if (timeron) timer_stop(t_blts) end
@@ -150,12 +140,10 @@ const tmat = Array{Float64}(undef, 5, 5)
                         jend,
                      )
             if (timeron) timer_stop(t_lcomm) end
-            #@info "$clusterid/$node: SSOR 5.2 k=$k"
          end
 
 
          for k = nz - 1:-1:2
-            #@info "$clusterid/$node: SSOR 6 k=$k"
 #---------------------------------------------------------------------
 #   receive data from south and east
 #---------------------------------------------------------------------
@@ -177,8 +165,6 @@ const tmat = Array{Float64}(undef, 5, 5)
                         jend,
                        )
             if (timeron) timer_stop(t_ucomm) end
-
-            #@info "$clusterid/$node: SSOR 7 k=$k"
 
             if (timeron) timer_start(t_buts) end
             for j = jend:-1:jst
@@ -203,7 +189,6 @@ const tmat = Array{Float64}(undef, 5, 5)
                      iend,
                    )
 
-               #@info "$clusterid/$node: SSOR 8 k=$k"
 #---------------------------------------------------------------------
 #   perform the upper triangular solution
 #---------------------------------------------------------------------
@@ -213,7 +198,6 @@ const tmat = Array{Float64}(undef, 5, 5)
                           d, a, b, c,
                           ist, iend)
 
-               #@info "$clusterid/$node: SSOR 9 k=$k"                          
             end
             if (timeron) timer_stop(t_buts) end
 
@@ -238,7 +222,6 @@ const tmat = Array{Float64}(undef, 5, 5)
                         jend, 
                      )
             if (timeron) timer_stop(t_ucomm) end
-            #@info "$clusterid/$node: SSOR 10 k=$k"
          end
 
 #---------------------------------------------------------------------
@@ -254,8 +237,6 @@ const tmat = Array{Float64}(undef, 5, 5)
                end
             end
          end
-
-         #@info "$clusterid/$node: SSOR 12"
 
 #---------------------------------------------------------------------
 #   compute the steady-state residuals

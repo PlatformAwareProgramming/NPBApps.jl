@@ -70,15 +70,15 @@ function verify(class::CLASS, dt, itmax)
 
          global lk_update_verify = ReentrantLock()
 
-         xcrref = Array{Float64}(undef, 5)
-         xceref = Array{Float64}(undef, 5)
-         xcrdif = Array{Float64}(undef, 5)
-         xcedif = Array{Float64}(undef, 5)
+         xcrref = Array{FloatType}(undef, 5)
+         xceref = Array{FloatType}(undef, 5)
+         xcrdif = Array{FloatType}(undef, 5)
+         xcedif = Array{FloatType}(undef, 5)
 
 #---------------------------------------------------------------------
 #   tolerance level
 #---------------------------------------------------------------------
-        epsilon = 1.0e-08
+        epsilon = FloatType == Float64 ? 1.0e-08 : 1.0e-04
 
         for m = 1:5
            xcrref[m] = 1.0

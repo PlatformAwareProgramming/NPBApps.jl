@@ -2,7 +2,7 @@
 #   to compute the l2-norm of vector v.
 #---------------------------------------------------------------------
 
-dummy = zeros(Float64, 5)
+dummy = zeros(FloatType, 5)
 
 function l2norm( nx0, ny0, nz0, ist, iend, jst, jend, v, SUM, comm_solve, timeron,)
 

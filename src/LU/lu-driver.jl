@@ -43,10 +43,10 @@
 
 
 
-const tsum = Array{Float64}(undef, t_last+2)
-const tming = Array{Float64}(undef, t_last+2)
-const tmaxg = Array{Float64}(undef, t_last+2)
-const trecs = Array{Float64}(undef, t_last+2)
+const tsum = Array{FloatType}(undef, t_last+2)
+const tming = Array{FloatType}(undef, t_last+2)
+const tmaxg = Array{FloatType}(undef, t_last+2)
+const trecs = Array{FloatType}(undef, t_last+2)
 
 const npbversion="3.4.2"
 
@@ -88,10 +88,7 @@ function go(class::CLASS; itimer=0, npb_verbose=0, zone_mapping = nothing)
 
    zone_setup(x_zones, y_zones, gx_size, gy_size, gz_size, nx, nxmax, ny, nz, nx1, ratio, npb_verbose) 
 
-   for zone = 1:num_zones
-      @info "zone $zone west=$(iz_west[zone]) east=$(iz_east[zone]) north=$(iz_north[zone]) south=$(iz_south[zone])"
-   end
-   
+ 
    alloc_proc_space(num_clusters, max_zones) 
 
    num_processes .= map(c -> c[2], clusters)
@@ -117,12 +114,12 @@ function go(class::CLASS; itimer=0, npb_verbose=0, zone_mapping = nothing)
    @printf(stdout, " Total number of processes: %6i\n", sum(num_processes))
    println(stdout) 
 
-   global tmax_all = DataFlowVector(Array{Float64}(undef, num_clusters))
-   global timers_all = DataFlowVector(Array{Tuple{Vector{Float64}, Vector{Float64}, Vector{Float64}}}(undef, num_clusters))
+   global tmax_all = DataFlowVector(Array{FloatType}(undef, num_clusters))
+   global timers_all = DataFlowVector(Array{Tuple{Vector{FloatType}, Vector{FloatType}, Vector{FloatType}}}(undef, num_clusters))
 
    global xce = zeros(5)
    global xcr = zeros(5)
-   global xci = Ref{Float64}(0.0)
+   global xci = Ref{FloatType}(0.0)
 
    verified = false
    t = Threads.@spawn verified = verify(class, dt, itmax)

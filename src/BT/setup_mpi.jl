@@ -17,7 +17,6 @@ function setup_mpi(proc_num_zones)
 #     excess ranks are marked as inactive.
 #---------------------------------------------------------------------
        global _, maxcells, no_nodes, total_nodes, node, comm_setup, active = get_active_nprocs(MPI.COMM_WORLD, 1)
-      @info "maxcells = $maxcells"
       if (!active) return end
 
       global comm_solve = Array{MPI.Comm}(undef, proc_num_zones)
@@ -131,7 +130,7 @@ function map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, mz_blo
             proc_zone_id = [zeros(Int64, max_zones) for _ = 1:num_clusters]
 
             z_order = Array{Int64}(undef, max_zones)
-            zone_size = Array{Float64}(undef, max_zones)
+            zone_size = Array{FloatType}(undef, max_zones)
             proc_group_flag = Array{Int64}(undef, num_clusters)
 
             tot_size = 0.0e0
@@ -139,7 +138,6 @@ function map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, mz_blo
                zone_size[iz] = 1.0e0*nx[iz]*ny[iz]*nz[iz]
                z_order[iz] = iz
                tot_size = tot_size + zone_size[iz]
-#               @info "tot_size=$tot_size"
             end
             for iz = 1:num_zones-1
                cur_size = zone_size[z_order[iz]]

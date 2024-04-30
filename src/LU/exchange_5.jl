@@ -6,7 +6,7 @@
 
       msgid1 = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
-      dum = Array{Float64}(undef, nz0)
+      dum = Array{FloatType}(undef, nz0)
 
 #---------------------------------------------------------------------
 #   communicate in the south and north directions

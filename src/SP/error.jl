@@ -6,8 +6,8 @@
 
 function error_norm(z, rms, grid_points)
 
-       rms_work = zeros(Float64,5)
-       u_exact = Array{Float64}(undef,5)
+       rms_work = zeros(FloatType,5)
+       u_exact = Array{FloatType}(undef,5)
 
        
        
@@ -49,7 +49,7 @@ end
 
 function rhs_norm(z, rms, grid_points)
 
-       rms_work = zeros(Float64, 5)
+       rms_work = zeros(FloatType, 5)
 
        for c = 1:ncells
           kk = cell_low[z][3, c] + cell_start[z][3, c]

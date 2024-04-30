@@ -58,7 +58,6 @@
 #---------------------------------------------------------------------
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
-      #@info "$clusterid/$node: exchange_3 -- 1 -- BEGIN"
       exchange_3(rsd, iex,
                   comm_solve, 
                   buf,
@@ -71,21 +70,16 @@
                   ny,
                   nz,
                )
-      #@info "$clusterid/$node: exchange_3 -- 1 -- END"
 
       L1 = 0
       if (north == -1) L1 = 1 end
       L2 = nx + 1
       if (south == -1) L2 = nx end
 
-      #@info "$clusterid/$node: R0"
-
       ist1 = 1
       iend1 = nx
       if (north == -1) ist1 = 4 end
       if (south == -1) iend1 = nx - 3 end
-
-      #@info "$clusterid/$node: R1"
 
       for k = 2:nz - 1
          for j = jst:jend
@@ -104,18 +98,14 @@
          end
       end
 
-      #@info "$clusterid/$node: R2 nz=$nz jst=$jst jend=$jend ist=$ist iend=$iend tx2=$tx2"
-
       for k = 2:nz - 1
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
-                  #@info "$clusterid/$node: --- frct: $(frct[m, i, j, k]) - $(flux[m, i+1, j, k]) - $(flux[m, i-1, j, k])x"
                   frct[m, i, j, k] =  frct[m, i, j, k] - tx2 * ( flux[m, i+1, j, k] - flux[m, i-1, j, k] )
                end
             end
 
-            #@info "$clusterid/$node: R31 k=$k j=$j"
 
             for i = ist:L2
                tmp = 1.0e+00 / rsd[1, i, j, k]
@@ -142,8 +132,6 @@
                      tx3 * ( u21i^2 - u21im1^2 )+
                      c1 * c5 * tx3 * ( u51i - u51im1 )
             end
-
-            #@info "$clusterid/$node: R32 k=$k j=$j"
 
             for i = ist:iend
                frct[1, i, j, k] = frct[1, i, j, k]+
@@ -172,7 +160,6 @@
                                               rsd[5, i+1, j, k] )
             end
 
-            #@info "$clusterid/$node: R33 k=$k j=$j"
 #---------------------------------------------------------------------
 #   Fourth-order dissipation
 #---------------------------------------------------------------------
@@ -190,8 +177,6 @@
              end
             end
 
-            #@info "$clusterid/$node: R34 k=$k j=$j"
-
             for i = ist1:iend1
                for m = 1:5
                   frct[m, i, j, k] = frct[m, i, j, k]-
@@ -202,8 +187,6 @@
                                           rsd[m, i+2, j, k] )
                end
             end
-
-            #@info "$clusterid/$node: R35 k=$k j=$j"
 
             if south == -1
              for m = 1:5
@@ -218,12 +201,9 @@
                               5.0e+00 * rsd[m, nx-1, j, k] )
              end
             end
-            #@info "$clusterid/$node: R36 k=$k j=$j"
 
          end
       end
-
-      #@info "$clusterid/$node: R4"
 
 #---------------------------------------------------------------------
 #   eta-direction flux differences
@@ -238,7 +218,6 @@
 #---------------------------------------------------------------------
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
-      #@info "$clusterid/$node: exchange_3 -- 2 -- BEGIN"
       exchange_3(rsd, iex,
                   comm_solve, 
                   buf,
@@ -251,7 +230,6 @@
                   ny,
                   nz,
                )
-      #@info "$clusterid/$node: exchange_3 -- 2 -- END"
 
       L1 = 0
       if (west == -1) L1 = 1 end

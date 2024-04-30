@@ -59,7 +59,6 @@
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
       if (timeron) timer_start(t_exch) end
-#@info "$clusterid/$node: EXCHANGE BEGIN 1"
       exchange_3(u, iex,
                   comm_solve, 
                   buf,
@@ -72,7 +71,6 @@
                   ny,
                   nz,
                  )
-#@info "$clusterid/$node: EXCHANGE END 1"
       if (timeron) timer_stop(t_exch) end
 
       L1 = 0
@@ -220,7 +218,6 @@
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
       if (timeron) timer_start(t_exch) end
-#@info "$clusterid/$node: EXCHANGE BEGIN 2"
       exchange_3(u, iex,
                   comm_solve, 
                   buf,
@@ -233,7 +230,6 @@
                   ny,
                   nz,
                 )
-#@info "$clusterid/$node: EXCHANGE END 2"
       if (timeron) timer_stop(t_exch) end
 
       L1 = 0
@@ -299,8 +295,6 @@
                      c1 * c5 * ty3 * ( u51j - u51jm1 )
             end
          end
-
-#@info "$clusterid:$node: RHS 1"
          
          for j = jst:jend
             for i = ist:iend
@@ -336,8 +330,6 @@
 
             end
          end
-
-#@info "$clusterid:$node: RHS 2"
 /#---------------------------------------------------------------------
 #   fourth-order dissipation
 #---------------------------------------------------------------------
@@ -388,8 +380,6 @@
 
       end
 
-#@info "$clusterid:$node: RHS 3"
-
 #---------------------------------------------------------------------
 #   zeta-direction flux differences
 #---------------------------------------------------------------------
@@ -421,8 +411,6 @@
             end
          end
       end
-
-#@info "$clusterid:$node: RHS 4"
       
 
       for k = 2:nz
@@ -455,8 +443,6 @@
          end
       end
 
-#@info "$clusterid:$node: RHS 5"
-
       for k = 2:nz - 1
          for j = jst:jend
             for i = ist:iend
@@ -487,8 +473,6 @@
             end
          end
       end
-
-      #@info "$clusterid:$node: RHS 6"
 
 #---------------------------------------------------------------------
 #   fourth-order dissipation
@@ -523,7 +507,6 @@
             end
          end
       end
-      #@info "$clusterid:$node: RHS 7"
 
       for j = jst:jend
          for i = ist:iend
@@ -540,7 +523,6 @@
             end
          end
       end
-      #@info "$clusterid:$node: RHS 8"
 
       if (timeron) timer_stop(t_rhs) end
 

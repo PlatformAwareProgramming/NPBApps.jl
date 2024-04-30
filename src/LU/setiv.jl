@@ -1,9 +1,9 @@
-ue_1jk = Array{Float64}(undef, 5)
-ue_nx0jk = Array{Float64}(undef, 5)
-ue_i1k = Array{Float64}(undef, 5) 
-ue_iny0k = Array{Float64}(undef, 5)
-ue_ij1 = Array{Float64}(undef, 5)
-ue_ijnz = Array{Float64}(undef, 5)
+ue_1jk = Array{FloatType}(undef, 5)
+ue_nx0jk = Array{FloatType}(undef, 5)
+ue_i1k = Array{FloatType}(undef, 5) 
+ue_iny0k = Array{FloatType}(undef, 5)
+ue_ij1 = Array{FloatType}(undef, 5)
+ue_ijnz = Array{FloatType}(undef, 5)
 
 #---------------------------------------------------------------------
 #
@@ -36,7 +36,6 @@ function setiv(u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt)
                   pzeta = (1.0e+00 - zeta) * ue_ij1[m] + zeta * ue_ijnz[m]
 
                   u[ m, i, j, k ] = pxi + peta + pzeta - pxi * peta - peta * pzeta - pzeta * pxi + pxi * peta * pzeta
-                  # @info "$m, $k, $jglob, $iglob, $pxi, $peta, $pzeta, $(u[ m, i, j, k ])"
                end
               end
             end

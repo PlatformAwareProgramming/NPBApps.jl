@@ -113,10 +113,6 @@ function map_zones(num_clusters, num_zones, zone_mapping)
          end
    end
 
-   @info "proc_num_zones = $proc_num_zones"
-   @info "proc_zone_id = $proc_zone_id"
-   @info "zone_proc_id = $zone_proc_id"
-
    return proc_num_zones, proc_zone_id, zone_proc_id
 end
       
@@ -131,7 +127,7 @@ function map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, mz_blo
       proc_zone_id = [zeros(Int64, max_zones) for _ = 1:num_clusters]
 
       z_order = Array{Int64}(undef, max_zones)
-      zone_size = Array{Float64}(undef, max_zones)
+      zone_size = Array{FloatType}(undef, max_zones)
       proc_group_flag = Array{Int64}(undef, num_clusters)
 
       tot_size = 0.0e0

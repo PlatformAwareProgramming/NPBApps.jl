@@ -102,15 +102,15 @@ function verify(class, dt, no_time_steps)
 
    global lk_update_verify = ReentrantLock()
            
-   xcrref = Array{Float64}(undef, 5)
-   xceref = Array{Float64}(undef, 5)
-   xcrdif = Array{Float64}(undef, 5)
-   xcedif = Array{Float64}(undef, 5)
+   xcrref = Array{FloatType}(undef, 5)
+   xceref = Array{FloatType}(undef, 5)
+   xcrdif = Array{FloatType}(undef, 5)
+   xcedif = Array{FloatType}(undef, 5)
 
 #---------------------------------------------------------------------
 #   tolerance level
 #---------------------------------------------------------------------
-   epsilon = 1.0e-08
+   epsilon = FloatType == Float64 ? 1.0e-08 : 1.0e-04
 
    for i = 1:num_clusters
        lock(verified_signal[i])
@@ -413,10 +413,10 @@ function verify(dt, ss, sr, b_size,
            rho_i, us, vs, ws, qs, square,
            rhs, forcing, u, nx, ny, nz, requests)
 
-   xce = Array{Float64}(undef, 5)
-   xcr = Array{Float64}(undef, 5)
-   xce_sub = Array{Float64}(undef, 5)
-   xcr_sub = Array{Float64}(undef, 5)
+   xce = Array{FloatType}(undef, 5)
+   xcr = Array{FloatType}(undef, 5)
+   xce_sub = Array{FloatType}(undef, 5)
+   xcr_sub = Array{FloatType}(undef, 5)
 
 #---------------------------------------------------------------------
 #   compute the error norm and the residual norm

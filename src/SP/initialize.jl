@@ -5,10 +5,10 @@
 
 function initialize(z)
 
-      Pface1 = Array{Array{Float64}}(undef,2)
-      Pface2 = Array{Array{Float64}}(undef,2)
-      Pface3 = Array{Array{Float64}}(undef,2)
-      temp = Array{Float64}(undef, 5)
+      Pface1 = Array{Array{FloatType}}(undef,2)
+      Pface2 = Array{Array{FloatType}}(undef,2)
+      Pface3 = Array{Array{FloatType}}(undef,2)
+      temp = Array{FloatType}(undef, 5)
 
 #---------------------------------------------------------------------
 #  Later (in compute_rhs) we compute 1/u for every element. A few of 
@@ -54,7 +54,6 @@ function initialize(z)
  
                    for iz = 1:2
                      Pface3[iz] = exact_solution(xi, eta, float(iz-1))
-                    # @info "$(xi), $(eta), $(float(iz-1)) --- $(Pface3[iz])"
                    end
 
                    for m = 1:5

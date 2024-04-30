@@ -19,8 +19,6 @@ function zone_setup(x_zones, y_zones, gx_size, gy_size, gz_size, nx, nxmax, ny, 
             y_end[j] = round(y_smallest*(y_r^j-1.0e0)/(y_r-1.0e0)+0.45e0) 
          end
 
-         @info "x_end=$x_end, y_end=$y_end"
-
        else
 
 #        compute essentially equal sized zone dimensions

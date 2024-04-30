@@ -288,24 +288,24 @@ function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_si
 
    global proc_num_zones = proc_num_zones_all[clusterid+1]
 
-   global face_out = Array{Array{Array{Float64}}}(undef, proc_num_zones)
+   global face_out = Array{Array{Array{FloatType}}}(undef, proc_num_zones)
    for iz = 1:proc_num_zones
       zone = proc_zone_id[iz]
-      face_out[iz] = Array{Array{Float64}}(undef, 4)
-      face_out[iz][1] = Array{Float64}(undef, 5, ny[zone], gz_size) 
-      face_out[iz][2] = Array{Float64}(undef, 5, ny[zone], gz_size) 
-      face_out[iz][3] = Array{Float64}(undef, 5, nx[zone], gz_size) 
-      face_out[iz][4] = Array{Float64}(undef, 5, nx[zone], gz_size) 
+      face_out[iz] = Array{Array{FloatType}}(undef, 4)
+      face_out[iz][1] = Array{FloatType}(undef, 5, ny[zone], gz_size) 
+      face_out[iz][2] = Array{FloatType}(undef, 5, ny[zone], gz_size) 
+      face_out[iz][3] = Array{FloatType}(undef, 5, nx[zone], gz_size) 
+      face_out[iz][4] = Array{FloatType}(undef, 5, nx[zone], gz_size) 
    end
 
-   global face_in = Array{Array{Array{Float64}}}(undef, proc_num_zones)
+   global face_in = Array{Array{Array{FloatType}}}(undef, proc_num_zones)
    for iz = 1:proc_num_zones
       zone = proc_zone_id[iz]
-      face_in[iz] = Array{Array{Float64}}(undef, 4)
-      face_in[iz][1] = Array{Float64}(undef, 5, ny[zone], gz_size)
-      face_in[iz][2] = Array{Float64}(undef, 5, ny[zone], gz_size)
-      face_in[iz][3] = Array{Float64}(undef, 5, nx[zone], gz_size)
-      face_in[iz][4] = Array{Float64}(undef, 5, nx[zone], gz_size)
+      face_in[iz] = Array{Array{FloatType}}(undef, 4)
+      face_in[iz][1] = Array{FloatType}(undef, 5, ny[zone], gz_size)
+      face_in[iz][2] = Array{FloatType}(undef, 5, ny[zone], gz_size)
+      face_in[iz][3] = Array{FloatType}(undef, 5, nx[zone], gz_size)
+      face_in[iz][4] = Array{FloatType}(undef, 5, nx[zone], gz_size)
    end
 
    global face_in_count = Array{Array{Int64}}(undef, proc_num_zones)

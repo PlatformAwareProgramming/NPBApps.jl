@@ -6,7 +6,7 @@
 
 const ipr_default = 1
 const omega_default = 1.2e0
-tolrsddef = Array{Float64}(undef, 5)
+tolrsddef = Array{FloatType}(undef, 5)
 tolrsddef .= 1.0f-08
 
 const c1 = 1.40e+00 
@@ -71,46 +71,46 @@ end
 
  function alloc_field_space(z, nx, ny, nz, problem_size)
 
-      rsdnm[z] = Array{Float64}(undef,5)
-      errnm[z] = Array{Float64}(undef,5)
+      rsdnm[z] = Array{FloatType}(undef,5)
+      errnm[z] = Array{FloatType}(undef,5)
 
-      u0 = zeros(Float64, 5, nx + 4, ny + 4, nz)
+      u0 = zeros(FloatType, 5, nx + 4, ny + 4, nz)
       u[z] = OffsetArray(u0, 1:5, -1:nx+2, -1:ny+2, 1:nz)
 
-      rsd0 = zeros(Float64, 5, nx + 4, ny + 4, nz)
+      rsd0 = zeros(FloatType, 5, nx + 4, ny + 4, nz)
       rsd[z] = OffsetArray(rsd0, 1:5, -1:nx+2, -1:ny+2, 1:nz)
 
-      frct0 = zeros(Float64, 5, nx + 4, ny + 4, nz)
+      frct0 = zeros(FloatType, 5, nx + 4, ny + 4, nz)
       frct[z] = OffsetArray(frct0, 1:5, -1:nx+2, -1:ny+2, 1:nz)
 
-      flux0 = zeros(Float64, 5, nx + 2, ny + 2, nz)
+      flux0 = zeros(FloatType, 5, nx + 2, ny + 2, nz)
       flux[z] = OffsetArray(flux0, 1:5, 0:nx+1,  0:ny+1, 1:nz)
 
-      a[z] = zeros(Float64, 5, 5, nx)
-      b[z] = zeros(Float64, 5, 5, nx)
-      c[z] = zeros(Float64, 5, 5, nx)
-      d[z] = zeros(Float64, 5, 5, nx)
+      a[z] = zeros(FloatType, 5, 5, nx)
+      b[z] = zeros(FloatType, 5, 5, nx)
+      c[z] = zeros(FloatType, 5, 5, nx)
+      d[z] = zeros(FloatType, 5, 5, nx)
 
       nmax = max(nx, ny, nz)
 
-      phi10 = zeros(Float64, nmax + 2, nmax + 2)
+      phi10 = zeros(FloatType, nmax + 2, nmax + 2)
       phi1[z] = OffsetArray(phi10, 0:nmax+1, 0:nmax+1)
 
-      phi20 = zeros(Float64, nmax + 2, nmax + 2)
+      phi20 = zeros(FloatType, nmax + 2, nmax + 2)
       phi2[z] = OffsetArray(phi20, 0:nmax+1, 0:nmax+1)
 
-      buf[z] = zeros(Float64, 5, 2*max(nx,ny)*nz)
-      buf1[z] = zeros(Float64, 5, 2*max(nx,ny)*nz)
+      buf[z] = zeros(FloatType, 5, 2*max(nx,ny)*nz)
+      buf1[z] = zeros(FloatType, 5, 2*max(nx,ny)*nz)
 
-      buf_exch_w_in[z] = Array{Float64}(undef, 5*nx*nz)
-      buf_exch_e_in[z] = Array{Float64}(undef, 5*nx*nz)
-      buf_exch_n_in[z] = Array{Float64}(undef, 5*ny*nz)
-      buf_exch_s_in[z] = Array{Float64}(undef, 5*ny*nz)
+      buf_exch_w_in[z] = Array{FloatType}(undef, 5*nx*nz)
+      buf_exch_e_in[z] = Array{FloatType}(undef, 5*nx*nz)
+      buf_exch_n_in[z] = Array{FloatType}(undef, 5*ny*nz)
+      buf_exch_s_in[z] = Array{FloatType}(undef, 5*ny*nz)
 
-      buf_exch_w_out[z] = Array{Float64}(undef, 5*nx*nz)
-      buf_exch_e_out[z] = Array{Float64}(undef, 5*nx*nz)
-      buf_exch_n_out[z] = Array{Float64}(undef, 5*ny*nz)
-      buf_exch_s_out[z] = Array{Float64}(undef, 5*ny*nz)
+      buf_exch_w_out[z] = Array{FloatType}(undef, 5*nx*nz)
+      buf_exch_e_out[z] = Array{FloatType}(undef, 5*nx*nz)
+      buf_exch_n_out[z] = Array{FloatType}(undef, 5*ny*nz)
+      buf_exch_s_out[z] = Array{FloatType}(undef, 5*ny*nz)
 
       return nothing
       
@@ -118,34 +118,34 @@ end
 
 function alloc_field_space_zones(proc_num_zones)
 
-      global rsdnm = Array{Array{Float64}}(undef, proc_num_zones)
-      global errnm = Array{Array{Float64}}(undef, proc_num_zones)
+      global rsdnm = Array{Array{FloatType}}(undef, proc_num_zones)
+      global errnm = Array{Array{FloatType}}(undef, proc_num_zones)
 
-      global u = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
-      global rsd = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
-      global frct = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
-      global flux = Array{OffsetArray{Float64, 4, Array{Float64, 4}}}(undef, proc_num_zones)
+      global u = Array{OffsetArray{FloatType, 4, Array{FloatType, 4}}}(undef, proc_num_zones)
+      global rsd = Array{OffsetArray{FloatType, 4, Array{FloatType, 4}}}(undef, proc_num_zones)
+      global frct = Array{OffsetArray{FloatType, 4, Array{FloatType, 4}}}(undef, proc_num_zones)
+      global flux = Array{OffsetArray{FloatType, 4, Array{FloatType, 4}}}(undef, proc_num_zones)
 
-      global a = Array{Array{Float64, 3}}(undef, proc_num_zones)
-      global b = Array{Array{Float64, 3}}(undef, proc_num_zones) 
-      global c = Array{Array{Float64, 3}}(undef, proc_num_zones) 
-      global d = Array{Array{Float64, 3}}(undef, proc_num_zones) 
+      global a = Array{Array{FloatType, 3}}(undef, proc_num_zones)
+      global b = Array{Array{FloatType, 3}}(undef, proc_num_zones) 
+      global c = Array{Array{FloatType, 3}}(undef, proc_num_zones) 
+      global d = Array{Array{FloatType, 3}}(undef, proc_num_zones) 
 
-      global phi1 = Array{OffsetArray{Float64, 2, Array{Float64, 2}}}(undef, proc_num_zones)
-      global phi2 = Array{OffsetArray{Float64, 2, Array{Float64, 2}}}(undef, proc_num_zones)
+      global phi1 = Array{OffsetArray{FloatType, 2, Array{FloatType, 2}}}(undef, proc_num_zones)
+      global phi2 = Array{OffsetArray{FloatType, 2, Array{FloatType, 2}}}(undef, proc_num_zones)
 
-      global buf = Array{Array{Float64, 2}}(undef, proc_num_zones) 
-      global buf1 = Array{Array{Float64, 2}}(undef, proc_num_zones) 
+      global buf = Array{Array{FloatType, 2}}(undef, proc_num_zones) 
+      global buf1 = Array{Array{FloatType, 2}}(undef, proc_num_zones) 
 
-      global buf_exch_w_in = Array{Array{Float64}}(undef, proc_num_zones) 
-      global buf_exch_e_in = Array{Array{Float64}}(undef, proc_num_zones) 
-      global buf_exch_n_in = Array{Array{Float64}}(undef, proc_num_zones) 
-      global buf_exch_s_in = Array{Array{Float64}}(undef, proc_num_zones) 
+      global buf_exch_w_in = Array{Array{FloatType}}(undef, proc_num_zones) 
+      global buf_exch_e_in = Array{Array{FloatType}}(undef, proc_num_zones) 
+      global buf_exch_n_in = Array{Array{FloatType}}(undef, proc_num_zones) 
+      global buf_exch_s_in = Array{Array{FloatType}}(undef, proc_num_zones) 
 
-      global buf_exch_w_out = Array{Array{Float64}}(undef, proc_num_zones) 
-      global buf_exch_e_out = Array{Array{Float64}}(undef, proc_num_zones) 
-      global buf_exch_n_out = Array{Array{Float64}}(undef, proc_num_zones) 
-      global buf_exch_s_out = Array{Array{Float64}}(undef, proc_num_zones) 
+      global buf_exch_w_out = Array{Array{FloatType}}(undef, proc_num_zones) 
+      global buf_exch_e_out = Array{Array{FloatType}}(undef, proc_num_zones) 
+      global buf_exch_n_out = Array{Array{FloatType}}(undef, proc_num_zones) 
+      global buf_exch_s_out = Array{Array{FloatType}}(undef, proc_num_zones) 
 
       return nothing
             

@@ -305,10 +305,10 @@ function exch_qbc_send(_::Val{ncells},
     zs = proc_zone_id_inv(iz_south[proc_zone_id[z]], proc_zone_id); tag_south = isnothing(zs) ? -1 : SOUTH + z
     zn = proc_zone_id_inv(iz_north[proc_zone_id[z]], proc_zone_id); tag_north = isnothing(zn) ? -1 : NORTH + z
 
-#     #@info "$clusterid/$node: tag = $tag_east --- dest=$(successor[1]) -- z=$z SEND TO EAST -- b_size[1]=$(b_size[1]) -- ss[1]=$(ss[1])"
-#     #@info "$clusterid/$node: tag = $tag_west --- dest=$(predecessor[1]) -- z=$z SEND TO WEST -- b_size[2]=$(b_size[2]) -- ss[2]=$(ss[2])"
-#     #@info "$clusterid/$node: tag = $tag_south --- dest=$(successor[2]) -- z=$z SEND TO SOUTH -- b_size[3]=$(b_size[3]) -- ss[3]=$(ss[3])"
-#     #@info "$clusterid/$node: tag = $tag_north --- dest=$(predecessor[2]) -- z=$z SEND TO NORTH -- b_size[4]=$(b_size[4]) -- ss[4]=$(ss[4])"
+     #@info "$clusterid/$node: tag = $tag_east --- dest=$(successor[1]) -- z=$z SEND TO EAST -- b_size[1]=$(b_size[1]) -- ss[1]=$(ss[1])"
+     #@info "$clusterid/$node: tag = $tag_west --- dest=$(predecessor[1]) -- z=$z SEND TO WEST -- b_size[2]=$(b_size[2]) -- ss[2]=$(ss[2])"
+     #@info "$clusterid/$node: tag = $tag_south --- dest=$(successor[2]) -- z=$z SEND TO SOUTH -- b_size[3]=$(b_size[3]) -- ss[3]=$(ss[3])"
+     #@info "$clusterid/$node: tag = $tag_north --- dest=$(predecessor[2]) -- z=$z SEND TO NORTH -- b_size[4]=$(b_size[4]) -- ss[4]=$(ss[4])"
 
      requests[5] = tag_east  > 0 ? MPI.Isend(view(out_buffer, ss[1]:ss[1]+b_size[1]-1), comm_exch; dest = successor[1],   tag = tag_east) : MPI.REQUEST_NULL
      requests[6] = tag_west  > 0 ? MPI.Isend(view(out_buffer, ss[2]:ss[2]+b_size[2]-1), comm_exch; dest = predecessor[1], tag = tag_west) : MPI.REQUEST_NULL

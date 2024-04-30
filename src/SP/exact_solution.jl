@@ -5,7 +5,7 @@
 
 function exact_solution(xi, eta, zeta)
 
-       dtemp = Array{Float64}(undef, 5)
+       dtemp = Array{FloatType}(undef, 5)
 
        for m = 1:5
           dtemp[m] =  ce[m, 1] +

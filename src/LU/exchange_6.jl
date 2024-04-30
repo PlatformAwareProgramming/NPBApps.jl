@@ -4,7 +4,7 @@
 
  function exchange_6(g, jbeg, jfin1, nz0, ny, nz, east, west, comm_solve)
 
-      dum = Array{Float64}(undef, nz0)
+      dum = Array{FloatType}(undef, nz0)
 
       msgid3 = Ref{MPI.Request}(MPI.REQUEST_NULL)
 
