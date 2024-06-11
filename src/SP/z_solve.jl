@@ -82,7 +82,8 @@ function z_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
 
             if timeron timer_start(t_zcomm) end
-             requests[1] = MPI.Irecv!(in_buffer, predecessor[3], DEFAULT_TAG, comm_solve)
+            perform_recv(WHAT_COMM, requests, 1, view(in_buffer,1:22*buffer_size), predecessor[3], DEFAULT_TAG, comm_solve)
+            # requests[1] = MPI.Irecv!(in_buffer, predecessor[3], DEFAULT_TAG, comm_solve)
             if timeron timer_stop(t_zcomm) end
 
 #---------------------------------------------------------------------
@@ -344,7 +345,8 @@ function z_solve(_::Val{ncells}, # ::Int64,
 
 
             if timeron timer_start(t_zcomm) end
-             requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[3], DEFAULT_TAG, comm_solve)
+            perform_send(WHAT_COMM, requests, 2, view(out_buffer,1:22*buffer_size), successor[3], DEFAULT_TAG, comm_solve)
+            #requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[3], DEFAULT_TAG, comm_solve)
             if timeron timer_stop(t_zcomm) end
 
           end
@@ -379,7 +381,8 @@ function z_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
 
             if timeron timer_start(t_zcomm) end
-             requests[1] = MPI.Irecv!(in_buffer, successor[3], DEFAULT_TAG, comm_solve)
+            perform_recv(WHAT_COMM, requests, 1, view(in_buffer,1:10*buffer_size), successor[3], DEFAULT_TAG, comm_solve)
+            # requests[1] = MPI.Irecv!(in_buffer, successor[3], DEFAULT_TAG, comm_solve)
             if timeron timer_stop(t_zcomm) end
 
 
@@ -529,7 +532,8 @@ function z_solve(_::Val{ncells}, # ::Int64,
              end
 
             if timeron timer_start(t_zcomm) end
-             requests[2] = MPI.Isend(view(out_buffer,1:10*buffer_size), predecessor[3], DEFAULT_TAG, comm_solve)
+            perform_send(WHAT_COMM, requests, 2, view(out_buffer,1:10*buffer_size), predecessor[3], DEFAULT_TAG, comm_solve)
+            #requests[2] = MPI.Isend(view(out_buffer,1:10*buffer_size), predecessor[3], DEFAULT_TAG, comm_solve)
             if timeron timer_stop(t_zcomm) end
 
           end

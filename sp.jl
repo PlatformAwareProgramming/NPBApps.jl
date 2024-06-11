@@ -1,3 +1,9 @@
 using NPBApps
-SP.go(SP.CLASS_S)
-#SP.go(Array{Int64}([12,12,12]), 100, 0.015)
+using MPIClusterManagers
+using Distributed
+
+addprocs(MPIWorkerManager(4); threadleve=:multiple)
+
+@everywhere workers() using NPBApps
+@everywhere workers() SP.go(SP.CLASS_W; timers=true)
+

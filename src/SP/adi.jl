@@ -1,7 +1,6 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-requests = Array{MPI.Request}(undef,12)
 s = Array{Float64}(undef,5)
 
 function adi(no_nodes,
@@ -79,6 +78,7 @@ function adi(no_nodes,
        ss,
        sr,
        b_size,
+       requests,
        timeron
 ) 
 

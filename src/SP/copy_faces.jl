@@ -195,8 +195,6 @@ function copy_faces(_::Val{no_nodes},
                      b_size,
                      ) where {ncells, no_nodes}  
 
-
-
 #---------------------------------------------------------------------
 # because the difference stencil for the diagonalized scheme is 
 # orthogonal, we do not have to perform the staged copying of faces, 
@@ -311,25 +309,7 @@ function copy_faces(_::Val{no_nodes},
         end
       if timeron timer_stop(t_bpack) end
 
-      if timeron timer_start(t_exch) end
-
-       requests[1] = MPI.Irecv!(view(in_buffer, sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = successor[1], tag = WEST)
-       requests[2] = MPI.Irecv!(view(in_buffer, sr[2]:sr[2]+b_size[2]-1), comm_rhs; source = predecessor[1], tag = EAST)
-       requests[3] = MPI.Irecv!(view(in_buffer, sr[3]:sr[3]+b_size[3]-1), comm_rhs; source = successor[2], tag = SOUTH)
-       requests[4] = MPI.Irecv!(view(in_buffer, sr[4]:sr[4]+b_size[4]-1), comm_rhs; source = predecessor[2], tag = NORTH)
-       requests[5] = MPI.Irecv!(view(in_buffer, sr[5]:sr[5]+b_size[5]-1), comm_rhs; source = successor[3], tag = BOTTOM)
-       requests[6] = MPI.Irecv!(view(in_buffer, sr[6]:sr[6]+b_size[6]-1), comm_rhs; source = predecessor[3], tag = TOP)
-
-       requests[7] = MPI.Isend(view(out_buffer, ss[1]:ss[1]+b_size[1]-1), comm_rhs; dest = successor[1], tag = EAST)
-       requests[8] = MPI.Isend(view(out_buffer, ss[2]:ss[2]+b_size[2]-1), comm_rhs; dest = predecessor[1], tag = WEST)
-       requests[9] = MPI.Isend(view(out_buffer, ss[3]:ss[3]+b_size[3]-1), comm_rhs; dest = successor[2], tag = NORTH)
-       requests[10] = MPI.Isend(view(out_buffer,ss[4]:ss[4]+b_size[4]-1), comm_rhs; dest = predecessor[2], tag = SOUTH)
-       requests[11] = MPI.Isend(view(out_buffer, ss[5]:ss[5]+b_size[5]-1), comm_rhs; dest = successor[3], tag = TOP)
-       requests[12] = MPI.Isend(view(out_buffer, ss[6]:ss[6]+b_size[6]-1), comm_rhs; dest = predecessor[3], tag = BOTTOM)
-
-       MPI.Waitall(requests)
-
-      if timeron timer_stop(t_exch) end
+      perform_comm(WHAT_COMM, requests, out_buffer, in_buffer, ss, sr, b_size, comm_rhs, successor, predecessor, timeron)
 
 #---------------------------------------------------------------------
 # unpack the data that has just been received;             
@@ -480,4 +460,73 @@ function copy_faces(_::Val{no_nodes},
                   timeron)
 
 return nothing
+end
+
+
+function perform_comm(_::Val{USE_MPIJL}, requests, out_buffer, in_buffer, ss, sr, b_size, comm_rhs, successor, predecessor, timeron)
+
+   if timeron timer_start(t_exch) end
+
+   requests[1] = MPI.Irecv!(view(in_buffer, sr[1]:sr[1]+b_size[1]-1), comm_rhs; source = successor[1], tag = WEST)
+   requests[2] = MPI.Irecv!(view(in_buffer, sr[2]:sr[2]+b_size[2]-1), comm_rhs; source = predecessor[1], tag = EAST)
+   requests[3] = MPI.Irecv!(view(in_buffer, sr[3]:sr[3]+b_size[3]-1), comm_rhs; source = successor[2], tag = SOUTH)
+   requests[4] = MPI.Irecv!(view(in_buffer, sr[4]:sr[4]+b_size[4]-1), comm_rhs; source = predecessor[2], tag = NORTH)
+   requests[5] = MPI.Irecv!(view(in_buffer, sr[5]:sr[5]+b_size[5]-1), comm_rhs; source = successor[3], tag = BOTTOM)
+   requests[6] = MPI.Irecv!(view(in_buffer, sr[6]:sr[6]+b_size[6]-1), comm_rhs; source = predecessor[3], tag = TOP)
+
+   requests[7] = MPI.Isend(view(out_buffer, ss[1]:ss[1]+b_size[1]-1), comm_rhs; dest = successor[1], tag = EAST)
+   requests[8] = MPI.Isend(view(out_buffer, ss[2]:ss[2]+b_size[2]-1), comm_rhs; dest = predecessor[1], tag = WEST)
+   requests[9] = MPI.Isend(view(out_buffer, ss[3]:ss[3]+b_size[3]-1), comm_rhs; dest = successor[2], tag = NORTH)
+   requests[10] = MPI.Isend(view(out_buffer, ss[4]:ss[4]+b_size[4]-1), comm_rhs; dest = predecessor[2], tag = SOUTH)
+   requests[11] = MPI.Isend(view(out_buffer, ss[5]:ss[5]+b_size[5]-1), comm_rhs; dest = successor[3], tag = TOP)
+   requests[12] = MPI.Isend(view(out_buffer, ss[6]:ss[6]+b_size[6]-1), comm_rhs; dest = predecessor[3], tag = BOTTOM)
+
+   if timeron timer_stop(t_exch) end
+
+   MPI.Waitall(requests)
+end
+
+function perform_comm(_::Val{USE_DISTRIBUTEDJL}, requests, out_buffer, in_buffer, ss, sr, b_size, comm_rhs, successor, predecessor, timeron)
+
+   if timeron timer_start(t_exch) end
+
+   remotecall(put_face, successor[1]+2,   out_buffer[ss[1]:ss[1]+b_size[1]-1], Val(EAST); role=:worker)
+   remotecall(put_face, predecessor[1]+2, out_buffer[ss[2]:ss[2]+b_size[2]-1], Val(WEST); role=:worker)
+   remotecall(put_face, successor[2]+2,   out_buffer[ss[3]:ss[3]+b_size[3]-1], Val(NORTH); role=:worker)
+   remotecall(put_face, predecessor[2]+2, out_buffer[ss[4]:ss[4]+b_size[4]-1], Val(SOUTH); role=:worker)
+   remotecall(put_face, successor[3]+2,   out_buffer[ss[5]:ss[5]+b_size[5]-1], Val(TOP); role=:worker)
+   remotecall(put_face, predecessor[3]+2, out_buffer[ss[6]:ss[6]+b_size[6]-1], Val(BOTTOM); role=:worker)
+
+   for i = 1:6
+      view(in_buffer, sr[i]:sr[i]+b_size[i]-1) .= get(faces, i)
+      reset(faces, i) 
+   end
+
+   if timeron timer_stop(t_exch) end
+end
+
+faces = DataFlowVector(Array{Float64}(undef, 6))
+
+function put_face(face, ::Val{WEST}) # FROM EAST
+   set(faces, 1, face)
+end
+
+function put_face(face, ::Val{EAST}) # FROM WEST
+   set(faces, 2, face)
+end
+
+function put_face(face, ::Val{SOUTH}) # FROM NORTH
+   set(faces, 3, face)
+end
+
+function put_face(face, ::Val{NORTH}) # FROM SOUTH
+   set(faces, 4, face)
+end
+
+function put_face(face, ::Val{BOTTOM}) # FROM TOP
+   set(faces, 5, face)
+end
+
+function put_face(face, ::Val{TOP}) # FROM BOTTOM
+   set(faces, 6, face)
 end

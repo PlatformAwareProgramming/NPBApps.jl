@@ -27,7 +27,7 @@
 #---------------------------------------------------------------------
 #   establish the global rank of this process and the group size
 #---------------------------------------------------------------------
-      id = node
+      global id = node
       num = no_nodes
 
       ndim   = nodedim(num)

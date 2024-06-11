@@ -8,12 +8,20 @@ module SP
     using Printf
     using MPI
     using StaticArrays
-    using LoopVectorization
+    #using LoopVectorization
+    using Distributed
     #using Traceur
     #using JET       
     #using InteractiveUtils
     #using ProfileView
+    using ConcurrentCollections
 
+    const USE_MPIJL = 0
+    const USE_DISTRIBUTEDJL = 1
+
+    const WHAT_COMM = Val(USE_DISTRIBUTEDJL)  
+
+    include("common/DFVariable.jl")
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")
     include("common/print_results.jl")

@@ -65,14 +65,16 @@ const t_last = 10
       c = zeros(Float64, 5, 5, isiz1)
       d = zeros(Float64, 5, 5, isiz1)
 
-      phi10 = zeros(Float64, isiz2 + 2, isiz3 + 2)
-      phi1 = OffsetArray(phi10, 0:isiz2+1, 0:isiz3+1)
+      isiz_max = max(isiz1, isiz2, isiz3)
 
-      phi20 = zeros(Float64, isiz2 + 2, isiz3 + 2)
-      phi2 = OffsetArray(phi20, 0:isiz2+1, 0:isiz3+1)
+      phi10 = zeros(Float64, isiz_max + 2, isiz_max + 2)
+      phi1 = OffsetArray(phi10, 0:isiz_max+1, 0:isiz_max+1)
 
-      buf = zeros(Float64, 5, 2*isiz2*isiz3)
-      buf1 = zeros(Float64, 5, 2*isiz2*isiz3)
+      phi20 = zeros(Float64, isiz_max + 2, isiz_max + 2)
+      phi2 = OffsetArray(phi20, 0:isiz_max+1, 0:isiz_max+1)
+
+      buf = zeros(Float64, 5, 2*max(isiz1,isiz2)*isiz3)
+      buf1 = zeros(Float64, 5, 2*max(isiz1,isiz2)*isiz3)
 
       return rsdnm, errnm, u, rsd, frct, flux, a, b, c, d, phi1, phi2, buf, buf1
       

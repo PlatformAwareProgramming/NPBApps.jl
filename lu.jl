@@ -1,3 +1,3 @@
 using NPBApps
-LU.go(LU.CLASS_A; timers=true)
-#LU.go(6, 6, 6, 50, 50, 0.5)
+LU.go(LU.CLASS_B; timers=true)
+#LU.go(76, 52, 17, 250, 250, 2.0e0; timers=true)

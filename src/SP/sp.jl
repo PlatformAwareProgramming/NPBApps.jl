@@ -153,6 +153,10 @@ function perform(maxcells, no_nodes, total_nodes, node, comm_setup, active, comm
 
        ss, sr, b_size = compute_buffer_size(no_nodes, ncells, cell_coord, cell_size, 5)
 
+       requests = Array{MPI.Request}(undef,12)
+       requests .= [MPI.REQUEST_NULL for i = 1:12]
+
+
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
 #---------------------------------------------------------------------
@@ -231,6 +235,7 @@ function perform(maxcells, no_nodes, total_nodes, node, comm_setup, active, comm
             ss,
             sr,
             b_size,
+            requests,
             timeron
    )
 
@@ -331,6 +336,7 @@ function perform(maxcells, no_nodes, total_nodes, node, comm_setup, active, comm
                ss,
                sr,
                b_size,
+               requests,
                timeron
          )
 

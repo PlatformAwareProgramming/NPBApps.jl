@@ -82,7 +82,8 @@ function x_solve(_::Val{ncells}, # ::Int64,
 #---------------------------------------------------------------------
             if timeron timer_start(t_xcomm) end
 
-             requests[1] = MPI.Irecv!(in_buffer, predecessor[1], DEFAULT_TAG, comm_solve)
+            perform_recv(WHAT_COMM, requests, 1, view(in_buffer,1:22*buffer_size), predecessor[1], DEFAULT_TAG, comm_solve)
+            #requests[1] = MPI.Irecv!(in_buffer, predecessor[1], DEFAULT_TAG, comm_solve)
 
             if timeron timer_stop(t_xcomm) end
 
@@ -355,7 +356,8 @@ function x_solve(_::Val{ncells}, # ::Int64,
 # can't receive data yet because buffer size will be wrong 
 #---------------------------------------------------------------------
             if timeron timer_start(t_xcomm) end
-             requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[1], DEFAULT_TAG, comm_solve)
+            perform_send(WHAT_COMM, requests, 2, view(out_buffer,1:22*buffer_size), successor[1], DEFAULT_TAG, comm_solve)
+            #requests[2] = MPI.Isend(view(out_buffer,1:22*buffer_size), successor[1], DEFAULT_TAG, comm_solve)
             if timeron timer_stop(t_xcomm) end
 
           end
@@ -389,7 +391,8 @@ function x_solve(_::Val{ncells}, # ::Int64,
 #            solution of the previous two stations     
 #---------------------------------------------------------------------
             if timeron timer_start(t_xcomm) end
-             requests[1] = MPI.Irecv!(in_buffer, successor[1], DEFAULT_TAG, comm_solve)
+            perform_recv(WHAT_COMM, requests, 1, view(in_buffer,1:10*buffer_size), successor[1], DEFAULT_TAG, comm_solve)
+            #requests[1] = MPI.Irecv!(in_buffer, successor[1], DEFAULT_TAG, comm_solve)
             if timeron timer_stop(t_xcomm) end
 
 #---------------------------------------------------------------------
@@ -532,7 +535,10 @@ function x_solve(_::Val{ncells}, # ::Int64,
 #            pack and send the buffer
 #---------------------------------------------------------------------
             if timeron timer_start(t_xcomm) end
-             requests[2] = MPI.Isend(view(out_buffer,1:10*buffer_size), predecessor[1], DEFAULT_TAG, comm_solve)
+            
+            perform_send(WHAT_COMM, requests, 2, view(out_buffer,1:10*buffer_size), predecessor[1], DEFAULT_TAG, comm_solve)
+            #requests[2] = MPI.Isend(view(out_buffer,1:10*buffer_size), predecessor[1], DEFAULT_TAG, comm_solve)
+
             if timeron timer_stop(t_xcomm) end
 
           end
@@ -558,7 +564,44 @@ end
 
 
 
+function perform_send(_::Val{USE_MPIJL}, requests, ix, buffer, dst_rank, tag, comm)
+   requests[ix] = MPI.Isend(buffer, dst_rank, tag, comm)
+end
+
+function perform_recv(_::Val{USE_MPIJL}, requests, ix, buffer, src_rank, tag, comm)
+   requests[ix] = MPI.Irecv!(buffer, src_rank, tag, comm)
+end
 
 
 
+dict = Ref{Array{DataFlowQueue{Array{Float64}}}}()
 
+function check_dict(dict)
+   if !isassigned(dict)
+      n = nprocs()
+      dict[] = Array{DataFlowQueue{Array{Float64}}}(undef,n)
+      for i = 1:n
+         dict[][i] = DataFlowQueue(Array{Float64})
+      end
+   end
+end
+
+function perform_send(_::Val{USE_DISTRIBUTEDJL}, _, _, buffer, dst_rank, tag, comm)
+   dst_pid = dst_rank + 2
+   remotecall(put_val, dst_pid, buffer, myid(); role=:worker)
+end
+
+function perform_recv(_::Val{USE_DISTRIBUTEDJL}, _, _, buffer, src_rank, tag, comm)
+   src_pid = src_rank + 2
+   check_dict(dict)
+   queue =dict[][src_pid]
+   buffer .= popfirst!(queue)
+end
+
+function put_val(buffer, src_pid)
+   
+   check_dict(dict)
+   queue = dict[][src_pid]
+
+   push!(queue, buffer)
+end
