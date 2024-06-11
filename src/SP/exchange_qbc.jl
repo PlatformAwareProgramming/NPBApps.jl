@@ -298,7 +298,7 @@ function exch_qbc_send(_::Val{ncells},
 #---------------------------------------------------------------------
 #       cell loop
 #---------------------------------------------------------------------
-       end
+    end
 
     ze = proc_zone_id_inv(iz_east[proc_zone_id[z]], proc_zone_id); tag_east = isnothing(ze) ? -1 : EAST + z
     zw = proc_zone_id_inv(iz_west[proc_zone_id[z]], proc_zone_id); tag_west = isnothing(zw) ? -1 : WEST + z
@@ -310,12 +310,12 @@ function exch_qbc_send(_::Val{ncells},
      #@info "$clusterid/$node: tag = $tag_south --- dest=$(successor[2]) -- z=$z SEND TO SOUTH -- b_size[3]=$(b_size[3]) -- ss[3]=$(ss[3])"
      #@info "$clusterid/$node: tag = $tag_north --- dest=$(predecessor[2]) -- z=$z SEND TO NORTH -- b_size[4]=$(b_size[4]) -- ss[4]=$(ss[4])"
 
-     requests[5] = tag_east  > 0 ? MPI.Isend(view(out_buffer, ss[1]:ss[1]+b_size[1]-1), comm_exch; dest = successor[1],   tag = tag_east) : MPI.REQUEST_NULL
-     requests[6] = tag_west  > 0 ? MPI.Isend(view(out_buffer, ss[2]:ss[2]+b_size[2]-1), comm_exch; dest = predecessor[1], tag = tag_west) : MPI.REQUEST_NULL
-     requests[7] = tag_south > 0 ? MPI.Isend(view(out_buffer, ss[3]:ss[3]+b_size[3]-1), comm_exch; dest = successor[2],   tag = tag_south) : MPI.REQUEST_NULL
-     requests[8] = tag_north > 0 ? MPI.Isend(view(out_buffer, ss[4]:ss[4]+b_size[4]-1), comm_exch; dest = predecessor[2], tag = tag_north) : MPI.REQUEST_NULL
+    requests[5] = tag_east  > 0 ? MPI.Isend(view(out_buffer, ss[1]:ss[1]+b_size[1]-1), comm_exch; dest = successor[1],   tag = tag_east) : MPI.REQUEST_NULL
+    requests[6] = tag_west  > 0 ? MPI.Isend(view(out_buffer, ss[2]:ss[2]+b_size[2]-1), comm_exch; dest = predecessor[1], tag = tag_west) : MPI.REQUEST_NULL
+    requests[7] = tag_south > 0 ? MPI.Isend(view(out_buffer, ss[3]:ss[3]+b_size[3]-1), comm_exch; dest = successor[2],   tag = tag_south) : MPI.REQUEST_NULL
+    requests[8] = tag_north > 0 ? MPI.Isend(view(out_buffer, ss[4]:ss[4]+b_size[4]-1), comm_exch; dest = predecessor[2], tag = tag_north) : MPI.REQUEST_NULL
 
-      if (timeron) timer_stop(t_rdis1) end
+    if (timeron) timer_stop(t_rdis1) end
 
 end
 

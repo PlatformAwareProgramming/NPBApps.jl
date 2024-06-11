@@ -61,3 +61,7 @@ function get(ref::DataFlowVector, i)
     end
     return ref.ref[i]
 end
+
+function reset(ref::DataFlowVector, i)
+   ref.cond_test = [false for _ = 1:length(ref.ref)]
+end

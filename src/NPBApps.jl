@@ -12,11 +12,6 @@ module SP
     using LoopVectorization
     using MPIClusterManagers
     using Distributed
-    #using Traceur
-    #using JET       
-    #using InteractiveUtils
-    #using ProfileView
-    #using Semaphores
 
     const FloatType = Float64
 
@@ -67,7 +62,7 @@ module BT
     using MPIClusterManagers
     using Distributed
  
-    const FloatType = Float64
+    const FloatType = Float32
 
     include("common/DFVariable.jl") 
     include("common/timers.jl")
@@ -131,9 +126,7 @@ module LU
     include("LU/zone_setup.jl")
     include("LU/bcast_inputs.jl")
     include("LU/exchange_qbc.jl")
-#    include("LU/blts_vec.jl")
     include("LU/blts.jl")
-#    include("LU/buts_vec.jl")
     include("LU/buts.jl")
     include("LU/erhs.jl")
     include("LU/error.jl")
@@ -143,9 +136,7 @@ module LU
     include("LU/exchange_4.jl")
     include("LU/exchange_5.jl")
     include("LU/exchange_6.jl")
-    #include("LU/jacld_vec.jl")
     include("LU/jacld.jl")
-#    include("LU/jacu_vec.jl")
     include("LU/jacu.jl")
     include("LU/l2norm.jl")
     include("LU/lu-node.jl")
@@ -156,7 +147,6 @@ module LU
     include("LU/rhs.jl")
     include("LU/setbv.jl")
     include("LU/setiv.jl")
-#    include("LU/ssor_vec.jl")
     include("LU/ssor.jl")
     include("LU/verify.jl")
 
