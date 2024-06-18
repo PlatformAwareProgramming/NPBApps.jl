@@ -71,13 +71,13 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
           total_size += alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]], problem_size) 
           make_set(iz, [nx[zone], ny[zone], nz[zone]])
 
-          #=for c = 1:ncells
+          for c = 1:ncells
              if (cell_size[iz][1, c] > IMAX[iz]) ||(cell_size[iz][2, c] > JMAX[iz]) ||(cell_size[iz][3, c] > KMAX[iz])
                 println(stdout, node, c, view(cell_size[iz], 1:3, c)...)
                 println(stdout, " Problem size too big for compiled array sizes")
                 @goto L999
              end
-         end=#
+         end
       end
 
       @info "$clusterid/$node: TOTAL SIZE = $(total_size) bytes"
