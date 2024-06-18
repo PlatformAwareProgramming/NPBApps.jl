@@ -62,7 +62,7 @@ module BT
     using MPIClusterManagers
     using Distributed
  
-    const FloatType = Float32
+    const FloatType = Float64
 
     include("common/DFVariable.jl") 
     include("common/timers.jl")
