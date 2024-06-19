@@ -16,4 +16,4 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 ConcurrentCollections = "0.1.1"
-Distributed = "1.11.0"
+Distributed = "1.10.4"
