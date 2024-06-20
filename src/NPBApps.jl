@@ -19,7 +19,7 @@ module SP
     const USE_MPIJL = 0
     const USE_DISTRIBUTEDJL = 1
 
-    const WHAT_COMM = Val(USE_DISTRIBUTEDJL)  
+    const WHAT_COMM = Val(USE_MPIJL)  
 
     include("common/DFVariable.jl")
     include("common/timers.jl")
