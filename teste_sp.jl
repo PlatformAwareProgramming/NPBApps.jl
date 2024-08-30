@@ -1,6 +1,6 @@
 using Distributed
-addprocs(2)
-process_count = [(2,4),(3,4)]
+addprocs(1)
+process_count = [(2,4)]
 @everywhere workers() using MPIClusterManagers
 @everywhere workers() using MPI
 for (w,np) in process_count
