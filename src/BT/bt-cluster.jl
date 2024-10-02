@@ -337,6 +337,6 @@ function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_si
    BT.go_node(clusterid, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose) 
 end
 
-function go_node(clusterid, no_nodes, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose)
-   @everywhere workers() BT.perform($clusterid, $no_nodes, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $problem_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $proc_zone_id, $zone_proc_id, $iz_west, $iz_east, $iz_north, $iz_south, $itimer, $npb_verbose)  
+function go_node(clusterid, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose)
+   @everywhere workers() BT.perform($clusterid, $clusters, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $problem_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $proc_zone_id, $zone_proc_id, $iz_west, $iz_east, $iz_north, $iz_south, $itimer, $npb_verbose)  
 end

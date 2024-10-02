@@ -332,8 +332,8 @@ function go_cluster(clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_si
    SP.go_node(clusterid, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose) 
 end
 
-function go_node(cluster_id, no_nodes, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose)
-   @everywhere workers() SP.perform($cluster_id, $no_nodes, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $problem_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $proc_zone_id, $zone_proc_id, $iz_west, $iz_east, $iz_north, $iz_south, $itimer, $npb_verbose) 
+function go_node(cluster_id, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer, npb_verbose)
+   @everywhere workers() SP.perform($cluster_id, $clusters, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $problem_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $proc_zone_id, $zone_proc_id, $iz_west, $iz_east, $iz_north, $iz_south, $itimer, $npb_verbose) 
 end
 
 
