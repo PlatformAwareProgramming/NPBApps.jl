@@ -39,7 +39,6 @@
 #---------------------------------------------------------------------
 
 function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_size, gy_size, gz_size, problem_size, nxmax, nx, ny, nz, proc_num_zones, proc_zone_id, zone_proc_id, iz_west, iz_east, iz_north, iz_south, itimer_=false, npb_verbose_=0)
-     BT.perform($clusterid, $clusters, $niter, $dt, $ratio, $x_zones, $y_zones, $gx_size, $gy_size, $gz_size, $problem_size, $nxmax, $nx, $ny, $nz, $proc_num_zones, $proc_zone_id, $zone_proc_id, $iz_west, $iz_east, $iz_north, $iz_south, $itimer, $npb_verbose)
 
        global clusterid = clusterid_
        global num_clusters = length(clusters) 
