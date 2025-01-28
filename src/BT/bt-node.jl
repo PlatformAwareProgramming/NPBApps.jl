@@ -54,7 +54,7 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
 
        #GC.enable(false)
 
-       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads()) ---- number of zones = $proc_num_zones --- $(MPI.Query_thread()) "
+       @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads()) ---- number of zones = $proc_num_zones --- $(MPI.Query_thread()) --- MEM=$(Sys.maxrss())"
 
        if (!active) @goto L999 end
 
@@ -68,6 +68,7 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
           zone = proc_zone_id[iz]
 
           total_size += alloc_field_space(iz, [nx[zone], ny[zone], nz[zone]], problem_size)
+          @info "$clusterid/$node: zone = $zone, total_size=$total_size, nx[$zone]=$(nx[zone]), ny[$zone]=$(ny[zone]), nz[$zone]=$(nz[zone]) --- MEM=$(Sys.maxrss())"
           make_set(iz, [nx[zone], ny[zone], nz[zone]])
 
           for c = 1:ncells
@@ -79,7 +80,7 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
          end
       end
 
-      @info "$clusterid/$node: TOTAL SIZE = $(total_size) bytes"
+      @info "$clusterid/$node: TOTAL SIZE = $(total_size) bytes -- MEM=$(Sys.maxrss())"
 
       for i = 1:t_last
           timer_clear(i)
@@ -92,16 +93,26 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
        compute_buffer_size_initial(proc_num_zones)
        set_constants(dt, gx_size, gy_size, gz_size, x_zones, y_zones) 
 
+       @info "$clusterid/$node: MEM 1 = $(Sys.maxrss())"
+
        Threads.@threads for iz = 1:proc_num_zones         
-         initialize(iz) 
-         lhsinit(iz) 
-         exact_rhs(iz) 
+         @info "$clusterid/$node: iz=$iz MEM 1.1 = $(Sys.maxrss())"
+         @time initialize(ncells, cell_low[iz], cell_high[iz], cell_size[iz], slice[iz], IMAX[iz], JMAX[iz], KMAX[iz], ce, dnxm1, dnym1, dnzm1, u[iz]) 
+         @info "$clusterid/$node: iz=$iz MEM 1.2 = $(Sys.maxrss())"  # *
+         @time lhsinit(ncells, cell_coord[iz], cell_start[iz], cell_end[iz], cell_size[iz], lhsc[iz]) 
+         @info "$clusterid/$node: iz=$iz MEM 1.3 = $(Sys.maxrss())"  # *
+         @time exact_rhs(ncells, cell_start[iz], cell_end[iz], cell_low[iz], cell_size[iz], dnxm1, dnym1, dnzm1, dssp, cuf[iz], buf[iz], q[iz], ue[iz], forcing[iz], ce, tx2,ty2,tz2,dx1tx1,dx2tx1,dx3tx1,dx4tx1,dx5tx1,dy1ty1,dy2ty1,dy3ty1,dy4ty1,dy5ty1,dz1tz1,dz2tz1,dz3tz1, dz4tz1, dz5tz1, xxcon2, xxcon3, xxcon4, xxcon5, yycon2, yycon3, yycon4, yycon5, zzcon2, zzcon3, zzcon4, zzcon5,) 
+         @info "$clusterid/$node: iz=$iz MEM 1.4 = $(Sys.maxrss())"  # *
          compute_buffer_size(iz, 5)
+         @info "$clusterid/$node: iz=$iz MEM 1.5 = $(Sys.maxrss())"
 
          ss[iz] = SA[start_send_east[iz]::Int start_send_west[iz]::Int start_send_north[iz]::Int start_send_south[iz]::Int start_send_top[iz]::Int start_send_bottom[iz]::Int]
          sr[iz] = SA[start_recv_east[iz]::Int start_recv_west[iz]::Int start_recv_north[iz]::Int start_recv_south[iz]::Int start_recv_top[iz]::Int start_recv_bottom[iz]::Int]
          b_size[iz] = SA[east_size[iz]::Int west_size[iz]::Int north_size[iz]::Int south_size[iz]::Int top_size[iz]::Int bottom_size[iz]::Int]
+         @info "$clusterid/$node: iz=$iz MEM 1.6 = $(Sys.maxrss())"
       end
+
+      @info "$clusterid/$node: MEM 2 = $(Sys.maxrss())"
 
       requests = Array{Array{MPI.Request}}(undef,proc_num_zones)
        s = Array{Array{FloatType}}(undef,proc_num_zones)
@@ -115,6 +126,8 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
          send_id[iz] = Ref{MPI.Request}(MPI.REQUEST_NULL)
          recv_id[iz] = Ref{MPI.Request}(MPI.REQUEST_NULL)
       end
+
+      @info "$clusterid/$node: MEM 3 = $(Sys.maxrss())"
 
 #---------------------------------------------------------------------
 #      do one time step to touch all code, and reinitialize
@@ -147,6 +160,8 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
                      comm_exch,
                      timeron,)  
        end
+
+       @info "$clusterid/$node: MEM 4 = $(Sys.maxrss())"
 
        Threads.@threads for iz = 1:proc_num_zones
             adi(iz, ss[iz], 
@@ -226,13 +241,15 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
                )
        end
 
+       @info "$clusterid/$node: MEM 5 = $(Sys.maxrss())"
 
        #@goto L999
 
        for iz = 1:proc_num_zones
-           initialize(iz)
+           initialize(ncells, cell_low[iz], cell_high[iz], cell_size[iz], slice[iz], IMAX[iz], JMAX[iz], KMAX[iz], ce, dnxm1, dnym1, dnzm1, u[iz])
        end
 
+       @info "$clusterid/$node: MEM 6 = $(Sys.maxrss())"
 
 #---------------------------------------------------------------------
 #      Synchronize before placing time stamp
@@ -253,6 +270,8 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
        timer_clear(64); t_64 = 0.0; t_64s = 0.0
        timer_clear(63); t_63 = 0.0; t_63s = 0.0
 
+       @info "$clusterid/$node: MEM 7 = $(Sys.maxrss())"
+
        for STEP = 1:niter
           #GC.gc()
           if node == root
@@ -260,6 +279,7 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
 
             if mod(STEP, Q) == 0 || STEP == 1
                @printf(stdout, "%2i: Time step %4i  -- %12.2F  -- %12.2F --- %4i \n", clusterid, STEP, t_63s/(STEP-1), t_64s/(STEP-1), Q)
+               @info "$clusterid/$node: MEM=$(Sys.maxrss())"
             end
           end
 

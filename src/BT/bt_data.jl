@@ -157,11 +157,6 @@ end
 
       total_size[] += sizeof(backsub_info[z])
 
-      in_buffer[z] = Array{FloatType}(undef, BUF_SIZE[z])
-      out_buffer[z] = Array{FloatType}(undef, BUF_SIZE[z])
-
-      total_size[] += sizeof(in_buffer[z])
-      total_size[] += sizeof(out_buffer[z])
 
       cv0 = zeros(FloatType, MAX_CELL_DIM[z] + 4)
       cv[z] = OffsetArray(cv0, -2:MAX_CELL_DIM[z]+1)
@@ -213,6 +208,20 @@ end
 
       total_size[] += sizeof(njac[z])
 
+
+   #   if z == 1
+
+            in_buffer[z] = Array{FloatType}(undef, BUF_SIZE[z])
+            out_buffer[z] = Array{FloatType}(undef, BUF_SIZE[z])
+       
+            total_size[] += sizeof(in_buffer[z])
+            total_size[] += sizeof(out_buffer[z])
+      
+   #   else
+   #         in_buffer[z] = in_buffer[1]
+   #         out_buffer[z] = out_buffer[1]
+   #   end
+
       lhsa0 = zeros(FloatType, 5, 5, MAX_CELL_DIM[z] + 2)
       lhsa[z] = OffsetArray(lhsa0, 1:5, 1:5, -1:MAX_CELL_DIM[z])
 
@@ -225,7 +234,6 @@ end
 
       us0 = zeros(FloatType, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)
       us[z] = OffsetArray(us0, -1:IMAX[z], -1:JMAX[z], -1:KMAX[z], 1:maxcells)      # 4,599,936
-      
       total_size[] += sizeof(us[z])
 
       vs0 = zeros(FloatType, IMAX[z]+2, JMAX[z]+2, KMAX[z]+2, maxcells)

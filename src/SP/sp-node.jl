@@ -248,6 +248,9 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
        @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads())"
 
        for STEP = 1:niter
+
+          GC.gc()
+
           if node == root
             Q = STEP > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
 

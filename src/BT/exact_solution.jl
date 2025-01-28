@@ -2,7 +2,7 @@
 #     this function returns the exact solution at point xi, eta, zeta  
 #---------------------------------------------------------------------
 
-function exact_solution(xi, eta, zeta)
+function exact_solution(xi, eta, zeta, ce)
 
       dtemp = Array{FloatType}(undef, 5)
 

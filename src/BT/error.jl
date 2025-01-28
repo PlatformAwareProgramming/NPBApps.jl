@@ -19,7 +19,7 @@ function error_norm(z, rms, grid_points)
             ii = 0
             for i = cell_low[z][1, c]:cell_high[z][1, c]
                xi = float(i) * dnxm1
-               u_exact = exact_solution(xi, eta, zeta)
+               u_exact = exact_solution(xi, eta, zeta, ce)
 
                for m = 1:5
                   add = u[z][m, ii, jj, kk, c] - u_exact[m]
