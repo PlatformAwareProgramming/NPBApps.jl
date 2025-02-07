@@ -1,7 +1,7 @@
 name = "NPBApps"
 uuid = "82b6ada2-cd04-4344-bed3-e09d14e16e4b"
-version = "0.1.0"
 authors = ["Francisco Heron de Carvalho Junior <heron@dc.ufc.br>"]
+version = "0.1.0"
 
 [deps]
 ConcurrentCollections = "5060bff5-0b44-40c5-b522-fcd3ca5cecdd"
@@ -9,6 +9,7 @@ Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 FortranFiles = "c58ffaec-ab22-586d-bfc5-781a99fd0b10"
 LoopVectorization = "bdcacae8-1622-11e9-2a5c-532679323890"
 MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
+MPIClusterManagers = "e7922434-ae4b-11e9-05c5-9780451d2c66"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -17,3 +18,4 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 [compat]
 ConcurrentCollections = "0.1.1"
 Distributed = "1.10.4"
+MPIClusterManagers = "0.2.4"

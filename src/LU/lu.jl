@@ -53,7 +53,7 @@ const t_recs = "total", "rhs", "blts", "buts", "#jacld", "#jacu",
             "exch", "lcomm", "ucomm", "rcomm",
             " totcomp", " totcomm"
 
-function go(class::CLASS; timers=false)
+function go(class::CLASS; timers=false, np=1, exeflags=``, mpiflags=``, dir="", threadlevel=:multiple)
          
       itmax = bt_class[class].itmax
       inorm = bt_class[class].inorm
@@ -62,8 +62,13 @@ function go(class::CLASS; timers=false)
       isiz02 = bt_class[class].isiz02
       isiz03 = bt_class[class].isiz03
    
-      go(isiz01, isiz02, isiz03, itmax, inorm, dt; timers=timers)
+      addprocs(MPIWorkerManager(np); threadlevel=threadlevel, exeflags=exeflags, mpiflags=mpiflags, dir=dir)
+
+      @everywhere workers() @eval using NPBApps
+      @everywhere workers() LU.go($isiz01, $isiz02, $isiz03, $itmax, $inorm, $dt; timers=$timers)
    
+      rmprocs(workers())
+
 end
    
 function go(isiz01, isiz02, isiz03, itmax, inorm, dt; timers=false)
@@ -329,14 +334,14 @@ function perform(xdim, ydim, no_nodes, total_nodes, node, comm_solve, active, id
             @printf(stdout, " nprocs =%6i           minimum     maximum     average\n", no_nodes)
             for i = 1:t_last+2
                   if t_recs[i][1:1] != "#"
-                  tsum[i] = tsum[i] / no_nodes
-                  @printf(stdout, " timer %2i(%8s) :  %10.4F  %10.4F  %10.4F\n", i, t_recs[i], tming[i], tmaxg[i], tsum[i])
+                     tsum[i] = tsum[i] / no_nodes
+                     @printf(stdout, " timer %2i(%8s) :  %10.4F  %10.4F  %10.4F\n", i, t_recs[i], tming[i], tmaxg[i], tsum[i])
                   end
             end
-      end
+         end
       end
       @label L999
-      MPI.Finalize()
+      #MPI.Finalize()
 
      return nothing
 end

@@ -15,6 +15,7 @@ module SP
     #using InteractiveUtils
     #using ProfileView
     using ConcurrentCollections
+    using MPIClusterManagers
 
     const USE_MPIJL = 0
     const USE_DISTRIBUTEDJL = 1
@@ -60,7 +61,9 @@ module BT
     using Printf
     using MPI
     using StaticArrays
- 
+    using MPIClusterManagers
+    using Distributed
+
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")
     include("common/print_results.jl")
@@ -105,6 +108,8 @@ module LU
     using Printf
     using MPI
     using StaticArrays
+    using MPIClusterManagers
+    using Distributed
 
     include("common/timers.jl")
     include("common/get_active_nprocs.jl")

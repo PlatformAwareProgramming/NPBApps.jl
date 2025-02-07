@@ -42,7 +42,7 @@
 #---------------------------------------------------------------------
 
 
-function go(class::CLASS; timers = false)
+function go(class::CLASS; timers = false, np=1, exeflags=``, mpiflags=``, dir="", threadlevel=:multiple)
 
    problem_size = bt_class[class].problem_size
    
@@ -54,7 +54,12 @@ function go(class::CLASS; timers = false)
    grid_points[2] = problem_size
    grid_points[3] = problem_size
 
-   go(grid_points, niter, dt; timers = timers)
+   addprocs(MPIWorkerManager(np); exeflags=exeflags, mpiflags=mpiflags, dir=dir, threadlevel=threadlevel)
+
+   @everywhere workers() @eval using NPBApps
+   @everywhere workers() BT.go($grid_points, $niter, $dt; timers = $timers)
+
+   rmprocs(workers())
 
 end
 
@@ -413,7 +418,7 @@ function perform(maxcells, no_nodes, total_nodes, node, comm_setup, active, comm
 
        @label L999
        MPI.Barrier(MPI.COMM_WORLD)
-       MPI.Finalize()
+       #MPI.Finalize()
 
        return nothing
 end
