@@ -450,7 +450,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
       end
    
       @label L999
-      MPI.Finalize()
+      #MPI.Finalize()
 
       return nothing
 end

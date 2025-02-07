@@ -433,7 +433,7 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
 
        @label L999
        MPI.Barrier(MPI.COMM_WORLD)
-       MPI.Finalize()
+       #MPI.Finalize()
 
        return nothing
 end
