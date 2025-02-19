@@ -122,10 +122,15 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 #---------------------------------------------------------------------
             south[iz], east[iz], north[iz], west[iz], south2[iz], east2[iz], north2[iz], west2[iz] = neighbors(row[iz], col[iz]) 
 
+            @info "$clusterid/$node: zone=$zone --- westzone=$(iz_west[zone]) eastzone=$(iz_east[zone]) northzone=$(iz_north[zone]) southzone=$(iz_south[zone])"
+            @info "$clusterid/$node: zone=$zone --- west=$(west[iz]) east=$(east[iz]) north=$(north[iz]) south=$(south[iz])"
+            @info "$clusterid/$node: zone=$zone --- west2=$(west2[iz]) east2=$(east2[iz]) north2=$(north2[iz]) south2=$(south2[iz])"
 #---------------------------------------------------------------------
 #   set up sub-domain sizes (calculate nx, ny, nz, ipt, jpt, ist, jst, iend, jend for zone iz)
 #---------------------------------------------------------------------
             subdomain(iz, row[iz], col[iz], west[iz], east[iz], north[iz], south[iz], nx0[zone], ny0[zone], nz0[zone], nx, ny, nz, ipt, jpt, ist, jst, iend, jend) 
+
+            @info "$clusterid/$node: zone=$zone --- nx=$(nx[iz]), ny=$(ny[iz]), nz=$(nz[iz]), ipt=$(ipt[iz]), jpt=$(jpt[iz]), ist=$(ist[iz]), jst=$(jst[iz]), iend=$(iend[iz]), jend=$(jend[iz])"
 
             alloc_field_space(iz, #=nx0[zone], ny0[zone], nz0[zone],=# nx[iz], ny[iz], nz[iz], problem_size)
 
@@ -189,22 +194,36 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
                   jend[iz],
                )
 
-
       end
 
-      if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
-         exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in)
-      end
+    #  @info "- - - - - before"
+      for iz = 1:proc_num_zones
+         zone = proc_zone_id[iz]
+      #   write_u(iz, u[iz], nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], ipt[iz], jpt[iz]) 
+     end
 
-     #@goto L999
+     requests = Array{MPI.Request}(undef,8*proc_num_zones)
+
+     # if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
+         exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in, requests)
+     # end
+
+     #@info "- - - - - after"
+     for iz = 1:proc_num_zones
+         zone = proc_zone_id[iz]
+         write_u(iz, u[iz], nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], ipt[iz], jpt[iz]) 
+     end
+
+   #  @goto L999
 
 #---------------------------------------------------------------------
 #   perform one SSOR iteration to touch all data and program pages 
 #---------------------------------------------------------------------
       Threads.@threads for iz = 1:proc_num_zones
             zone = proc_zone_id[iz]
- 
-            ssor(comm_solve[iz],
+            
+            ssor( iz, ipt[iz], jpt[iz], proc_num_zones,
+                  comm_solve[iz],
                   u[iz],
                   rsd[iz],
                   frct[iz],
@@ -243,6 +262,8 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
                   jend[iz],
             )
       end
+
+
 
       #---------------------------------------------------------------------
       #   reset the boundary and initial values
@@ -294,11 +315,9 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
                )
 
        end
-       
-      # @goto L999
 
        for i = 1:t_last
-            timer_clear(i)
+           timer_clear(i)
        end
    
        MPI.Barrier(comm_setup)
@@ -311,7 +330,7 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
        timer_clear(64); t_64 = 0.0; t_64s = 0.0
        timer_clear(63); t_63 = 0.0; t_63s = 0.0
 
-       @info "$clusterid/$node: GO! NUM_THREADS = $(Threads.nthreads())"
+      # @info "$clusterid/$node: GO! NUM_THREADS = $(Threads.nthreads())"
 
       #---------------------------------------------------------------------
       #   perform the SSOR iterations
@@ -330,18 +349,26 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
             timer_start(63)
          
-            if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
-               exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in) 
-            end
+           # if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
+               exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in, requests) 
+           # end
 
             t_63 = timer_stop(63); t_63s += t_63
 
             timer_start(64)
 
+         #   if istep == 2
+         #      @info "- - - - - aaa $istep"
+         #      for iz = 1:proc_num_zones
+         #         zone = proc_zone_id[iz]
+         #         write_u(iz, u[iz], nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], ipt[iz], jpt[iz]) 
+         #      end
+         #   end
+
             Threads.@threads for iz = 1:proc_num_zones
                   zone = proc_zone_id[iz]
-
-                  ssor(comm_solve[iz],
+                  ssor( iz, ipt[iz], jpt[iz], proc_num_zones,
+                        comm_solve[iz],
                         u[iz],
                         rsd[iz],
                         frct[iz], 
@@ -379,10 +406,17 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
                         jst[iz],
                         jend[iz],
                         )
-            end
+                  end
+
+         
+            #if istep == 2
+            #   @goto L999
+            #end
 
             t_64 = timer_stop(64); t_64s += t_64
      end
+
+     @info "FINISH ITERATIONS"
 
       timer_stop(1)
       wtime = timer_read(1)      

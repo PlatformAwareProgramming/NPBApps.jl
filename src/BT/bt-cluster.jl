@@ -61,8 +61,8 @@ end
 proc = ["send_east_face", "send_west_face", "send_north_face", "send_south_face"]
 
 function perform_deposit_face(z, target_zone, l1, h1, l2, h2, f, n1, n2, buffer, send_proc)
-   # @info "$clusterid: perform_deposit_face($f) BEGIN --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
-   view(face_out[z][f], 1:5, l1:h1, l2:h2) .= buffer 
+      # @info "$clusterid: perform_deposit_face($f) BEGIN --- z=$z target_zone=$target_zone $l1/$h1/$l2/$h2"
+      view(face_out[z][f], 1:5, l1:h1, l2:h2) .= buffer 
       if update_and_test_face_out_count(f, z, l1, h1, l2, h2, n1, n2)
          clusterid_ = zone_proc_id[target_zone] 
          if clusterid_ != clusterid  

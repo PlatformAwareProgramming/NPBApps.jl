@@ -43,7 +43,45 @@ function setiv(u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt)
          end
       end
 
-
-
       return nothing
+end
+
+function write_u2(z, u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt)
+
+  for k = 2:nz - 1
+    for j = 1:ny
+#     jglob = jpt + j
+#     if jglob != 1 && jglob != ny0
+       for i = 1:nx
+#         iglob = ipt + i
+#         if iglob != 1 && iglob != nx0
+           for m = 1:5
+              @info "$z, $m, $i, $j, $k, $(u[m, i, j, k])"
+           end
+          #end
+       end
+#      end
+    end
+ end
+
+end
+
+function write_u(z, u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt)
+
+  for k = 1:nz
+    for j = 1:ny
+     jglob = jpt + j
+#     if jglob != 1 && jglob != ny0
+       for i = 1:nx
+         iglob = ipt + i
+#         if iglob != 1 && iglob != nx0
+           for m = 1:5
+              @info "$z, $m, $iglob, $jglob, $k, $(u[m, i, j, k])"
+           end
+          #end
+       end
+#      end
+    end
+ end
+
 end

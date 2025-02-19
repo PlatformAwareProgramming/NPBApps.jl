@@ -218,18 +218,7 @@
 #   communicate and receive/send two rows of data
 #---------------------------------------------------------------------
       if (timeron) timer_start(t_exch) end
-      exchange_3(u, iex,
-                  comm_solve, 
-                  buf,
-                  buf1,
-                  south,
-                  east,
-                  north,
-                  west,
-                  nx,
-                  ny,
-                  nz,
-                )
+      exchange_3(u, iex, comm_solve, buf, buf1, south, east, north, west, nx, ny, nz)
       if (timeron) timer_stop(t_exch) end
 
       L1 = 0

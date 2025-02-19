@@ -147,7 +147,7 @@
                        tx2 * ( (c1*u[5, i+1, j, k, c] -
                        c2*square[i+1, j, k, c])*up1 -(
                        c1*u[5, i-1, j, k, c] -
-                       c2*square[i-1, j, k, c])*um1 )
+                       c2*square[i-1, j, k, c])*um1 ) 
                end
             end
          end

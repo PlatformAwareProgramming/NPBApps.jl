@@ -89,7 +89,7 @@ function write_rhs(z)
             ii = cell_low[z][1, c] + cell_start[z][1, c]
             for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
                for m = 1:5
-                  @info "rhs[$m, $ii, $jj, $kk][$zone] = $(rhs[z][m, i, j, k, c])"
+                  @info "$m $ii $jj $kk $zone $(rhs[z][m, i, j, k, c])"
                end
                ii += 1
             end
@@ -113,7 +113,7 @@ function write_u(z)
             for i = cell_start[z][1, c]:cell_size[z][1, c]-cell_end[z][1, c]-1
                for m = 1:5
 #                  @info "$node: u[$m, $ii, $jj, $kk][$zone] = $(u[z][m, i, j, k, c])"
-                  @info "$m $ii $jj $kk  $(rhs[z][m, i, j, k, c])"
+                  @info "$m $ii $jj $kk $zone $(u[z][m, i, j, k, c])"
                end
                ii += 1
             end
@@ -125,3 +125,39 @@ function write_u(z)
 
    return nothing
 end
+
+function write_u_all(z, IMAX, JMAX, KMAX)
+   zone = proc_zone_id[z]
+   
+   for c = 1:ncells
+      kk = cell_low[z][3, c]
+      for k = 0:cell_size[z][3, c]-1
+         jj = cell_low[z][2, c]
+         for j = 0:cell_size[z][2, c]-1
+            ii = cell_low[z][1, c]
+            for i = 0:cell_size[z][1, c]-1
+               for m = 1:5
+#                  @info "$node: u[$m, $ii, $jj, $kk][$zone] = $(u[z][m, i, j, k, c])"
+                  @info "$m $ii $jj $kk $zone $(u[z][m, i, j, k, c]) ---"
+               end
+               ii += 1
+            end
+            jj += 1
+         end
+         kk += 1
+      end
+   end
+
+   #=for c = 1:ncells
+      for kk = -1:KMAX
+          for jj = -1:JMAX
+              for ii = -1:IMAX
+                  for m = 1:5
+                     @info "$m $ii $jj $kk $zone $(u[z][m, ii, jj, kk, c])"
+                  end
+              end
+           end
+        end
+   end=#
+
+end   

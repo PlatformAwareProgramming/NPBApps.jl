@@ -200,7 +200,6 @@ function initialize(ncells, cell_low, cell_high, cell_size, slice, IMAX, JMAX, K
        jj = jj + 1
     end
 
-    #write_u(z)
 
     return nothing
 end

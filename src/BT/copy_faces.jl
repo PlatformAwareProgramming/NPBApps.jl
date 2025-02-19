@@ -14,7 +14,7 @@
 #     exit immediately if there are no faces to be copied           
 #---------------------------------------------------------------------
 
-function copy_faces(z, sr, 
+function copy_faces(z, ss, sr, 
                      b_size,
                      cell_coord,
                      cell_size,
@@ -179,7 +179,6 @@ function copy_faces(z, ss,
                      successor,
                      requests,
                      ) where {no_nodes, ncells}
-
 
 #@info "$clusterid/$node: copy faces 0 - z=$z" 
                      

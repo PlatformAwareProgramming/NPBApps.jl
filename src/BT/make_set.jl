@@ -102,6 +102,15 @@ function make_set(z, grid_points)
                 end
              end
           end
+
+          for dir = 1:3
+            for c = 1:ncells
+               @info "cell_low[$z][$dir,$c] = $(cell_low[z][dir, c])"
+               @info "cell_high[$z][$dir,$c] = $(cell_high[z][dir, c])"
+               @info "cell_size[$z][$dir,$c] = $(cell_high[z][dir, c])"
+            end
+         end
+
    
           return nothing
    end

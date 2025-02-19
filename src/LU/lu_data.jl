@@ -16,10 +16,10 @@ const c4 = 1.00e+00
 const c5 = 1.40e+00
 
 
-const from_s = 1
-const from_n = 2
-const from_e = 3
-const from_w = 4
+const from_s = 1000
+const from_n = 2000
+const from_e = 3000
+const from_w = 4000
 
 
 #---------------------------------------------------------------------
@@ -102,15 +102,15 @@ end
       buf[z] = zeros(FloatType, 5, 2*max(nx,ny)*nz)
       buf1[z] = zeros(FloatType, 5, 2*max(nx,ny)*nz)
 
-      buf_exch_w_in[z] = Array{FloatType}(undef, 5*nx*nz)
-      buf_exch_e_in[z] = Array{FloatType}(undef, 5*nx*nz)
-      buf_exch_n_in[z] = Array{FloatType}(undef, 5*ny*nz)
-      buf_exch_s_in[z] = Array{FloatType}(undef, 5*ny*nz)
+      buf_exch_w_in[z] = Array{FloatType}(undef, 5*(ny-2)*(nz-2))
+      buf_exch_e_in[z] = Array{FloatType}(undef, 5*(ny-2)*(nz-2))
+      buf_exch_n_in[z] = Array{FloatType}(undef, 5*nx*(nz-2))
+      buf_exch_s_in[z] = Array{FloatType}(undef, 5*nx*(nz-2))
 
-      buf_exch_w_out[z] = Array{FloatType}(undef, 5*nx*nz)
-      buf_exch_e_out[z] = Array{FloatType}(undef, 5*nx*nz)
-      buf_exch_n_out[z] = Array{FloatType}(undef, 5*ny*nz)
-      buf_exch_s_out[z] = Array{FloatType}(undef, 5*ny*nz)
+      buf_exch_w_out[z] = Array{FloatType}(undef, 5*(ny-2)*(nz-2))
+      buf_exch_e_out[z] = Array{FloatType}(undef, 5*(ny-2)*(nz-2))
+      buf_exch_n_out[z] = Array{FloatType}(undef, 5*nx*(nz-2))
+      buf_exch_s_out[z] = Array{FloatType}(undef, 5*nx*(nz-2))
 
       return nothing
       
