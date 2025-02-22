@@ -102,13 +102,13 @@ end
       buf[z] = zeros(FloatType, 5, 2*max(nx,ny)*nz)
       buf1[z] = zeros(FloatType, 5, 2*max(nx,ny)*nz)
 
-      buf_exch_w_in[z] = Array{FloatType}(undef, 5*(ny-2)*(nz-2))
-      buf_exch_e_in[z] = Array{FloatType}(undef, 5*(ny-2)*(nz-2))
+      buf_exch_w_in[z] = Array{FloatType}(undef, 5*(ny#=*-2*=#)*(nz-2))
+      buf_exch_e_in[z] = Array{FloatType}(undef, 5*(ny#=*-2*=#)*(nz-2))
       buf_exch_n_in[z] = Array{FloatType}(undef, 5*nx*(nz-2))
       buf_exch_s_in[z] = Array{FloatType}(undef, 5*nx*(nz-2))
 
-      buf_exch_w_out[z] = Array{FloatType}(undef, 5*(ny-2)*(nz-2))
-      buf_exch_e_out[z] = Array{FloatType}(undef, 5*(ny-2)*(nz-2))
+      buf_exch_w_out[z] = Array{FloatType}(undef, 5*(ny#=*-2*=#)*(nz-2))
+      buf_exch_e_out[z] = Array{FloatType}(undef, 5*(ny#=*-2*=#)*(nz-2))
       buf_exch_n_out[z] = Array{FloatType}(undef, 5*nx*(nz-2))
       buf_exch_s_out[z] = Array{FloatType}(undef, 5*nx*(nz-2))
 

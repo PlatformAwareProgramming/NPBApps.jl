@@ -76,7 +76,7 @@ function write_u(z, u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt)
          iglob = ipt + i
 #         if iglob != 1 && iglob != nx0
            for m = 1:5
-              @info "$z, $m, $iglob, $jglob, $k, $(u[m, i, j, k])"
+              @info "$node, $z, $m, $iglob, $jglob, $k, $(u[m, i, j, k])"
            end
           #end
        end
