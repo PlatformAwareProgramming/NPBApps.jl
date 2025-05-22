@@ -122,25 +122,25 @@ end
 # WEST
 function deposit_face(z, l1, h1, l2, h2, buffer, _::Val{1})
    zone = proc_zone_id[z]
-   perform_deposit_face(z, iz_west[zone], l1, h1, l2, h2, 1, ny[zone]#=*-2*=#, nz[zone]-2, buffer, send_east_face)
+   perform_deposit_face(z, iz_west[zone], l1, h1, l2, h2, 1, nx[zone], nz[zone]-2, buffer, send_east_face)
 end
 
 # EAST
 function deposit_face(z, l1, h1, l2, h2, buffer, _::Val{2})
    zone = proc_zone_id[z]
-   perform_deposit_face(z, iz_east[zone], l1, h1, l2, h2, 2, ny[zone]#=*-2*=#, nz[zone]-2, buffer, send_west_face)
+   perform_deposit_face(z, iz_east[zone], l1, h1, l2, h2, 2, nx[zone], nz[zone]-2, buffer, send_west_face)
 end
 
 # SOUTH
 function deposit_face(z, l1, h1, l2, h2, buffer, _::Val{3})
    zone = proc_zone_id[z]
-   perform_deposit_face(z, iz_south[zone], l1, h1, l2, h2, 3, nx[zone]#=-2=#, nz[zone]-2, buffer, send_north_face)
+   perform_deposit_face(z, iz_south[zone], l1, h1, l2, h2, 3, ny[zone], nz[zone]-2, buffer, send_north_face)
 end
 
 # NORTH
 function deposit_face(z, l1, h1, l2, h2, buffer, _::Val{4})
    zone = proc_zone_id[z]
-   perform_deposit_face(z, iz_north[zone], l1, h1, l2, h2, 4, nx[zone]#=-2=#, nz[zone]-2, buffer, send_south_face)
+   perform_deposit_face(z, iz_north[zone], l1, h1, l2, h2, 4, ny[zone], nz[zone]-2, buffer, send_south_face)
 end
 
 function proc_zone_id_inv(zone, proc_zone_id)
@@ -152,7 +152,7 @@ function proc_zone_id_inv(zone, proc_zone_id)
 function send_west_face(zone, buffer)
    z = proc_zone_id_inv(zone, proc_zone_id)
    #@info "$clusterid: send_west_face - BEGIN 1 --- zone=$zone z=$z"
-   face_receive_wait(z, 1, ny[zone]#=*-2*=#, nz[zone]-2)
+   face_receive_wait(z, 1, nx[zone], nz[zone]-2)
    #@info "$clusterid: send_west_face - BEGIN 2 --- zone=$zone z=$z"
    face_receive_and_notify(buffer, z, 1)
    #@info "$clusterid: send_west_face - END --- zone=$zone z=$z"
@@ -161,7 +161,7 @@ end
 function send_east_face(zone, buffer)
    z = proc_zone_id_inv(zone, proc_zone_id)
    #@info "$clusterid: send_east_face - BEGIN 1 --- zone=$zone z=$z"
-   face_receive_wait(z, 2, ny[zone]#=*-2*=#, nz[zone]-2)
+   face_receive_wait(z, 2, nx[zone], nz[zone]-2)
    #@info "$clusterid: send_east_face - BEGIN 2 --- zone=$zone z=$z"
    face_receive_and_notify(buffer, z, 2)
    #@info "$clusterid: send_east_face - END --- zone=$zone z=$z "
@@ -170,7 +170,7 @@ end
 function send_south_face(zone, buffer)
    z = proc_zone_id_inv(zone, proc_zone_id)
    #@info "$clusterid: send_south_face - BEGIN 1 --- zone=$zone z=$z"
-   face_receive_wait(z, 3, nx[zone], nz[zone]-2)
+   face_receive_wait(z, 3, ny[zone], nz[zone]-2)
    #@info "$clusterid: send_south_face - BEGIN 2 --- zone=$zone z=$z"
    face_receive_and_notify(buffer, z, 3)
    #@info "$clusterid: send_south_face - END --- zone=$zone z=$z"
@@ -179,7 +179,7 @@ end
 function send_north_face(zone, buffer)
    z = proc_zone_id_inv(zone, proc_zone_id)
    #@info "$clusterid: send_north_face - BEGIN 1 --- zone=$zone z=$z"
-   face_receive_wait(z, 4, nx[zone], nz[zone]-2)
+   face_receive_wait(z, 4, ny[zone], nz[zone]-2)
    #@info "$clusterid: send_north_face - BEGIN 2 --- zone=$zone z=$z"
    face_receive_and_notify(buffer, z, 4)
    #@info "$clusterid: send_north_face - END --- zone=$zone z=$z"
@@ -188,7 +188,7 @@ end
 function face_receive_wait(z, f, n1, n2)
    try
       lock(face_in_receive[z][f])
-      while face_in_count[z][f] < (n1#=-2=#)*(n2#=-2=#)*5    
+      while face_in_count[z][f] < (n1)*(n2)*5    
          #@info "$clusterid: receive wait BEGIN f=$f z=$z --- $(face_in_count[z][f])<$((n1-2)*(n2-2)*5)"   
          wait(face_in_receive[z][f])
          #@info "$clusterid: receive wait END f=$f z=$z --- $(face_in_count[z][f])<$((n1-2)*(n2-2)*5)"   
@@ -222,7 +222,7 @@ function update_face_in_count(z, l1, h1, l2, h2, f, n1, n2)
 
    lock(face_in_receive[z][f])
    try
-      if face_in_count[z][f] == (n1#=-2=#)*(n2#=-2=#)*5
+      if face_in_count[z][f] == (n1)*(n2)*5
          #@info "$clusterid: face collect finished - notify ! z=$z f=$f count=$(face_in_count[z][f])"
          notify(face_in_receive[z][f]#=; all=true=#)
       end
@@ -257,22 +257,22 @@ end
 
 function collect_face(z, l1, h1, l2, h2, _::Val{1})
    zone = proc_zone_id[z]
-   perform_collect_face(z, l1, h1, l2, h2, 1, ny[zone]#=*-2*=#, nz[zone]-2)
+   perform_collect_face(z, l1, h1, l2, h2, 1, nx[zone], nz[zone]-2)
 end
 
 function collect_face(z, l1, h1, l2, h2, _::Val{2})
    zone = proc_zone_id[z]
-   perform_collect_face(z, l1, h1, l2, h2, 2, ny[zone]#=*-2*=#, nz[zone]-2)
+   perform_collect_face(z, l1, h1, l2, h2, 2, nx[zone], nz[zone]-2)
 end
 
 function collect_face(z, l1, h1, l2, h2, _::Val{3})
    zone = proc_zone_id[z]
-   perform_collect_face(z, l1, h1, l2, h2, 3, nx[zone]#=-2=#, nz[zone]-2)
+   perform_collect_face(z, l1, h1, l2, h2, 3, ny[zone], nz[zone]-2)
 end
 
 function collect_face(z, l1, h1, l2, h2, _::Val{4})
    zone = proc_zone_id[z]
-   perform_collect_face(z, l1, h1, l2, h2, 4, nx[zone]#=-2=#, nz[zone]-2)
+   perform_collect_face(z, l1, h1, l2, h2, 4, ny[zone], nz[zone]-2)
 end
 
 function reportMaxTimeNode(tmax)
@@ -307,20 +307,20 @@ function go_cluster(clusters, niter, inorm, dt, ratio, x_zones, y_zones, gx_size
    for iz = 1:proc_num_zones
       zone = proc_zone_id[iz]
       face_out[iz] = Array{Array{FloatType}}(undef, 4)
-      face_out[iz][1] = Array{FloatType}(undef, 5, ny[zone]#=*-2*=#, nz[zone]-2 #=gz_size=#) 
-      face_out[iz][2] = Array{FloatType}(undef, 5, ny[zone]#=*-2*=#, nz[zone]-2 #=gz_size=#) 
-      face_out[iz][3] = Array{FloatType}(undef, 5, nx[zone], nz[zone]-2 #=gz_size=#) 
-      face_out[iz][4] = Array{FloatType}(undef, 5, nx[zone], nz[zone]-2 #=gz_size=#) 
+      face_out[iz][1] = Array{FloatType}(undef, 5, nx[zone], nz[zone]-2 #=gz_size=#) 
+      face_out[iz][2] = Array{FloatType}(undef, 5, nx[zone], nz[zone]-2 #=gz_size=#) 
+      face_out[iz][3] = Array{FloatType}(undef, 5, ny[zone], nz[zone]-2 #=gz_size=#) 
+      face_out[iz][4] = Array{FloatType}(undef, 5, ny[zone], nz[zone]-2 #=gz_size=#) 
    end
 
    global face_in = Array{Array{Array{FloatType}}}(undef, proc_num_zones)
    for iz = 1:proc_num_zones
       zone = proc_zone_id[iz]
       face_in[iz] = Array{Array{FloatType}}(undef, 4)
-      face_in[iz][1] = Array{FloatType}(undef, 5, ny[zone]#=*-2*=#, nz[zone]-2 #=gz_size=#)
-      face_in[iz][2] = Array{FloatType}(undef, 5, ny[zone]#=*-2*=#, nz[zone]-2 #=gz_size=#)
-      face_in[iz][3] = Array{FloatType}(undef, 5, nx[zone], nz[zone]-2 #=gz_size=#)
-      face_in[iz][4] = Array{FloatType}(undef, 5, nx[zone], nz[zone]-2 #=gz_size=#)
+      face_in[iz][1] = Array{FloatType}(undef, 5, nx[zone], nz[zone]-2 #=gz_size=#)
+      face_in[iz][2] = Array{FloatType}(undef, 5, nx[zone], nz[zone]-2 #=gz_size=#)
+      face_in[iz][3] = Array{FloatType}(undef, 5, ny[zone], nz[zone]-2 #=gz_size=#)
+      face_in[iz][4] = Array{FloatType}(undef, 5, ny[zone], nz[zone]-2 #=gz_size=#)
    end
 
    global face_in_count = Array{Array{Int64}}(undef, proc_num_zones)
@@ -337,10 +337,10 @@ function go_cluster(clusters, niter, inorm, dt, ratio, x_zones, y_zones, gx_size
          face_in_collect[iz][f] = Threads.Condition()
          face_in_receive[iz][f] = Threads.Condition()
       end
-      face_in_count[iz][1] = (ny[zone]#=*-2*=#)*(nz[zone]-2)*5
-      face_in_count[iz][2] = (ny[zone]#=*-2*=#)*(nz[zone]-2)*5
-      face_in_count[iz][3] = (nx[zone]#=-2=#)*(nz[zone]-2)*5 
-      face_in_count[iz][4] = (nx[zone]#=-2=#)*(nz[zone]-2)*5
+      face_in_count[iz][1] = (nx[zone])*(nz[zone]-2)*5
+      face_in_count[iz][2] = (nx[zone])*(nz[zone]-2)*5
+      face_in_count[iz][3] = (ny[zone])*(nz[zone]-2)*5 
+      face_in_count[iz][4] = (ny[zone])*(nz[zone]-2)*5
    end
 
    global lkout = ReentrantLock()
