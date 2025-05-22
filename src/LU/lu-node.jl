@@ -204,11 +204,11 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
      # end
 
 
-     @info "- - - - - before"
-     for iz = 1:proc_num_zones
-         zone = proc_zone_id[iz]
-        write_u(iz, u[iz], nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], ipt[iz], jpt[iz]) 
-     end
+     #@info "- - - - - before"
+     #for iz = 1:proc_num_zones
+     #    zone = proc_zone_id[iz]
+     #   write_u(iz, u[iz], nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], ipt[iz], jpt[iz]) 
+     #end
 
 #---------------------------------------------------------------------
 #   perform one SSOR iteration to touch all data and program pages 
@@ -257,11 +257,11 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
             )
       end
 
-      @info "- - - - - after"
-      for iz = 1:proc_num_zones
-          zone = proc_zone_id[iz]
-          write_u(iz, u[iz], nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], ipt[iz], jpt[iz]) 
-      end
+      #@info "- - - - - after"
+      #for iz = 1:proc_num_zones
+      #    zone = proc_zone_id[iz]
+      #    write_u(iz, u[iz], nx0[zone], ny0[zone], nz0[zone], nx[iz], ny[iz], nz[iz], ipt[iz], jpt[iz]) 
+      #end
 
 
       #---------------------------------------------------------------------
