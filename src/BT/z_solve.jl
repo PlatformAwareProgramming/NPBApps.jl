@@ -525,6 +525,7 @@ end
 #     determine c (labeled f) and s jacobians for cell c
 #---------------------------------------------------------------------
             for k = cell_start[3, c]-1:cell_size[3, c]-cell_end[3, c]
+               #@warn "k=$k c=$c cell_size[3, $c]=$(cell_size[3, c]) cell_end[3, $c]=$(cell_end[3, c])"
                utmp[1,k] = 1.0e0 / u[1, i, j, k, c]
                utmp[2,k] = u[2, i, j, k, c]
                utmp[3,k] = u[3, i, j, k, c]

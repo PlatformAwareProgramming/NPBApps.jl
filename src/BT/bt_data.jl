@@ -107,7 +107,7 @@ end
 
       total_size = Ref{Int64}(0)
 
-#      MAX_CELL_DIM[z] = div(problem_size, maxcells)+1    #64
+      MAX_CELL_DIM[z] = div(problem_size, maxcells)+1    #64
       @warn "------>>>>> zone=$z $problem_size $maxcells $(MAX_CELL_DIM[z])"
 
 #      IMAX[z] = MAX_CELL_DIM[z]
@@ -117,6 +117,8 @@ end
       IMAX[z] = div(grid_points[1], maxcells) + 1 #MAX_CELL_DIM
       JMAX[z] = div(grid_points[2], maxcells) + 1 #MAX_CELL_DIM
       KMAX[z] = div(grid_points[3], maxcells) + 1 #MAX_CELL_DIM
+
+      @info "IMAX[$z]=$(IMAX[z]) / JMAX[$z]=$(JMAX[z]) / KMAX[$z] = $(KMAX[z])"
 
       MAX_CELL_DIM[z] = max(IMAX[z], JMAX[z], KMAX[z])
 
