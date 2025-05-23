@@ -94,23 +94,17 @@ function make_set(z, grid_points)
                    cell_low[z][dir, c]  = excess*(SIZE+1)+(cell_coord[z][dir, c]-excess-1)*SIZE
                    cell_high[z][dir, c] = cell_low[z][dir, c]+SIZE-1
                 end
+                  @info "cell_low[$z][$dir,$c] = $(cell_low[z][dir, c])"
+                  @info "cell_high[$z][$dir,$c] = $(cell_high[z][dir, c])"
+                  @info "cell_size[$z][$dir,$c] = $(cell_high[z][dir, c])"
                 if cell_size[z][dir, c] <= 2
-                   @printf(stdout, " Error: Cell size too small. Min size is 3\n", )
+                   @error " Error: Cell size $(cell_size[z][dir, c]) too small. Min size is 3\n"
                    ierrcode = 1
                    MPI.Abort(MPI.COMM_WORLD, ierrcode)
                    exit(1)
                 end
              end
           end
-
-          for dir = 1:3
-            for c = 1:ncells
-               @info "cell_low[$z][$dir,$c] = $(cell_low[z][dir, c])"
-               @info "cell_high[$z][$dir,$c] = $(cell_high[z][dir, c])"
-               @info "cell_size[$z][$dir,$c] = $(cell_high[z][dir, c])"
-            end
-         end
-
    
           return nothing
    end

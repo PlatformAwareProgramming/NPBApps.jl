@@ -123,7 +123,6 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
        for iz = 1:proc_num_zones
          requests[iz] = Array{MPI.Request}(undef,12)
          s[iz] = Array{FloatType}(undef,5)
-         @info "utmp[$iz] = OffsetArray(zeros(FloatType, 6, $(JMAX[iz]+4), 1:6, -2:$(JMAX[iz]+1) --- JMAX[$iz] = $(JMAX[iz])"
          utmpy[iz] = OffsetArray(zeros(FloatType, 6, JMAX[iz]+4), 1:6, -2:JMAX[iz]+1)
          utmpz[iz] = OffsetArray(zeros(FloatType, 6, KMAX[iz]+4), 1:6, -2:KMAX[iz]+1)
          send_id[iz] = Ref{MPI.Request}(MPI.REQUEST_NULL)
