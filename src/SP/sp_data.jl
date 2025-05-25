@@ -85,12 +85,14 @@ function alloc_field_space(z, grid_points, problem_size)
 
       MAX_CELL_DIM[z] = div(problem_size, maxcells) + 1
 
-      IMAX[z] = MAX_CELL_DIM[z] # div(grid_points[1], maxcells) + 1 #MAX_CELL_DIM
-      JMAX[z] = MAX_CELL_DIM[z] # div(grid_points[2], maxcells) + 1 #MAX_CELL_DIM
-      KMAX[z] = MAX_CELL_DIM[z] # div(grid_points[3], maxcells) + 1 #MAX_CELL_DIM
+      IMAX[z] = #=MAX_CELL_DIM[z] =# div(grid_points[1], maxcells) + 1 #MAX_CELL_DIM
+      JMAX[z] = #=MAX_CELL_DIM[z] =# div(grid_points[2], maxcells) + 1 #MAX_CELL_DIM
+      KMAX[z] = #=MAX_CELL_DIM[z] =# div(grid_points[3], maxcells) + 1 #MAX_CELL_DIM
 
       IMAXP[z] = div(IMAX[z],2)*2+1
       JMAXP[z] = div(JMAX[z],2)*2+1
+
+      MAX_CELL_DIM[z] = max(IMAX[z], JMAX[z], KMAX[z])
 
 #---------------------------------------------------------------------
 # +1 at end to avoid zero length arrays for 1 node
