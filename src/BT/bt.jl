@@ -54,12 +54,14 @@ function go(class::CLASS; timers = false, np=1, exeflags=``, mpiflags=``, dir=""
    grid_points[2] = problem_size
    grid_points[3] = problem_size
 
-   addprocs(MPIWorkerManager(np); exeflags=exeflags, mpiflags=mpiflags, dir=dir, threadlevel=threadlevel)
+   workers = addprocs(MPIWorkerManager(np); exeflags=exeflags, mpiflags=mpiflags, dir=dir, threadlevel=threadlevel)
 
-   @everywhere workers() @eval using NPBApps
-   @everywhere workers() BT.go($grid_points, $niter, $dt; timers = $timers)
-
-   rmprocs(workers())
+   try
+      @everywhere workers @eval using NPBApps
+      @everywhere workers BT.go($grid_points, $niter, $dt; timers = $timers)
+   finally
+      rmprocs(workers)
+   end
 
 end
 

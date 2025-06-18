@@ -62,12 +62,14 @@ function go(class::CLASS; timers=false, np=1, exeflags=``, mpiflags=``, dir="", 
       isiz02 = bt_class[class].isiz02
       isiz03 = bt_class[class].isiz03
    
-      addprocs(MPIWorkerManager(np); threadlevel=threadlevel, exeflags=exeflags, mpiflags=mpiflags, dir=dir)
+      workers = addprocs(MPIWorkerManager(np); threadlevel=threadlevel, exeflags=exeflags, mpiflags=mpiflags, dir=dir)
 
-      @everywhere workers() @eval using NPBApps
-      @everywhere workers() LU.go($isiz01, $isiz02, $isiz03, $itmax, $inorm, $dt; timers=$timers)
-   
-      rmprocs(workers())
+      try 
+            @everywhere workers @eval using NPBApps
+            @everywhere workers LU.go($isiz01, $isiz02, $isiz03, $itmax, $inorm, $dt; timers=$timers)
+      finally   
+            rmprocs(workers)
+      end
 
 end
    
