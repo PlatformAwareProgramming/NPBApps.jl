@@ -42,7 +42,7 @@
 #---------------------------------------------------------------------
 
 
-function go(class::CLASS; timers = false, np=1, exeflags=``, mpiflags=``, dir="", threadlevel=:multiple)
+function go(class::CLASS; timers = false, np=1, exeflags=``, mpiflags=``, dir="", threadlevel=:multiple, master_tcp_interface="")
 
    problem_size = bt_class[class].problem_size
    
@@ -54,7 +54,7 @@ function go(class::CLASS; timers = false, np=1, exeflags=``, mpiflags=``, dir=""
    grid_points[2] = problem_size
    grid_points[3] = problem_size
 
-   workers = addprocs(MPIWorkerManager(np); exeflags=exeflags, mpiflags=mpiflags, dir=dir, threadlevel=threadlevel)
+   workers = addprocs(MPIWorkerManager(np); threadlevel=threadlevel, exeflags=exeflags, mpiflags=mpiflags, dir=dir, master_tcp_interface=master_tcp_interface)
 
    try
       @everywhere workers @eval using NPBApps
