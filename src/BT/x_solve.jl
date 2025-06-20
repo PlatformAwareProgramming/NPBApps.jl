@@ -231,6 +231,7 @@ function x_solve(
      if timeron timer_stop(t_xsolve) end
 
       return nothing
+   end
 end
 
 
@@ -240,13 +241,14 @@ end
 #---------------------------------------------------------------------
 
  function x_unpack_solve_info(c,
-                                   JMAX,
-                                   KMAX,
-                                   rhs,
-                                   lhsc,
-                                   out_buffer,
-                                   )
-
+                              JMAX,
+                              KMAX,
+                              rhs,
+                              lhsc,
+                              out_buffer,
+                             )
+@inbounds begin
+   
       istart = 0
       ptr = 0
       for k = 0:KMAX-1
