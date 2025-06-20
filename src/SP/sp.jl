@@ -51,7 +51,9 @@ const t_recs = ["total", "rhs", "xsolve", "ysolve", "zsolve",
 
 const npbversion="3.4.2"
 
-function go(class::CLASS; timers = false, np=1, exeflags=``, mpiflags=``, dir="", threadlevel=:multiple)
+function go(class::CLASS; timers = false, np=1, exeflags=``, mpiflags=``, dir="", threadlevel=:multiple, master_tcp_interface="")
+
+#function go(class::CLASS; args...)
 
    problem_size = sp_class[class].problem_size
    
@@ -63,7 +65,8 @@ function go(class::CLASS; timers = false, np=1, exeflags=``, mpiflags=``, dir=""
    grid_points[2] = problem_size
    grid_points[3] = problem_size
 
-   workers = addprocs(MPIWorkerManager(np); threadlevel=threadlevel, exeflags=exeflags, mpiflags=mpiflags, dir=dir)
+   workers = addprocs(MPIWorkerManager(np); threadlevel=threadlevel, exeflags=exeflags, mpiflags=mpiflags, dir=dir, master_tcp_interface=master_tcp_interface)
+#   workers = addprocs(MPIWorkerManager(np); args)
 
    try 
      @everywhere workers @eval using NPBApps
