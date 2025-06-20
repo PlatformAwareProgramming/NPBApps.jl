@@ -14,7 +14,7 @@ function lhsz(c,
                speed,
                dz4, dz5, dz1, con43, c3c4, c1c5, dttz2, dttz1, dzmax,
                comz5, comz4, comz1, comz6, c2dttz1)
-
+@inbounds begin
 #---------------------------------------------------------------------
 #      treat only cell c                                         
 #---------------------------------------------------------------------
@@ -113,6 +113,7 @@ function lhsz(c,
        end
 
        return nothing
+   end
 end
 
 

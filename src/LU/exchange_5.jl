@@ -20,7 +20,7 @@
 
         MPI.Wait(msgid1[])
 
-        for k = 1:nz
+        @inbounds for k = 1:nz
           g[nx+1,k] = dum[k]
         end
 
@@ -30,7 +30,7 @@
 #   send north
 #---------------------------------------------------------------------
       if ibeg == 1
-        for k = 1:nz
+        @inbounds for k = 1:nz
           dum[k] = g[1,k]
         end
 

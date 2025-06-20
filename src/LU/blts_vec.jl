@@ -26,7 +26,7 @@
 
 
      if timeron timer_start(t_blts) end
-      for j = jst:jend
+     @inbounds for j = jst:jend
          for i = ist:iend
             for m = 1:5
 
@@ -41,7 +41,7 @@
       end
 
 
-      for l = ist+jst:iend+jend
+      @inbounds for l = ist+jst:iend+jend
          istp  = max(l - jend, ist)
          iendp = min(l - jst, iend)
 

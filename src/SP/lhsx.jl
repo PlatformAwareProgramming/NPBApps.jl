@@ -17,6 +17,7 @@ function lhsx(c,
               comz5, comz4, comz1, comz6
               )
 
+@inbounds begin              
 #---------------------------------------------------------------------
 #      treat only cell c             
 #---------------------------------------------------------------------
@@ -109,8 +110,8 @@ function lhsx(c,
              end
           end
        end
-
-       return nothing
+      end
+      return nothing
 end
 
 

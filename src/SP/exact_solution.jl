@@ -7,7 +7,7 @@ function exact_solution(xi, eta, zeta)
 
        dtemp = Array{Float64}(undef, 5)
 
-       for m = 1:5
+       @inbounds for m = 1:5
           dtemp[m] =  ce[m, 1] +
           xi*(ce[m, 2] + xi*(ce[m, 5] + xi*(ce[m, 8] + xi*ce[m, 11]))) +
           eta*(ce[m, 3] + eta*(ce[m, 6] + eta*(ce[m, 9] + eta*ce[m, 12])))+

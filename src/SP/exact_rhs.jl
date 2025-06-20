@@ -12,11 +12,11 @@ function exact_rhs(ncells, forcing, ue, buf, cuf, q, cell_low, cell_start, cell_
                    dy1ty1, dy2ty1, dy3ty1, dy4ty1, dy5ty1,
                    dz1tz1, dz2tz1, dz3tz1, dz4tz1, dz5tz1
                   )
-
+ @inbounds begin
 #---------------------------------------------------------------------
 # loop over all cells owned by this node                   
 #---------------------------------------------------------------------
-       for c = 1:ncells
+    for c = 1:ncells
 
 #---------------------------------------------------------------------
 #         initialize                                  
@@ -348,6 +348,7 @@ function exact_rhs(ncells, forcing, ue, buf, cuf, q, cell_low, cell_start, cell_
        end
 
        return nothing
+   end
 end
 
 

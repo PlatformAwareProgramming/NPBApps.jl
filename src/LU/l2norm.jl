@@ -11,7 +11,7 @@ function l2norm( ldx, ldy, ldz, nx0, ny0, nz0, ist, iend, jst, jend, v, SUM,
 
       dummy .= 0
 
-      for k = 2:nz0-1
+      @inbounds for k = 2:nz0-1
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
@@ -31,7 +31,7 @@ function l2norm( ldx, ldy, ldz, nx0, ny0, nz0, ist, iend, jst, jend, v, SUM,
 #      MPI_ALLREDUCE( dummy, SUM, 5, dp_type, MPI_SUM, comm_solve, IERROR )
      if timeron timer_stop(t_rcomm) end
 
-      for m = 1:5
+     @inbounds for m = 1:5
          SUM[m] = sqrt(SUM[m] / (float(nx0-2)*(ny0-2)*(nz0-2)))
       end 
 

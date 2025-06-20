@@ -21,7 +21,7 @@
 
         MPI.Wait(msgid3[])
 
-        for k = 1:nz
+        @inbounds for k = 1:nz
           g[ny+1,k] = dum[k]
         end
 
@@ -31,7 +31,7 @@
 #   send west
 #---------------------------------------------------------------------
       if jbeg == 1
-        for k = 1:nz
+        @inbounds for k = 1:nz
           dum[k] = g[1,k]
         end
 

@@ -21,7 +21,7 @@
 
           if north != -1
               MPI.Recv!(view(buf1, 1:5, jst:jend), north, from_n, comm_solve)
-              for j = jst:jend
+              @inbounds for j = jst:jend
                   g[1,0,j,k] = buf1[1, j]
                   g[2,0,j,k] = buf1[2, j]
                   g[3,0,j,k] = buf1[3, j]
@@ -32,7 +32,7 @@
 
           if west != -1
               MPI.Recv!(view(buf1, 1:5, ist:iend), west, from_w, comm_solve)
-              for i = ist:iend
+              @inbounds for i = ist:iend
                   g[1,i,0,k] = buf1[1, i]
                   g[2,i,0,k] = buf1[2, i]
                   g[3,i,0,k] = buf1[3, i]
@@ -45,7 +45,7 @@
 
           if south != -1
               MPI.Recv!(view(buf1, 1:5, jst:jend), south, from_s, comm_solve)
-              for j = jst:jend
+              @inbounds for j = jst:jend
                   g[1,nx+1,j,k] = buf1[1, j]
                   g[2,nx+1,j,k] = buf1[2, j]
                   g[3,nx+1,j,k] = buf1[3, j]
@@ -56,7 +56,7 @@
 
           if east != -1
               MPI.Recv!(view(buf1, 1:5, ist:iend), east, from_e,  comm_solve)
-              for i = ist:iend
+              @inbounds for i = ist:iend
                   g[1,i,ny+1,k] = buf1[1, i]
                   g[2,i,ny+1,k] = buf1[2, i]
                   g[3,i,ny+1,k] = buf1[3, i]
@@ -68,7 +68,7 @@
       elseif iex == 2
 
           if south != -1
-              for j = jst:jend
+              @inbounds for j = jst:jend
                   buf[1, j] = g[1,nx,j,k]
                   buf[2, j] = g[2,nx,j,k]
                   buf[3, j] = g[3,nx,j,k]
@@ -79,7 +79,7 @@
           end
 
           if east != -1
-              for i = ist:iend
+             @inbounds for i = ist:iend
                   buf[1, i] = g[1,i,ny,k]
                   buf[2, i] = g[2,i,ny,k]
                   buf[3, i] = g[3,i,ny,k]
@@ -92,7 +92,7 @@
       else
 
           if north != -1
-              for j = jst:jend
+              @inbounds for j = jst:jend
                   buf[1, j] = g[1,1,j,k]
                   buf[2, j] = g[2,1,j,k]
                   buf[3, j] = g[3,1,j,k]
@@ -103,7 +103,7 @@
           end
 
           if west != -1
-              for i = ist:iend
+              @inbounds for i = ist:iend
                   buf[1, i] = g[1,i,1,k]
                   buf[2, i] = g[2,i,1,k]
                   buf[3, i] = g[3,i,1,k]

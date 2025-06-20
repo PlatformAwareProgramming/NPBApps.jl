@@ -5,6 +5,7 @@
 #---------------------------------------------------------------------
 
 function compute_buffer_size(no_nodes, ncells, cell_coord, cell_size, dim)
+ @inbounds begin
 
    if no_nodes > 1 && ncells > 1
 
@@ -67,5 +68,6 @@ function compute_buffer_size(no_nodes, ncells, cell_coord, cell_size, dim)
    end
 
    return ss, sr, b_size
+end
 end
 

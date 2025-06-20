@@ -23,7 +23,7 @@
 
         MPI.Wait(msgid3[])
 
-        for i = 1:nx
+        @inbounds for i = 1:nx
           g[i,ny+1] = dum[i]
           h[i,ny+1] = dum[i+nx]
         end
@@ -34,7 +34,7 @@
 #   send west
 #---------------------------------------------------------------------
       if jbeg == 1
-        for i = 1:nx
+        @inbounds for i = 1:nx
           dum[i] = g[i,1]
           dum[i+nx] = h[i,1]
         end
@@ -56,7 +56,7 @@
 
         MPI.Wait(msgid1[])
 
-        for j = 0:ny+1
+        @inbounds for j = 0:ny+1
           g[nx+1,j] = dum[j+1]
           h[nx+1,j] = dum[j+ny2+1]
         end
@@ -67,7 +67,7 @@
 #   send north
 #---------------------------------------------------------------------
       if ibeg == 1
-        for j = 0:ny+1
+        @inbounds for j = 0:ny+1
           dum[j+1] = g[1,j]
           dum[j+ny2+1] = h[1,j]
         end

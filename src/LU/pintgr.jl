@@ -37,7 +37,7 @@
         end
       end
 
-      for j = jbeg:jfin
+      @inbounds for j = jbeg:jfin
          jglob = jpt + j
          for i = ibeg:ifin
             iglob = ipt + i
@@ -66,7 +66,7 @@
 
       frc1 = 0.0e+00
 
-      for j = jbeg:jfin1
+      @inbounds for j = jbeg:jfin1
          for i = ibeg:ifin1
             frc1 += (  phi1[i, j]+
                             phi1[i+1, j]+
@@ -92,7 +92,7 @@
 #---------------------------------------------------------------------
 #   initialize
 #---------------------------------------------------------------------
-      for k = 0:isiz3+1
+      @inbounds for k = 0:isiz3+1
         for i = 0:isiz2+1
           phi1[i, k] = 0.
           phi2[i, k] = 0.
@@ -102,7 +102,7 @@
       ind1 = 0
       if jglob == ji1
         ind1 = 1
-        for k = ki1:ki2
+        @inbounds for k = ki1:ki2
            for i = ibeg:ifin
               iglob = ipt + i
               phi1[i, k] = c2*(  u[5, i, jbeg, k]-
@@ -118,7 +118,7 @@
       ind2 = 0
       if jglob == ji2
         ind2 = 1
-        for k = ki1:ki2
+        @inbounds for k = ki1:ki2
            for i = ibeg:ifin
               iglob = ipt + i
               phi2[i, k] = c2*(  u[5, i, jfin, k]-
@@ -141,7 +141,7 @@
       end
 
       frc2 = 0.0e+00
-      for k = ki1:ki2-1
+      @inbounds for k = ki1:ki2-1
          for i = ibeg:ifin1
             frc2 += (  phi1[i, k]+
                             phi1[i+1, k]+
@@ -167,7 +167,7 @@
 #---------------------------------------------------------------------
 #   initialize
 #---------------------------------------------------------------------
-      for k = 0:isiz3+1
+      @inbounds for k = 0:isiz3+1
         for i = 0:isiz2+1
           phi1[i, k] = 0.
           phi2[i, k] = 0.
@@ -177,7 +177,7 @@
       ind1 = 0
       if iglob == ii1
         ind1 = 1
-        for k = ki1:ki2
+        @inbounds for k = ki1:ki2
            for j = jbeg:jfin
               jglob = jpt + j
               phi1[j, k] = c2*(  u[5, ibeg, j, k]-
@@ -193,7 +193,7 @@
       ind2 = 0
       if iglob == ii2
         ind2 = 1
-        for k = ki1:ki2
+        @inbounds for k = ki1:ki2
            for j = jbeg:jfin
               jglob = jpt + j
               phi2[j, k] = c2*(  u[5, ifin, j, k]-
@@ -217,7 +217,7 @@
 
       frc3 = 0.0e+00
 
-      for k = ki1:ki2-1
+      @inbounds for k = ki1:ki2-1
          for j = jbeg:jfin1
             frc3 += (  phi1[j, k]+
                             phi1[j+1, k]+

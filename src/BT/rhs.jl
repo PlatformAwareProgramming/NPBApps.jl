@@ -48,7 +48,7 @@
                      zzcon4,
                      zzcon5,
                   )
-
+ @inbounds begin
       if timeron timer_start(t_rhs) end
 #---------------------------------------------------------------------
 #     loop over all cells owned by this node                           
@@ -457,6 +457,7 @@
       if timeron timer_stop(t_rhs) end
 
       return nothing
+   end
 end
 
 

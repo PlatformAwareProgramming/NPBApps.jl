@@ -16,6 +16,7 @@ function lhsy(c,
             dy3, dy5, dy1, dymax, dtty1, dtty2, 
             comz5, comz4, comz1, comz6)
 
+@inbounds begin
 #---------------------------------------------------------------------
 #      treat only cell c
 #---------------------------------------------------------------------
@@ -115,6 +116,7 @@ function lhsy(c,
        end
 
        return nothing
+   end
 end
 
 

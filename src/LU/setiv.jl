@@ -14,7 +14,7 @@ ue_ijnz = Array{Float64}(undef, 5)
 
 function setiv(u, nx0, ny0, nz0, nx, ny, nz, ipt, jpt)
 
-     for k = 2:nz - 1
+     @inbounds for k = 2:nz - 1
          zeta = ( float(k-1) ) / (nz-1)
          for j = 1:ny
           jglob = jpt + j

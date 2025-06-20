@@ -16,7 +16,7 @@ function txinvr(_::Val{ncells},
                 rhs,
                 c2,
                 bt) where ncells
-
+@inbounds begin
 #---------------------------------------------------------------------
 #      loop over all cells owned by this node          
 #---------------------------------------------------------------------
@@ -53,6 +53,7 @@ function txinvr(_::Val{ncells},
        end
 
        return nothing
+   end
 end
 
 

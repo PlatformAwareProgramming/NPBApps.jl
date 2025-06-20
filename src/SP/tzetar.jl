@@ -16,7 +16,7 @@ function tzetar(c,
                ainv,
                bt,
                c2iv)
-
+@inbounds begin
 #---------------------------------------------------------------------
 #      treat only one cell                                             
 #---------------------------------------------------------------------
@@ -56,4 +56,5 @@ function tzetar(c,
        end
 
        return nothing
+   end
 end

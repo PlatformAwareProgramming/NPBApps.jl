@@ -4,6 +4,7 @@
 #---------------------------------------------------------------------
 
 function initialize(IMAX, JMAX, KMAX, ncells, u, cell_low, cell_high, cell_size, slice, dnxm1, dnym1, dnzm1)
+ @inbounds begin
 
       Pface1 = Array{Array{Float64}}(undef,2)
       Pface2 = Array{Array{Float64}}(undef,2)
@@ -207,6 +208,7 @@ function initialize(IMAX, JMAX, KMAX, ncells, u, cell_low, cell_high, cell_size,
       end
 
       return nothing
+   end
 end
 
 
@@ -214,7 +216,7 @@ end
 #---------------------------------------------------------------------
 
 function lhsinit(ncells, lhsc, cell_coord, cell_start, cell_end, cell_size)
-
+ @inbounds begin
 #---------------------------------------------------------------------
 #     loop over all cells                                       
 #---------------------------------------------------------------------
@@ -254,6 +256,7 @@ function lhsinit(ncells, lhsc, cell_coord, cell_start, cell_end, cell_size)
       end
 
       return nothing
+   end
 end
 
 
@@ -262,7 +265,7 @@ end
 #---------------------------------------------------------------------
 
 function lhsabinit(lhsa, lhsb, SIZE)
-
+ @inbounds begin
       for i = 0:SIZE
          for m = 1:5
             for n = 1:5
@@ -274,6 +277,7 @@ function lhsabinit(lhsa, lhsb, SIZE)
       end
 
       return nothing
+   end
 end
 
 

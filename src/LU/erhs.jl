@@ -10,7 +10,7 @@
 
       dsspm = dssp
 
-      for k = 1:nz
+      @inbounds for k = 1:nz
          for j = 1:ny
             for i = 1:nx
                for m = 1:5
@@ -20,7 +20,7 @@
          end
       end
 
-      for k = 1:nz
+      @inbounds for k = 1:nz
          zeta = ( float(k-1) ) / ( nz - 1 )
          for j = 1:ny
             jglob = jpt + j
@@ -83,7 +83,7 @@
       if (north == -1) ist1 = 4 end
       if (south == -1) iend1 = nx - 3 end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for j = jst:jend
             for i = L1:L2
                flux[1, i, j, k] = rsd[2, i, j, k]
@@ -101,7 +101,7 @@
          end
       end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
@@ -244,7 +244,7 @@
       if (west == -1) jst1 = 4 end
       if (east == -1) jend1 = ny - 3 end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for j = L1:L2
             for i = ist:iend
                flux[1, i, j, k] = rsd[3, i, j, k]
@@ -262,7 +262,7 @@
          end
       end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for i = ist:iend
             for j = jst:jend
                for m = 1:5
@@ -383,7 +383,7 @@
 #---------------------------------------------------------------------
 #   zeta-direction flux differences
 #---------------------------------------------------------------------
-      for k = 1:nz
+      @inbounds for k = 1:nz
          for j = jst:jend
             for i = ist:iend
                flux[1, i, j, k] = rsd[4, i, j, k]
@@ -401,7 +401,7 @@
          end
       end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
@@ -412,7 +412,7 @@
          end
       end
 
-      for k = 2:nz
+      @inbounds for k = 2:nz
          for j = jst:jend
             for i = ist:iend
                tmp = 1.0e+00 / rsd[1, i, j, k]
@@ -443,7 +443,7 @@
          end
       end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for j = jst:jend
             for i = ist:iend
                frct[1, i, j, k] = frct[1, i, j, k]+
@@ -477,7 +477,7 @@
 #---------------------------------------------------------------------
 #   fourth-order dissipation
 #---------------------------------------------------------------------
-      for j = jst:jend
+      @inbounds for j = jst:jend
          for i = ist:iend
             for m = 1:5
                frct[m, i, j, 2] = frct[m, i, j, 2]-
@@ -493,7 +493,7 @@
          end
       end
 
-      for k = 4:nz - 3
+      @inbounds for k = 4:nz - 3
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
@@ -508,7 +508,7 @@
          end
       end
 
-      for j = jst:jend
+      @inbounds for j = jst:jend
          for i = ist:iend
             for m = 1:5
                frct[m, i, j, nz-2] = frct[m, i, j, nz-2]-

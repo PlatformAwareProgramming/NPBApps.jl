@@ -23,7 +23,7 @@
       c1345 = c1 * c3 * c4 * c5
       c34 = c3 * c4
 
-      for i = ist:iend
+      @inbounds for i = ist:iend
 
 #---------------------------------------------------------------------
 #   form the block daigonal

@@ -8,7 +8,7 @@ function ninvr(c,
                cell_end,
                rhs,
                bt,)
-
+@inbounds begin
 #---------------------------------------------------------------------
 #      treat only one cell                           
 #---------------------------------------------------------------------
@@ -35,4 +35,5 @@ function ninvr(c,
        end
 
        return nothing
+   end
 end

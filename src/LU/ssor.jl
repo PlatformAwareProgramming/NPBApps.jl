@@ -67,7 +67,7 @@ const tmat = Array{Float64}(undef, 5, 5)
 #   initialize a,b,c,d to zero (guarantees that page tables have been
 #   formed, if applicable on given architecture, before timestepping).
 #---------------------------------------------------------------------
-      for i = 1:isiz1
+      @inbounds for i = 1:isiz1
          for m = 1:5
             for k = 1:5
                a[k, m, i] = 0.0e0
@@ -134,7 +134,7 @@ const tmat = Array{Float64}(undef, 5, 5)
 #---------------------------------------------------------------------
 #   the timestep loop
 #---------------------------------------------------------------------
-      for istep = 1:niter
+      @inbounds for istep = 1:niter
 
          if id == 0
             if mod(istep, 20) == 0 || istep == itmax || istep == 1

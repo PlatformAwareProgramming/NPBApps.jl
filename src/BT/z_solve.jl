@@ -38,6 +38,7 @@ function z_solve(
                successor,
                utmp,
           )  where ncells
+ @inbounds begin
 
       kstart = 0
 
@@ -222,6 +223,7 @@ function z_solve(
      if timeron timer_stop(t_zsolve) end
 
       return nothing
+     end
 end
 
 
@@ -237,6 +239,7 @@ end
                               lhsc,
                               out_buffer,
                              )
+ @inbounds begin
 
       kstart = 0
       ptr = 0
@@ -256,6 +259,7 @@ end
       end
 
       return nothing
+     end
 end
 
 
@@ -278,6 +282,7 @@ end
                               comm_solve,     
                               successor,
                         ) where ncells
+ @inbounds begin
 
       ksize = cell_size[3, c]-1
       ip = cell_coord[1, c] - 1
@@ -312,6 +317,7 @@ end
 
       return send_id
 end
+end
 
 
 #---------------------------------------------------------------------
@@ -330,6 +336,7 @@ end
                                    comm_solve,     
                                    predecessor,
                         ) where ncells
+ @inbounds begin
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -353,6 +360,7 @@ end
      if timeron timer_stop(t_zcomm) end
 
       return send_id
+  end
 end
 
 
@@ -366,6 +374,7 @@ end
                                         backsub_info,
                                         out_buffer,     
           )
+ @inbounds begin
 
       ptr = 0
       for j = 0:JMAX-1
@@ -378,6 +387,7 @@ end
       end
 
       return nothing
+end
 end
 
 
@@ -393,6 +403,7 @@ end
                                         comm_solve,
                                         successor
           )  where ncells
+ @inbounds begin
 
       ip = cell_coord[1, c] - 1
       jp = cell_coord[2, c] - 1
@@ -400,6 +411,7 @@ end
       recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), successor[3], TOP+ip+jp*ncells, comm_solve)
 
       return recv_id
+ end
 end
 
 
@@ -415,6 +427,7 @@ end
                                         comm_solve,
                                         predecessor,
                              )  where ncells
+ @inbounds begin
 
       ip = cell_coord[1, c] - 1
       jp = cell_coord[2, c] - 1
@@ -422,6 +435,7 @@ end
       recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), predecessor[3], BOTTOM+ip+jp*ncells, comm_solve)
 
       return recv_id
+ end
 end
 
 
@@ -440,6 +454,7 @@ end
                                    lhsc,
                                    backsub_info,
           )
+ @inbounds begin
 
       kstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -472,6 +487,7 @@ end
       end
 
       return nothing
+     end
 end
 
 
@@ -502,6 +518,7 @@ end
                          tz2,
                          utmp,
                          )
+ @inbounds begin
 
       kstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -857,6 +874,7 @@ end
 
 
       return nothing
+end
 end
 
 

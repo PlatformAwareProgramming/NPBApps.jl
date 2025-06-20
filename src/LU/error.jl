@@ -11,7 +11,7 @@
 
       errnm .= 0.0e+00
 
-      for k = 2:nz-1
+      @inbounds for k = 2:nz-1
          for j = jst:jend
             jglob = jpt + j
             for i = ist:iend

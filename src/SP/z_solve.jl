@@ -46,7 +46,7 @@ function z_solve(_::Val{ncells}, # ::Int64,
                  s,
                  timeron
                  ) where ncells
-
+@inbounds begin
 #       requests = Array{MPI.Request}(undef,2)
 #       s = Array{Float64}(undef,5)
 
@@ -563,6 +563,7 @@ function z_solve(_::Val{ncells}, # ::Int64,
       if timeron timer_stop(t_zsolve) end
 
        return nothing
+   end
 end
 
 

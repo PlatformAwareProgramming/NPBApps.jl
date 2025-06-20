@@ -179,7 +179,7 @@ function copy_faces(ss,
                      predecessor,
                      successor,
                      ) where {no_nodes, ncells}
-
+ @inbounds begin
  #---------------------------------------------------------------------
 #     because the difference stencil for the diagonalized scheme is 
 #     orthogonal, we do not have to perform the staged copying of faces, 
@@ -468,4 +468,5 @@ function copy_faces(ss,
                )
 
       return nothing
+  end
 end

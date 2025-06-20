@@ -9,7 +9,7 @@ function pinvr(c,
                rhs,
                bt,
                )
-
+@inbounds begin
 #---------------------------------------------------------------------
 #      treat only one cell                                   
 #---------------------------------------------------------------------
@@ -36,6 +36,7 @@ function pinvr(c,
        end
 
        return nothing
+   end
 end
 
 

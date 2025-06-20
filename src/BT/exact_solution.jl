@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------
 
 function exact_solution(xi, eta, zeta)
-
+ @inbounds begin
       dtemp = Array{Float64}(undef, 5)
 
       for m = 1:5
@@ -15,6 +15,7 @@ function exact_solution(xi, eta, zeta)
       end
 
       return dtemp
+end
 end
 
 

@@ -40,6 +40,7 @@ function y_solve(
      successor,
      utmp,
 ) where ncells
+ @inbounds begin
 
       jstart = 0
 
@@ -226,6 +227,7 @@ function y_solve(
      if timeron timer_stop(t_ysolve) end
 
       return nothing
+   end
 end
 
 
@@ -241,6 +243,7 @@ function y_unpack_solve_info(c,
                                    lhsc,
                                    out_buffer,
                                    )
+ @inbounds begin
 
       jstart = 0
       ptr = 0
@@ -260,6 +263,7 @@ function y_unpack_solve_info(c,
       end
 
       return nothing
+   end
 end
 
 
@@ -282,6 +286,7 @@ function y_send_solve_info(c,
                                    comm_solve,     
                                    successor
                                    ) where ncells
+ @inbounds begin
 
       jsize = cell_size[2, c]-1
       ip = cell_coord[1, c] - 1
@@ -315,6 +320,7 @@ function y_send_solve_info(c,
      if timeron timer_stop(t_ycomm) end
 
       return send_id
+   end
 end
 
 
@@ -334,6 +340,7 @@ function y_send_backsub_info(c,
                                    comm_solve,
                                    predecessor
                                    )  where ncells
+ @inbounds begin
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -356,6 +363,7 @@ function y_send_backsub_info(c,
      if timeron timer_stop(t_ycomm) end
 
       return send_id
+   end
 end
 
 
@@ -369,6 +377,7 @@ function y_unpack_backsub_info(c,
                                         backsub_info,
                                         out_buffer,
      )
+ @inbounds begin
 
       ptr = 0
       for k = 0:KMAX-1
@@ -381,6 +390,7 @@ function y_unpack_backsub_info(c,
       end
 
       return nothing
+   end
 end
 
 
@@ -396,12 +406,14 @@ function y_receive_backsub_info(c,
                                         comm_solve,     
                                         successor
           )  where ncells
+ @inbounds begin
 
       ip = cell_coord[1, c] - 1
       kp = cell_coord[3, c] - 1
       buffer_size = MAX_CELL_DIM*MAX_CELL_DIM*BLOCK_SIZE
       recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), successor[2], NORTH+ip+kp*ncells, comm_solve)
       return recv_id
+ end
 end
 
 
@@ -417,6 +429,7 @@ function y_receive_solve_info(c,
                                         comm_solve,
                                         predecessor
                                     )  where ncells
+ @inbounds begin
 
       ip = cell_coord[1, c] - 1
       kp = cell_coord[3, c] - 1
@@ -424,6 +437,7 @@ function y_receive_solve_info(c,
       recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), predecessor[2], SOUTH+ip+kp*ncells, comm_solve)
 
       return recv_id
+ end
 end
 
 
@@ -442,6 +456,7 @@ function y_backsubstitute(FIRST, LAST, c,
                                    lhsc,
                                    backsub_info,
                                    )
+ @inbounds begin
 
       jstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -474,6 +489,7 @@ function y_backsubstitute(FIRST, LAST, c,
       end
 
       return nothing
+   end
 end
 
 
@@ -504,8 +520,8 @@ function y_solve_cell(FIRST, LAST, c,
                     ty2,
                     utmp,
           )
+ @inbounds begin
 
-      
       
       jstart = 0
       isize = cell_size[1, c]-cell_end[1, c]-1
@@ -812,6 +828,7 @@ function y_solve_cell(FIRST, LAST, c,
 
 
       return nothing
+   end
 end
 
 

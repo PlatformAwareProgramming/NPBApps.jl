@@ -2,7 +2,7 @@
 #     subtracts bvec=bvec - ablock*avec
 #---------------------------------------------------------------------
 function matvec_sub(ablock, i, avec, a1, a2, a3, a4, bvec, b1, b2, b3, b4)
-
+ @inbounds begin
 
 #---------------------------------------------------------------------
 #            rhs[i,ic,jc,kc,ccell] = rhs[i,ic,jc,kc,ccell] 
@@ -34,6 +34,7 @@ function matvec_sub(ablock, i, avec, a1, a2, a3, a4, bvec, b1, b2, b3, b4)
                               ablock[5,4,i]*avec[4,a1,a2,a3,a4] +
                               ablock[5,5,i]*avec[5,a1,a2,a3,a4]
       return nothing
+ end
 end
 
 #---------------------------------------------------------------------
@@ -41,7 +42,7 @@ end
 #---------------------------------------------------------------------
 
 function matmul_sub(ablock, ia, bblock, b1, b2, b3, b4, cblock, ic)
-
+ @inbounds begin
       timer_start(64)
 
      #= for j = 1:5, i = 1:5
@@ -184,6 +185,7 @@ function matmul_sub(ablock, ia, bblock, b1, b2, b3, b4, cblock, ic)
       timer_stop(64)
 
       return nothing
+end
 end 
 
 #---------------------------------------------------------------------
@@ -191,7 +193,7 @@ end
 #---------------------------------------------------------------------
 
 function matmul_sub2(ablock, bblock, cblock)
-
+ @inbounds begin
 
       timer_start(64)
 
@@ -459,6 +461,7 @@ function matmul_sub2(ablock, bblock, cblock)
 
       return nothing
 end
+end
 
 
 
@@ -466,7 +469,7 @@ end
 #---------------------------------------------------------------------
 
 function binvcrhs(lhs, i, c, ic1, ic2, ic3, ic4, r, ir1, ir2, ir3, ir4)
-
+ @inbounds begin
       pivot = 1.00e0/lhs[1,1,i]
       lhs[1,2,i] *= pivot
       lhs[1,3,i] *= pivot
@@ -720,6 +723,7 @@ function binvcrhs(lhs, i, c, ic1, ic2, ic3, ic4, r, ir1, ir2, ir3, ir4)
       r[4,ir1,ir2,ir3,ir4] -= coeff*r[5,ir1,ir2,ir3,ir4]
 
       return nothing
+ end
 end
 
 
@@ -728,7 +732,7 @@ end
 #---------------------------------------------------------------------
 
 function binvrhs(lhsb, i, rhs, ir1, ir2, ir3, ir4)
-
+ @inbounds begin
       pivot = 1.00e0/lhsb[1,1,i]
       lhsb[1,2,i] *= pivot
       lhsb[1,3,i] *= pivot
@@ -859,6 +863,7 @@ function binvrhs(lhsb, i, rhs, ir1, ir2, ir3, ir4)
       rhs[4,ir1,ir2,ir3,ir4] -= coeff*rhs[5,ir1,ir2,ir3,ir4]
 
       return nothing
+ end
 end
 
 

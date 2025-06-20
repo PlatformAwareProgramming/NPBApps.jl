@@ -31,7 +31,7 @@ function exchange_3(g, iex,
 #   send south
 #---------------------------------------------------------------------
         if south != -1
-            for k = 1:nz
+            @inbounds for k = 1:nz
               for j = 1:ny
                 ipos1 = (k-1)*ny + j
                 ipos2 = ipos1 + ny*nz
@@ -57,7 +57,7 @@ function exchange_3(g, iex,
         if north != -1
           MPI.Wait(mid[])
 
-          for k = 1:nz
+          @inbounds for k = 1:nz
             for j = 1:ny
               ipos1 = (k-1)*ny + j
               ipos2 = ipos1 + ny*nz
@@ -84,7 +84,7 @@ function exchange_3(g, iex,
 #   send north
 #---------------------------------------------------------------------
         if north != -1
-          for k = 1:nz
+          @inbounds for k = 1:nz
             for j = 1:ny
               ipos1 = (k-1)*ny + j
               ipos2 = ipos1 + ny*nz
@@ -110,7 +110,7 @@ function exchange_3(g, iex,
         if south != -1
           MPI.Wait(mid[])
 
-          for k = 1:nz
+          @inbounds for k = 1:nz
             for j = 1:ny
               ipos1 = (k-1)*ny + j
               ipos2 = ipos1 + ny*nz
@@ -141,7 +141,7 @@ function exchange_3(g, iex,
 #   send east
 #---------------------------------------------------------------------
         if east != -1
-          for k = 1:nz
+          @inbounds for k = 1:nz
             for i = 1:nx
               ipos1 = (k-1)*nx + i
               ipos2 = ipos1 + nx*nz
@@ -167,7 +167,7 @@ function exchange_3(g, iex,
         if west != -1
           MPI.Wait(mid[])
 
-          for k = 1:nz
+          @inbounds for k = 1:nz
             for i = 1:nx
               ipos1 = (k-1)*nx + i
               ipos2 = ipos1 + nx*nz
@@ -194,7 +194,7 @@ function exchange_3(g, iex,
 #   send west
 #---------------------------------------------------------------------
       if west != -1
-          for k = 1:nz
+          @inbounds for k = 1:nz
             for i = 1:nx
               ipos1 = (k-1)*nx + i
               ipos2 = ipos1 + nx*nz
@@ -220,7 +220,7 @@ function exchange_3(g, iex,
         if east != -1
           MPI.Wait(mid[])
 
-          for k = 1:nz
+          @inbounds for k = 1:nz
             for i = 1:nx
               ipos1 = (k-1)*nx + i
               ipos2 = ipos1 + nx*nz

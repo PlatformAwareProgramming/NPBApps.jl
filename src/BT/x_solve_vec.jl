@@ -11,7 +11,7 @@
 #---------------------------------------------------------------------
 
 function x_solve()
-
+ @inbounds begin
       istart = 0
 
       if timeron timer_start(t_xsolve) end
@@ -102,6 +102,7 @@ function x_solve()
      if timeron timer_stop(t_xsolve) end
 
       return nothing
+     end
 end
 
 
@@ -111,7 +112,7 @@ end
 #---------------------------------------------------------------------
 
  function x_unpack_solve_info(c)
-
+ @inbounds begin
       istart = 0
       ptr = 0
       for k = 0:KMAX-1
@@ -130,6 +131,7 @@ end
       end
 
       return nothing
+     end
 end
 
 #---------------------------------------------------------------------
@@ -138,7 +140,7 @@ end
 #---------------------------------------------------------------------
 
  function x_send_solve_info(c)
-
+ @inbounds begin
 
       isize = cell_size[1, c]-1
       jp = cell_coord[2, c] - 1
@@ -174,6 +176,7 @@ end
 
       return send_id
 end
+end
 
 
 #---------------------------------------------------------------------
@@ -181,6 +184,7 @@ end
 #---------------------------------------------------------------------
 
  function x_send_backsub_info(c)
+ @inbounds begin
 
 #---------------------------------------------------------------------
 #     Send element 0 to previous processor
@@ -203,6 +207,7 @@ end
      if timeron timer_stop(t_xcomm) end
 
       return send_id
+  end
 end
 
 
@@ -211,6 +216,7 @@ end
 #---------------------------------------------------------------------
 
  function x_unpack_backsub_info(c)
+  @inbounds begin
 
       ptr = 0
       for k = 0:KMAX-1
@@ -223,6 +229,7 @@ end
       end
 
       return nothing
+  end
 end
 
 
@@ -231,6 +238,7 @@ end
 #---------------------------------------------------------------------
 
  function x_receive_backsub_info(c)
+ @inbounds begin
 
       jp = cell_coord[2, c] - 1
       kp = cell_coord[3, c] - 1
@@ -238,6 +246,7 @@ end
       recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), successor[1], EAST+jp+kp*ncells, comm_solve)
 
       return recv_id
+ end
 end
 
 #---------------------------------------------------------------------
@@ -245,6 +254,7 @@ end
 #---------------------------------------------------------------------
 
  function x_receive_solve_info(c)
+ @inbounds begin
 
       jp = cell_coord[2, c] - 1
       kp = cell_coord[3, c] - 1
@@ -252,6 +262,7 @@ end
       recv_id = MPI.Irecv!(view(out_buffer, 1:buffer_size), predecessor[1], WEST+jp+kp*ncells,  comm_solve)
 
       return recv_id
+ end
 end
 
 
@@ -263,6 +274,7 @@ end
 #---------------------------------------------------------------------
 
  function x_backsubstitute(FIRST, LAST, c)
+ @inbounds begin
 
       istart = 0
       isize = cell_size[1, c]-1
@@ -302,6 +314,7 @@ end
       end
 
       return nothing
+  end
 end
 
 
@@ -316,6 +329,7 @@ end
 #---------------------------------------------------------------------
 
  function x_solve_cell(FIRST, LAST, c)
+ @inbounds begin
 
       istart = 0
       isize = cell_size[1, c]-1
@@ -680,5 +694,6 @@ end
 
 
       return nothing
+  end
 end
 

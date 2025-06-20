@@ -9,9 +9,9 @@ function add(_::Val{ncells},
              cell_end,
              u,
              rhs) where ncells
+ @inbounds begin
 
-
-      for c = 1:ncells
+       for c = 1:ncells
          for m = 1:5
              for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
                 for j = cell_start[2, c]:cell_size[2, c]-cell_end[2, c]-1
@@ -42,4 +42,5 @@ function add(_::Val{ncells},
    
 
        return nothing
+   end
 end

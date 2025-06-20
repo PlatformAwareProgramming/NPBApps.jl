@@ -72,7 +72,8 @@ function copy_faces(_::Val{1},
                      sr,
                      b_size,
                      ) where ncells
-
+ @inbounds begin
+   
 #---------------------------------------------------------------------
 #      exit immediately if there are no faces to be copied           
 #---------------------------------------------------------------------
@@ -128,6 +129,7 @@ function copy_faces(_::Val{1},
                dssp,
                con43, 
                timeron)    
+ end
 end 
 
 function copy_faces(_::Val{no_nodes},
@@ -194,6 +196,7 @@ function copy_faces(_::Val{no_nodes},
                      sr,
                      b_size,
                      ) where {ncells, no_nodes}  
+ @inbounds begin
 
 #---------------------------------------------------------------------
 # because the difference stencil for the diagonalized scheme is 
@@ -209,7 +212,7 @@ function copy_faces(_::Val{no_nodes},
        p4 = 0
        p5 = 0
 
-       for c = 1:ncells
+      for c = 1:ncells
           for m = 1:5
 
 #---------------------------------------------------------------------
@@ -322,7 +325,7 @@ function copy_faces(_::Val{no_nodes},
        p4 = 0
        p5 = 0
 
-       for c = 1:ncells
+      for c = 1:ncells
           for m = 1:5
 
              if cell_coord[1, c] != 1
@@ -459,7 +462,8 @@ function copy_faces(_::Val{no_nodes},
                   con43, 
                   timeron)
 
-return nothing
+      return nothing
+   end
 end
 
 

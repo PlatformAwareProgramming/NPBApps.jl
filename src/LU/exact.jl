@@ -10,7 +10,7 @@ function exact(i, j, k, u000ijk, nx0, ny0, nz0)
       eta  = ( float( j - 1 ) ) / ( ny0 - 1 )
       zeta = ( float( k - 1 ) ) / ( nz0 - 1 )
 
-      for m = 1:5
+      @inbounds for m = 1:5
          u000ijk[m] =  ce[m, 1] +
                        ce[m, 2] * xi+
                        ce[m, 3] * eta+

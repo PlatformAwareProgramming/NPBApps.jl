@@ -17,7 +17,7 @@
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
 
-         for i = iend:-1:ist
+         @inbounds for i = iend:-1:ist
             for m = 1:5
                   tv[m,i] = omega * (  udz[m,1,i] * v[1,i,j,k+1]+
                                        udz[m,2,i] * v[2,i,j,k+1]+
@@ -28,7 +28,7 @@
          end
 
 
-         for i = iend:-1:ist
+         @inbounds for i = iend:-1:ist
 
             for m = 1:5
                   tv[m,i] += omega * ( udy[m,1,i] * v[1,i,j+1,k]+

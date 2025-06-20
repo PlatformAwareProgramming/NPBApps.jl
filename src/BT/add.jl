@@ -10,6 +10,7 @@ function add(
             rhs,
             ::Val{ncells},   
             ) where ncells
+ @inbounds begin
 
       for c = 1:ncells
          for k = cell_start[3, c]:cell_size[3, c]-cell_end[3, c]-1
@@ -40,4 +41,5 @@ function add(
 
 
       return nothing
+   end
 end

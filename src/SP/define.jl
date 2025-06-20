@@ -3,6 +3,8 @@
 
 function compute_buffer_size(no_nodes, ncells, cell_coord, cell_size, dim)
 
+ @inbounds begin
+
     if (no_nodes > 1 && ncells > 1)
 
 #---------------------------------------------------------------------
@@ -14,7 +16,7 @@ function compute_buffer_size(no_nodes, ncells, cell_coord, cell_size, dim)
         west_size = 0
         east_size = 0
 
-        for c = 1:ncells
+         for c = 1:ncells
            face_size = cell_size[2, c] * cell_size[3, c] * dim * 2
            if (cell_coord[1, c] != 1) 
              west_size = west_size + face_size 
@@ -26,7 +28,7 @@ function compute_buffer_size(no_nodes, ncells, cell_coord, cell_size, dim)
 
         north_size = 0
         south_size = 0
-        for c = 1:ncells
+         for c = 1:ncells
            face_size = cell_size[1, c]*cell_size[3, c] * dim * 2
            if (cell_coord[2, c] != 1) 
              south_size = south_size + face_size 
@@ -38,7 +40,7 @@ function compute_buffer_size(no_nodes, ncells, cell_coord, cell_size, dim)
 
         top_size = 0
         bottom_size = 0
-        for c = 1:ncells
+         for c = 1:ncells
            face_size = cell_size[1, c] * cell_size[2, c] * dim * 2
            if (cell_coord[3, c] != 1) 
              bottom_size = bottom_size + face_size
@@ -70,6 +72,6 @@ function compute_buffer_size(no_nodes, ncells, cell_coord, cell_size, dim)
     end
 
     return ss, sr, b_size
-       
+  end    
 end
 

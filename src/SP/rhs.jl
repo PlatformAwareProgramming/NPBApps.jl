@@ -55,6 +55,7 @@ function compute_rhs(ncells,
                      con43,
                      timeron
                      )
+@inbounds begin
 
        if (timeron) timer_start(t_rhs) end
 #---------------------------------------------------------------------
@@ -449,6 +450,7 @@ function compute_rhs(ncells,
        if (timeron) timer_stop(t_rhs) end
 
        return nothing
+   end
 end
 
 

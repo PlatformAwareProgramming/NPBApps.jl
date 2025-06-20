@@ -35,7 +35,7 @@
 
      if timeron timer_start(t_rhs) end
 
-      for k = 1:nz
+     @inbounds for k = 1:nz
          for j = 1:ny
             for i = 1:nx
                for m = 1:5
@@ -83,7 +83,7 @@
       if (north == -1) ist1 = 4 end
       if (south == -1) iend1 = nx - 3 end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for j = jst:jend
             for i = L1:L2
                flux[1, i, j, k] = u[2, i, j, k]
@@ -242,7 +242,7 @@
       if (west == -1) jst1 = 4 end
       if (east == -1) jend1 = ny - 3 end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for j = L1:L2
             for i = ist:iend
                flux[1, i, j, k] = u[3, i, j, k]
@@ -384,7 +384,7 @@
 #---------------------------------------------------------------------
 #   zeta-direction flux differences
 #---------------------------------------------------------------------
-      for k = 1:nz
+     @inbounds for k = 1:nz
          for j = jst:jend
             for i = ist:iend
                flux[1, i, j, k] = u[4, i, j, k]
@@ -403,7 +403,7 @@
          end
       end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
@@ -413,7 +413,7 @@
          end
       end
 
-      for k = 2:nz
+      @inbounds for k = 2:nz
          for j = jst:jend
             for i = ist:iend
                tmp = 1.0e+00 / u[1, i, j, k]
@@ -443,7 +443,7 @@
          end
       end
 
-      for k = 2:nz - 1
+      @inbounds for k = 2:nz - 1
          for j = jst:jend
             for i = ist:iend
                rsd[1, i, j, k] +=
@@ -477,7 +477,7 @@
 #---------------------------------------------------------------------
 #   fourth-order dissipation
 #---------------------------------------------------------------------
-      for j = jst:jend
+      @inbounds for j = jst:jend
          for i = ist:iend
             for m = 1:5
                rsd[m, i, j, 2] -=
@@ -493,7 +493,7 @@
          end
       end
 
-      for k = 4:nz - 3
+      @inbounds for k = 4:nz - 3
          for j = jst:jend
             for i = ist:iend
                for m = 1:5
@@ -508,7 +508,7 @@
          end
       end
 
-      for j = jst:jend
+      @inbounds for j = jst:jend
          for i = ist:iend
             for m = 1:5
                rsd[m, i, j, nz-2] -=
