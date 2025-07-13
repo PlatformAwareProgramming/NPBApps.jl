@@ -122,15 +122,15 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 #---------------------------------------------------------------------
             south[iz], east[iz], north[iz], west[iz], south2[iz], east2[iz], north2[iz], west2[iz] = neighbors(row[iz], col[iz]) 
 
-            @info "$clusterid/$node: zone=$zone --- westzone=$(iz_west[zone]) eastzone=$(iz_east[zone]) northzone=$(iz_north[zone]) southzone=$(iz_south[zone])"
-            @info "$clusterid/$node: zone=$zone --- west=$(west[iz]) east=$(east[iz]) north=$(north[iz]) south=$(south[iz])"
-            @info "$clusterid/$node: zone=$zone --- west2=$(west2[iz]) east2=$(east2[iz]) north2=$(north2[iz]) south2=$(south2[iz])"
+  #          @info "$clusterid/$node: zone=$zone --- westzone=$(iz_west[zone]) eastzone=$(iz_east[zone]) northzone=$(iz_north[zone]) southzone=$(iz_south[zone])"
+  #          @info "$clusterid/$node: zone=$zone --- west=$(west[iz]) east=$(east[iz]) north=$(north[iz]) south=$(south[iz])"
+  #          @info "$clusterid/$node: zone=$zone --- west2=$(west2[iz]) east2=$(east2[iz]) north2=$(north2[iz]) south2=$(south2[iz])"
 #---------------------------------------------------------------------
 #   set up sub-domain sizes (calculate nx, ny, nz, ipt, jpt, ist, jst, iend, jend for zone iz)
 #---------------------------------------------------------------------
             subdomain(iz, row[iz], col[iz], west[iz], east[iz], north[iz], south[iz], nx0[zone], ny0[zone], nz0[zone], nx, ny, nz, ipt, jpt, ist, jst, iend, jend) 
 
-            @info "$clusterid/$node: zone=$zone --- nx=$(nx[iz]), ny=$(ny[iz]), nz=$(nz[iz]), ipt=$(ipt[iz]), jpt=$(jpt[iz]), ist=$(ist[iz]), jst=$(jst[iz]), iend=$(iend[iz]), jend=$(jend[iz])"
+   #         @info "$clusterid/$node: zone=$zone --- nx=$(nx[iz]), ny=$(ny[iz]), nz=$(nz[iz]), ipt=$(ipt[iz]), jpt=$(jpt[iz]), ist=$(ist[iz]), jst=$(jst[iz]), iend=$(iend[iz]), jend=$(jend[iz])"
 
             alloc_field_space(iz, #=nx0[zone], ny0[zone], nz0[zone],=# nx[iz], ny[iz], nz[iz], problem_size)
 

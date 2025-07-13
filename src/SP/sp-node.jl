@@ -247,25 +247,12 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
 
        @info "$clusterid/$node: NUM_THREADS = $(Threads.nthreads())"
 
+       timer_count = 0
+
        for STEP = 1:niter
 
-          GC.gc()
-
-          if node == root
-            Q = STEP > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
-
-            if mod(STEP, Q) == 0 || STEP == 1
-               @printf(stdout, "%2i: Time step %4i  -- %12.5F  -- %12.5F --- %4i \n", clusterid, STEP, t_63s/(STEP-1), t_64s/(STEP-1), Q)
-            end
-          end
-
-          if STEP == 30
-               # RESTART THE TIMERS TO MINIMIZE TRANSIENT EFFECTS
-               @info "restarting timers"
-               timer_clear(64); t_64 = 0.0; t_64s = 0.0
-               timer_clear(63); t_63 = 0.0; t_63s = 0.0
-          end
-
+          timer_count = timer_count + 1
+         
           timer_start(63)
  
           if (no_nodes > 1 && num_clusters > 1) || proc_num_zones > 1
@@ -383,6 +370,23 @@ function perform(clusterid_, clusters, niter, dt, ratio, x_zones, y_zones, gx_si
          end
 
          t_64 = timer_stop(64); t_64s += t_64
+
+          if node == root
+            Q = STEP > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
+
+            if mod(STEP, Q) == 0 || STEP == 1 || STEP == niter
+               @printf(stdout, "%2i: Time step %4i  -- %12.5F  -- %12.5F --- %4i \n", clusterid, STEP, t_63s/(timer_count), t_64s/(timer_count), Q)
+            end
+          end
+
+          if STEP == 30
+               # RESTART THE TIMERS TO MINIMIZE TRANSIENT EFFECTS
+               @info "restarting timers"
+               timer_clear(64); t_64 = 0.0; t_64s = 0.0
+               timer_clear(63); t_63 = 0.0; t_63s = 0.0
+               timer_count = 0
+          end
+
 
        end
 
