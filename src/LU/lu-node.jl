@@ -341,12 +341,19 @@ function perform(clusterid_, clusters, itmax, inorm, dt, ratio, x_zones, y_zones
 
                if mod(istep, Q) == 0 || istep == itmax || istep == 1
                   if (niter > 1) 
-                     @printf(stdout, "%2i: Time step %4i  -- %12.2F  -- %12.2F --- %4i \n", clusterid, istep, t_63s/(istep-1), t_64s/(istep-1), Q)
+                     @printf(stdout, "%2i: Time step %4i  -- %12.5F  -- %12.5F --- %4i \n", clusterid, istep, t_63s/(istep-1), t_64s/(istep-1), Q)
                   end
                end
             end
 
-            timer_start(63)
+            if istep == 30
+                  # RESTART THE TIMERS TO MINIMIZE TRANSIENT EFFECTS
+                  @info "restarting timers"
+                  timer_clear(64); t_64 = 0.0; t_64s = 0.0
+                  timer_clear(63); t_63 = 0.0; t_63s = 0.0
+            end
+
+           timer_start(63)
          
            # if no_nodes > 1 && (num_clusters > 1 || proc_num_zones > 1)
                exch_qbc(proc_num_zones, zone_proc_id, proc_zone_id, u, row, col, west, east, north, south, west2, east2, north2, south2, nx, ny, nz, timeron, ist, iend, jst, jend, iz_west, iz_east, iz_south, iz_north, comm_exch, buf_exch_w_out, buf_exch_e_out, buf_exch_n_out, buf_exch_s_out, buf_exch_w_in, buf_exch_e_in, buf_exch_n_in, buf_exch_s_in, requests) 

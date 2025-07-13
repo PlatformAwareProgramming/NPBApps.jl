@@ -281,9 +281,16 @@ function perform(clusterid_, clusters,  niter,  dt,  ratio,  x_zones,  y_zones, 
             Q = STEP > 1 && t_64 < 5.0 ? ceil(5.0 / t_64) : Q
 
             if mod(STEP, Q) == 0 || STEP == 1
-               @printf(stdout, "%2i: Time step %4i  -- %12.2F  -- %12.2F --- %4i \n", clusterid, STEP, t_63s/(STEP-1), t_64s/(STEP-1), Q)
+               @printf(stdout, "%2i: Time step %4i  -- %12.5F  -- %12.5F --- %4i \n", clusterid, STEP, t_63s/(STEP-1), t_64s/(STEP-1), Q)
                #@info "$clusterid/$node: MEM=$(Sys.maxrss())"
             end
+          end
+
+         if STEP == 30
+               # RESTART THE TIMERS TO MINIMIZE TRANSIENT EFFECTS
+               @info "restarting timers"
+               timer_clear(64); t_64 = 0.0; t_64s = 0.0
+               timer_clear(63); t_63 = 0.0; t_63s = 0.0
           end
 
           timer_start(63)

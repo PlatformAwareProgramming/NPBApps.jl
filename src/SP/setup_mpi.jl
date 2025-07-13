@@ -22,9 +22,15 @@ function setup_mpi(proc_num_zones)
       global comm_solve = Array{MPI.Comm}(undef, proc_num_zones)
       global comm_rhs = Array{MPI.Comm}(undef, proc_num_zones)
       global comm_exch =  MPI.Comm_dup(comm_setup)
+#      for iz = 1:proc_num_zones
+#          comm_solve[iz] = MPI.Comm_dup(comm_setup)
+#          comm_rhs[iz] = MPI.Comm_dup(comm_setup)
+#      end
+      comm_solve_ =  MPI.Comm_dup(comm_setup)
+      comm_rhs_ =  MPI.Comm_dup(comm_setup)
       for iz = 1:proc_num_zones
-          comm_solve[iz] = MPI.Comm_dup(comm_setup)
-          comm_rhs[iz] = MPI.Comm_dup(comm_setup)
+          comm_solve[iz] = comm_solve_ # MPI.Comm_dup(comm_setup)
+          comm_rhs[iz] = comm_rhs_ # MPI.Comm_dup(comm_setup)
       end
 
 #---------------------------------------------------------------------
