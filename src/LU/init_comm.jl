@@ -216,7 +216,7 @@ function map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, mz_blo
 #        the current group and does not worsen the computation balance
          mz = z_order[iz]
          if iz < num_zones
-            zone_comm = get_comm_index(mz, ip)
+            zone_comm = get_comm_index(mz, ip, x_zones, y_zones, zone_proc_id, x_size, y_size)
             for z2 = iz+1:num_zones
                zone = z_order[z2]
 
@@ -224,7 +224,7 @@ function map_zones(num_clusters, x_zones, y_zones, num_zones, nx, ny, nz, mz_blo
                if (diff_ratio > 0.05E0) @goto L120 end
 
                if zone_proc_id[zone] < 0
-                  comm_index = get_comm_index(zone, ip)
+                  comm_index = get_comm_index(zone, ip, x_zones, y_zones, zone_proc_id, x_size, y_size)
                   if comm_index > zone_comm
                      mz = zone
                      zone_comm = comm_index
