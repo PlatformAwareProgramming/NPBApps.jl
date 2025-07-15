@@ -48,6 +48,40 @@
       return nothing
 end
 
+function get_comm_index(zone, iproc, x_zones, y_zones, zone_proc_id, x_size, y_size)
+   #
+      #      use sp_data
+      #      use mpinpb
+      #
+      #      implicit none
+      #
+      #  Calculate the communication index of a zone within a processor group
+      #
+      #      integer zone, iproc, comm_index
+      #
+      #     local variables
+      #      integer izone, jzone
+      #
+            jzone  = div(zone - 1, x_zones) + 1
+            izone  = mod(zone - 1, x_zones) + 1
+      #
+            comm_index = 0
+            if (zone_proc_id[iz_west[zone]] == iproc)
+               comm_index = comm_index + y_size[jzone]
+            end
+            if (zone_proc_id[iz_east[zone]] == iproc)
+               comm_index = comm_index + y_size[jzone]
+            end
+            if (zone_proc_id[iz_south[zone]] == iproc)
+               comm_index = comm_index + x_size[izone]
+            end
+            if (zone_proc_id[iz_north[zone]] == iproc)
+               comm_index = comm_index + x_size[izone]
+            end
+      #
+            return comm_index
+end
+
 function map_zones(num_clusters, num_zones, zone_mapping)
    proc_num_zones = Array{Int64}(undef, num_clusters)
    zone_proc_id = zeros(Int64, num_zones)
